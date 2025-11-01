@@ -1,0 +1,285 @@
+import { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '../../lib/supabase';
+import { BarChart3, TrendingUp, TrendingDown, Activity, ExternalLink, Info, ArrowLeft } from 'lucide-react';
+import { LegalEntityFilter } from '../shared/LegalEntityFilter';
+
+interface BalanceSheetMetric {
+  id: string;
+  report_date: string;
+  total_assets: number;
+  total_liabilities: number;
+  total_equity: number;
+  cash_and_due_from_banks: number;
+  securities_available_for_sale: number;
+  loans_gross: number;
+  deposits_total: number;
+  tier1_capital: number;
+  tier1_capital_ratio: number;
+  leverage_ratio: number;
+}
+
+interface IRRBBMetric {
+  id: string;
+  report_date: string;
+  scenario_type: string;
+  eve_change_amount: number;
+  eve_change_percent: number;
+  nii_change_amount: number;
+  nii_change_percent: number;
+  duration_gap: number;
+}
+
+interface BalanceSheetDetailViewProps {
+  onNavigate?: (view: string) => void;
+}
+
+export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewProps) {
+  const { user } = useAuth();
+  const [balanceSheetMetrics, setBalanceSheetMetrics] = useState<BalanceSheetMetric[]>([]);
+  const [irrbbMetrics, setIRRBBMetrics] = useState<IRRBBMetric[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+
+  useEffect(() => {
+    loadMetrics();
+  }, [user, selectedEntityId]);
+
+  const loadMetrics = async () => {
+    if (!user) return;
+
+    let bsQuery = supabase
+      .from('balance_sheet_metrics')
+      .select('*')
+      .eq('user_id', user.id);
+
+    let irrbbQuery = supabase
+      .from('interest_rate_risk_metrics')
+      .select('*')
+      .eq('user_id', user.id);
+
+    if (selectedEntityId) {
+      bsQuery = bsQuery.eq('legal_entity_id', selectedEntityId);
+      irrbbQuery = irrbbQuery.eq('legal_entity_id', selectedEntityId);
+    }
+
+    const [bsResult, irrbbResult] = await Promise.all([
+      bsQuery.order('report_date', { ascending: false }).limit(10),
+      irrbbQuery.order('report_date', { ascending: false }).limit(10)
+    ]);
+
+    if (bsResult.data) setBalanceSheetMetrics(bsResult.data);
+    if (irrbbResult.data) setIRRBBMetrics(irrbbResult.data);
+    setLoading(false);
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      notation: 'compact',
+      maximumFractionDigits: 1,
+    }).format(amount);
+  };
+
+  const formatPercent = (value: number) => {
+    return `${(value * 100).toFixed(2)}%`;
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const latestBS = balanceSheetMetrics[0];
+  const latestIRRBB = irrbbMetrics[0];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4 mb-6">
+        <button
+          onClick={() => onNavigate?.('dashboard')}
+          className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <div className="flex-1">
+          <h1 className="text-2xl font-bold text-slate-900">Balance Sheet & Interest Rate Risk</h1>
+          <p className="text-sm text-slate-600">Comprehensive balance sheet composition and IRRBB analysis</p>
+        </div>
+        <div className="w-80">
+          <LegalEntityFilter
+            selectedEntityId={selectedEntityId}
+            onEntityChange={setSelectedEntityId}
+          />
+        </div>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+        <div className="flex items-start gap-4">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Info className="w-6 h-6 text-blue-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-slate-900 mb-2">About This Metric</h3>
+            <p className="text-sm text-slate-700 mb-4">
+              Balance sheet metrics provide a comprehensive view of an institution's financial position, assets, liabilities, and equity composition.
+              Interest Rate Risk in the Banking Book (IRRBB) measures potential impacts on economic value of equity (EVE) and net interest income (NII) from interest rate changes.
+            </p>
+            <div className="space-y-2 text-sm">
+              <div>
+                <p className="font-medium text-slate-900 mb-1">Regulatory Requirements:</p>
+                <ul className="list-disc list-inside space-y-1 text-slate-700 ml-2">
+                  <li>Basel III capital requirements: Tier 1 capital ratio minimum of 6%</li>
+                  <li>Leverage ratio minimum of 3% (5% for US G-SIBs)</li>
+                  <li>IRRBB standards require institutions to measure and control interest rate risk</li>
+                  <li>Supervisory outlier test: EVE decline &gt; 15% of Tier 1 capital triggers enhanced monitoring</li>
+                </ul>
+              </div>
+              <div className="pt-3 border-t border-blue-200">
+                <p className="font-medium text-slate-900 mb-2">Regulatory Resources:</p>
+                <div className="space-y-1">
+                  <a
+                    href="https://www.bis.org/bcbs/publ/d368.htm"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Basel Committee - Interest Rate Risk in the Banking Book (IRRBB)</span>
+                  </a>
+                  <a
+                    href="https://www.federalreserve.gov/supervisionreg/topics/capital.htm"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Federal Reserve - Capital Requirements</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <div className="flex items-start gap-3">
+          <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm text-amber-900">
+              <strong>Data Source:</strong> Representative sample data based on State Street Corporation's publicly available financial reports.
+              Balance sheet figures are modeled on <a
+                href="https://investors.statestreet.com/financial-information/quarterly-results/default.aspx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-amber-700"
+              >Q3 2024 10-Q filing</a>.
+              IRRBB metrics represent typical institutional risk sensitivities and are not sourced from actual State Street disclosures.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <div className="text-slate-600">Loading metrics...</div>
+        </div>
+      ) : (
+        <>
+          {latestBS && (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Latest Balance Sheet ({formatDate(latestBS.report_date)})</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div>
+                  <p className="text-sm text-slate-600 mb-1">Total Assets</p>
+                  <p className="text-2xl font-bold text-slate-900">{formatCurrency(latestBS.total_assets)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 mb-1">Total Liabilities</p>
+                  <p className="text-2xl font-bold text-slate-900">{formatCurrency(latestBS.total_liabilities)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 mb-1">Total Equity</p>
+                  <p className="text-2xl font-bold text-green-600">{formatCurrency(latestBS.total_equity)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 mb-1">Tier 1 Capital</p>
+                  <p className="text-2xl font-bold text-slate-900">{formatCurrency(latestBS.tier1_capital)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 mb-1">Tier 1 Capital Ratio</p>
+                  <p className={`text-2xl font-bold ${latestBS.tier1_capital_ratio >= 0.06 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatPercent(latestBS.tier1_capital_ratio)}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">Minimum: 6%</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 mb-1">Leverage Ratio</p>
+                  <p className={`text-2xl font-bold ${latestBS.leverage_ratio >= 0.05 ? 'text-green-600' : 'text-amber-600'}`}>
+                    {formatPercent(latestBS.leverage_ratio)}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">US G-SIB Minimum: 5%</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {latestIRRBB && (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4">Interest Rate Risk Scenario: {latestIRRBB.scenario_type}</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <p className="text-sm text-slate-600 mb-1">EVE Change</p>
+                  <p className={`text-2xl font-bold ${latestIRRBB.eve_change_percent < -0.15 ? 'text-red-600' : latestIRRBB.eve_change_percent < 0 ? 'text-amber-600' : 'text-green-600'}`}>
+                    {formatPercent(latestIRRBB.eve_change_percent)}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">{formatCurrency(latestIRRBB.eve_change_amount)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-600 mb-1">NII Change</p>
+                  <p className={`text-2xl font-bold ${latestIRRBB.nii_change_percent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {formatPercent(latestIRRBB.nii_change_percent)}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-1">{formatCurrency(latestIRRBB.nii_change_amount)}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4">Historical Trends</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-slate-200">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Date</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700">Total Assets</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700">Total Equity</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700">Tier 1 Ratio</th>
+                    <th className="text-right py-3 px-4 text-sm font-semibold text-slate-700">Leverage Ratio</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {balanceSheetMetrics.map((metric) => (
+                    <tr key={metric.id} className="border-b border-slate-100 hover:bg-slate-50">
+                      <td className="py-3 px-4 text-sm text-slate-900">{formatDate(metric.report_date)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-slate-900">{formatCurrency(metric.total_assets)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-green-600">{formatCurrency(metric.total_equity)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-slate-900">{formatPercent(metric.tier1_capital_ratio)}</td>
+                      <td className="py-3 px-4 text-sm text-right text-slate-900">{formatPercent(metric.leverage_ratio)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
