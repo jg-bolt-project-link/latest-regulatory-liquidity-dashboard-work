@@ -9,7 +9,7 @@ import { LiquidityMetricsDetailView } from './executive/LiquidityMetricsDetailVi
 import { CapitalMetricsDetailView } from './executive/CapitalMetricsDetailView';
 import { CashFlowAnalysisView } from './executive/CashFlowAnalysisView';
 import { IntradayLiquidityView } from './executive/IntradayLiquidityView';
-import { DataQualityDashboard } from './DataQualityDashboard';
+import { DataQualityDashboardNew } from './DataQualityDashboardNew';
 import { FR2052aDashboard } from './FR2052aDashboard';
 import { FR2052aValidation } from './FR2052aValidation';
 import {
@@ -81,7 +81,7 @@ export function MainApp() {
       case 'intraday-liquidity':
         return <IntradayLiquidityView onNavigate={setActiveView} />;
       case 'data-quality':
-        return <DataQualityDashboard onClose={() => setActiveView('dashboard')} />;
+        return <DataQualityDashboardNew onClose={() => setActiveView('dashboard')} />;
       case 'fr2052a':
         return <FR2052aDashboard onClose={() => setActiveView('dashboard')} />;
       case 'fr2052a-validation':

@@ -17,6 +17,7 @@ import {
   FileText
 } from 'lucide-react';
 import { seedDashboardData, seedStateStreetData } from '../utils/seedStateStreetData';
+import { MetricCardWithQuality } from './shared/MetricCardWithQuality';
 
 interface DashboardMetrics {
   totalAssets: number;
@@ -426,54 +427,61 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
           </div>
         </button>
 
-        <button
-          onClick={() => onNavigate?.('liquidity-metrics')}
-          className={`rounded-xl shadow-sm p-6 border-2 hover:shadow-md transition-all text-left ${
-            (metrics.lcrRatio && metrics.lcrRatio >= 1.0) && (metrics.nsfrRatio && metrics.nsfrRatio >= 1.0) && (metrics.rlapSurplus && metrics.rlapSurplus >= 0)
-              ? 'bg-green-50 border-green-300 hover:border-green-500'
-              : 'bg-amber-50 border-amber-300 hover:border-amber-500'
-          }`}
+        <MetricCardWithQuality
+          metricName="Liquidity Coverage Ratio (LCR)"
+          targetTable="lcr_metrics"
+          targetColumn="lcr_ratio"
+          dataSource="Analytics"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Droplets className="w-5 h-5 text-blue-600" />
+          <button
+            onClick={() => onNavigate?.('liquidity-metrics')}
+            className={`rounded-xl shadow-sm p-6 border-2 hover:shadow-md transition-all text-left w-full ${
+              (metrics.lcrRatio && metrics.lcrRatio >= 1.0) && (metrics.nsfrRatio && metrics.nsfrRatio >= 1.0) && (metrics.rlapSurplus && metrics.rlapSurplus >= 0)
+                ? 'bg-green-50 border-green-300 hover:border-green-500'
+                : 'bg-amber-50 border-amber-300 hover:border-amber-500'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Droplets className="w-5 h-5 text-blue-600" />
+              </div>
+              <span className="text-xs font-medium text-slate-500">Liquidity Metrics</span>
             </div>
-            <span className="text-xs font-medium text-slate-500">Liquidity Metrics</span>
-          </div>
-          <h3 className="text-sm font-medium text-slate-700 mb-3">Regulatory & Resolution Liquidity</h3>
-          <div className="space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-600">LCR</span>
-              <span className={`text-sm font-semibold ${metrics.lcrRatio && metrics.lcrRatio >= 1.0 ? 'text-green-600' : 'text-red-600'}`}>
-                {metrics.lcrRatio !== null ? formatPercent(metrics.lcrRatio) : 'N/A'}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-600">NSFR</span>
-              <span className={`text-sm font-semibold ${metrics.nsfrRatio && metrics.nsfrRatio >= 1.0 ? 'text-green-600' : 'text-red-600'}`}>
-                {metrics.nsfrRatio !== null ? formatPercent(metrics.nsfrRatio) : 'N/A'}
-              </span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-xs text-slate-600">RLAP Surplus</span>
-              <span className={`text-sm font-semibold ${metrics.rlapSurplus && metrics.rlapSurplus >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {metrics.rlapSurplus !== null ? formatCurrency(metrics.rlapSurplus) : 'N/A'}
-              </span>
-            </div>
-            <div className="pt-2 border-t border-slate-200">
-              <div className="flex items-center gap-2">
-                {(metrics.lcrRatio && metrics.lcrRatio >= 1.0) && (metrics.nsfrRatio && metrics.nsfrRatio >= 1.0) ? (
-                  <CheckCircle className="w-4 h-4 text-green-600" />
-                ) : (
-                  <AlertTriangle className="w-4 h-4 text-amber-600" />
-                )}
-                <span className="text-xs font-medium text-slate-700">
-                  {(metrics.lcrRatio && metrics.lcrRatio >= 1.0) && (metrics.nsfrRatio && metrics.nsfrRatio >= 1.0) ? 'Compliant' : 'Monitor'}
+            <h3 className="text-sm font-medium text-slate-700 mb-3">Regulatory & Resolution Liquidity</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-600">LCR</span>
+                <span className={`text-sm font-semibold ${metrics.lcrRatio && metrics.lcrRatio >= 1.0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {metrics.lcrRatio !== null ? formatPercent(metrics.lcrRatio) : 'N/A'}
                 </span>
               </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-600">NSFR</span>
+                <span className={`text-sm font-semibold ${metrics.nsfrRatio && metrics.nsfrRatio >= 1.0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {metrics.nsfrRatio !== null ? formatPercent(metrics.nsfrRatio) : 'N/A'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-xs text-slate-600">RLAP Surplus</span>
+                <span className={`text-sm font-semibold ${metrics.rlapSurplus && metrics.rlapSurplus >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {metrics.rlapSurplus !== null ? formatCurrency(metrics.rlapSurplus) : 'N/A'}
+                </span>
+              </div>
+              <div className="pt-2 border-t border-slate-200">
+                <div className="flex items-center gap-2">
+                  {(metrics.lcrRatio && metrics.lcrRatio >= 1.0) && (metrics.nsfrRatio && metrics.nsfrRatio >= 1.0) ? (
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-amber-600" />
+                  )}
+                  <span className="text-xs font-medium text-slate-700">
+                    {(metrics.lcrRatio && metrics.lcrRatio >= 1.0) && (metrics.nsfrRatio && metrics.nsfrRatio >= 1.0) ? 'Compliant' : 'Monitor'}
+                  </span>
+                </div>
+              </div>
             </div>
-          </div>
-        </button>
+          </button>
+        </MetricCardWithQuality>
 
         <button
           onClick={() => onNavigate?.('cash-flow')}

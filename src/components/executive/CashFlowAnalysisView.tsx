@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, TrendingUp, TrendingDown, DollarSign, Calendar, Activity, Info, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
+import { LegalEntityFilter } from '../shared/LegalEntityFilter';
 
 interface CashFlowAnalysisViewProps {
   onNavigate?: (view: string) => void;
@@ -20,10 +21,11 @@ export function CashFlowAnalysisView({ onNavigate }: CashFlowAnalysisViewProps) 
   const [cashFlowData, setCashFlowData] = useState<CashFlowData[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
+  const [selectedEntity, setSelectedEntity] = useState<string>('all');
 
   useEffect(() => {
     loadCashFlowData();
-  }, [user, selectedPeriod]);
+  }, [user, selectedPeriod, selectedEntity]);
 
   const loadCashFlowData = async () => {
     if (!user) return;
@@ -168,24 +170,31 @@ export function CashFlowAnalysisView({ onNavigate }: CashFlowAnalysisViewProps) 
       </div>
 
       <div>
-          <div className="flex items-center gap-2 mb-6">
-            <Calendar className="w-5 h-5 text-slate-600" />
-            <span className="text-sm font-medium text-slate-700">Period:</span>
-            <div className="flex gap-2">
-              {(['7d', '30d', '90d', '1y'] as const).map(period => (
-                <button
-                  key={period}
-                  onClick={() => setSelectedPeriod(period)}
-                  className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
-                    selectedPeriod === period
-                      ? 'bg-green-600 text-white'
-                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  {period === '1y' ? '1 Year' : period.toUpperCase()}
-                </button>
-              ))}
+          <div className="flex flex-wrap items-center gap-6 mb-6">
+            <div className="flex items-center gap-2">
+              <Calendar className="w-5 h-5 text-slate-600" />
+              <span className="text-sm font-medium text-slate-700">Period:</span>
+              <div className="flex gap-2">
+                {(['7d', '30d', '90d', '1y'] as const).map(period => (
+                  <button
+                    key={period}
+                    onClick={() => setSelectedPeriod(period)}
+                    className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+                      selectedPeriod === period
+                        ? 'bg-green-600 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {period === '1y' ? '1 Year' : period.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
+
+            <LegalEntityFilter
+              selectedEntity={selectedEntity}
+              onEntityChange={setSelectedEntity}
+            />
           </div>
 
           {loading ? (
