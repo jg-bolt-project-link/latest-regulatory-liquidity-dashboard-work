@@ -1,7 +1,7 @@
-import { FR2052aValidation } from './components/FR2052aValidation';
+import { MainApp } from './components/MainApp';
 
 function App() {
-  return <FR2052aValidation />;
+  return <MainApp />;
 }
 
 export default App;

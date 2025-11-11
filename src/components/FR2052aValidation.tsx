@@ -440,49 +440,47 @@ export function FR2052aValidation() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="flex items-center justify-center py-12">
         <div className="text-slate-600">Loading validation system...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">FR 2052a Validation System</h1>
-          <p className="text-slate-600">Comprehensive data quality and compliance validation for regulatory reporting</p>
-        </div>
-
-        <div className="mb-6">
-          <div className="flex gap-2 border-b border-slate-200">
-            {[
-              { key: 'overview', label: 'Overview', icon: TrendingUp },
-              { key: 'rules', label: 'Validation Rules', icon: Database },
-              { key: 'submissions', label: 'Submissions', icon: FileText },
-              { key: 'errors', label: 'Error Details', icon: AlertTriangle },
-            ].map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key as any)}
-                className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === key
-                    ? 'border-blue-600 text-blue-600'
-                    : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {activeTab === 'overview' && renderOverview()}
-        {activeTab === 'rules' && renderRules()}
-        {activeTab === 'submissions' && renderSubmissions()}
-        {activeTab === 'errors' && renderErrors()}
+    <div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-slate-900 mb-2">FR 2052a Validation System</h1>
+        <p className="text-slate-600">Comprehensive data quality and compliance validation for regulatory reporting</p>
       </div>
+
+      <div className="mb-6">
+        <div className="flex gap-2 border-b border-slate-200">
+          {[
+            { key: 'overview', label: 'Overview', icon: TrendingUp },
+            { key: 'rules', label: 'Validation Rules', icon: Database },
+            { key: 'submissions', label: 'Submissions', icon: FileText },
+            { key: 'errors', label: 'Error Details', icon: AlertTriangle },
+          ].map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key as any)}
+              className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === key
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-slate-600 hover:text-slate-900 hover:border-slate-300'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {activeTab === 'overview' && renderOverview()}
+      {activeTab === 'rules' && renderRules()}
+      {activeTab === 'submissions' && renderSubmissions()}
+      {activeTab === 'errors' && renderErrors()}
     </div>
   );
 }

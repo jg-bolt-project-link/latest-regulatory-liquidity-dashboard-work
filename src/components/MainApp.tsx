@@ -11,6 +11,7 @@ import { CashFlowAnalysisView } from './executive/CashFlowAnalysisView';
 import { IntradayLiquidityView } from './executive/IntradayLiquidityView';
 import { DataQualityDashboard } from './DataQualityDashboard';
 import { FR2052aDashboard } from './FR2052aDashboard';
+import { FR2052aValidation } from './FR2052aValidation';
 import {
   LayoutDashboard,
   FileText,
@@ -26,7 +27,8 @@ import {
   CheckCircle,
   Database,
   Menu,
-  X
+  X,
+  FileCheck
 } from 'lucide-react';
 
 type ViewType =
@@ -41,7 +43,8 @@ type ViewType =
   | 'cash-flow'
   | 'intraday-liquidity'
   | 'data-quality'
-  | 'fr2052a';
+  | 'fr2052a'
+  | 'fr2052a-validation';
 
 export function MainApp() {
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
@@ -56,6 +59,7 @@ export function MainApp() {
     { id: 'intraday-liquidity', label: 'Intraday Liquidity', icon: Clock },
     { id: 'data-quality', label: 'Data Quality', icon: CheckCircle },
     { id: 'fr2052a', label: 'FR 2052a', icon: Database },
+    { id: 'fr2052a-validation', label: 'FR 2052a Validation', icon: FileCheck },
     { id: 'accounts', label: 'Accounts', icon: Wallet },
     { id: 'transactions', label: 'Transactions', icon: Receipt },
     { id: 'reports', label: 'Reports', icon: FileText },
@@ -80,6 +84,8 @@ export function MainApp() {
         return <DataQualityDashboard onClose={() => setActiveView('dashboard')} />;
       case 'fr2052a':
         return <FR2052aDashboard onClose={() => setActiveView('dashboard')} />;
+      case 'fr2052a-validation':
+        return <FR2052aValidation />;
       case 'accounts':
         return <Accounts />;
       case 'transactions':
