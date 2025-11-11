@@ -1,7 +1,12 @@
 import { MainApp } from './components/MainApp';
+import { AuthProvider } from './contexts/AuthContext';
 
 function App() {
-  return <MainApp />;
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
+  );
 }
 
 export default App;

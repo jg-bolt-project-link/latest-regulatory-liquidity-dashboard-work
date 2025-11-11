@@ -13,25 +13,17 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const mockUser = {
+    id: 'mock-user-id',
+    email: 'user@statestreet.com',
+    app_metadata: {},
+    user_metadata: {},
+    aud: 'authenticated',
+    created_at: new Date().toISOString(),
+  } as User;
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      (() => {
-        (async () => {
-          setUser(session?.user ?? null);
-        })();
-      })();
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  const [user] = useState<User | null>(mockUser);
+  const [loading] = useState(false);
 
   const signUp = async (email: string, password: string, fullName?: string) => {
     const { data, error } = await supabase.auth.signUp({
