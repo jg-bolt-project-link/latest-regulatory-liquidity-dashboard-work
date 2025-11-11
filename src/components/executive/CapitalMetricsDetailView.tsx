@@ -232,21 +232,38 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div>
                       <p className="text-sm text-slate-600 mb-1">Tier 1 Capital</p>
-                      <p className="text-2xl font-bold text-slate-900">{formatCurrency(latestBS.tier1_capital)}</p>
+                      <MetricValueWithDetails
+                        value={formatCurrency(latestBS.tier1_capital)}
+                        metricName="Tier 1 Capital"
+                        targetTable="balance_sheet_metrics"
+                        targetColumn="tier1_capital"
+                        dataSource="Analytics"
+                        className="text-2xl font-bold text-slate-900"
+                      />
                       <p className="text-xs text-slate-500 mt-1">Common equity + Additional Tier 1</p>
                     </div>
                     <div>
                       <p className="text-sm text-slate-600 mb-1">Tier 1 Capital Ratio</p>
-                      <p className={`text-2xl font-bold ${latestBS.tier1_capital_ratio >= 0.06 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatPercent(latestBS.tier1_capital_ratio)}
-                      </p>
+                      <MetricValueWithDetails
+                        value={formatPercent(latestBS.tier1_capital_ratio)}
+                        metricName="Tier 1 Capital Ratio"
+                        targetTable="balance_sheet_metrics"
+                        targetColumn="tier1_capital_ratio"
+                        dataSource="Analytics"
+                        className={`text-2xl font-bold ${latestBS.tier1_capital_ratio >= 0.06 ? 'text-green-600' : 'text-red-600'}`}
+                      />
                       <p className="text-xs text-slate-500 mt-1">Minimum: 6.0% (Basel III)</p>
                     </div>
                     <div>
                       <p className="text-sm text-slate-600 mb-1">Leverage Ratio</p>
-                      <p className={`text-2xl font-bold ${latestBS.leverage_ratio >= 0.05 ? 'text-green-600' : 'text-amber-600'}`}>
-                        {formatPercent(latestBS.leverage_ratio)}
-                      </p>
+                      <MetricValueWithDetails
+                        value={formatPercent(latestBS.leverage_ratio)}
+                        metricName="Leverage Ratio"
+                        targetTable="balance_sheet_metrics"
+                        targetColumn="leverage_ratio"
+                        dataSource="Analytics"
+                        className={`text-2xl font-bold ${latestBS.leverage_ratio >= 0.05 ? 'text-green-600' : 'text-amber-600'}`}
+                      />
                       <p className="text-xs text-slate-500 mt-1">US G-SIB Minimum: 5.0%</p>
                     </div>
                   </div>
@@ -359,9 +376,14 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
                         <p className="text-xs text-slate-500">Resolution Capital Adequacy Position</p>
                       </div>
                       <div>
-                        <p className={`text-3xl font-bold ${latestRC.rcap_surplus_deficit >= 0 ? 'text-green-700' : 'text-red-700'}`}>
-                          {formatPercent(latestRC.rcap_ratio)}
-                        </p>
+                        <MetricValueWithDetails
+                          value={formatPercent(latestRC.rcap_ratio)}
+                          metricName="Resolution Capital Adequacy Position (RCAP) Ratio"
+                          targetTable="resolution_capital_metrics"
+                          targetColumn="rcap_ratio"
+                          dataSource="Analytics"
+                          className={`text-3xl font-bold ${latestRC.rcap_surplus_deficit >= 0 ? 'text-green-700' : 'text-red-700'}`}
+                        />
                         <div className="mt-4 space-y-2">
                           <div className="flex justify-between text-xs">
                             <span className="text-slate-600">Amount</span>

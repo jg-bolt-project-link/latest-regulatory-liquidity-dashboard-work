@@ -23,17 +23,17 @@ export function MetricValueWithDetails({
 
   return (
     <>
-      <span className="inline-flex items-center gap-1.5 group">
+      <span className="inline-flex items-center gap-2">
         <span className={className}>{value}</span>
         <button
           onClick={(e) => {
             e.stopPropagation();
             setShowDetails(true);
           }}
-          className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-slate-100 rounded"
+          className="flex-shrink-0 p-1 hover:bg-blue-100 rounded transition-colors"
           title="View data quality, feeds, and lineage"
         >
-          <Eye className="w-3.5 h-3.5 text-blue-600" />
+          <Eye className="w-4 h-4 text-blue-600 hover:text-blue-700" />
         </button>
       </span>
 

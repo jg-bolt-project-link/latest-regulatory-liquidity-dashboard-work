@@ -278,9 +278,14 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
                         <p className="text-sm text-slate-600 mb-1">LCR Ratio</p>
-                        <p className={`text-2xl font-bold ${latestLCR.lcr_ratio >= 1.0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {formatPercent(latestLCR.lcr_ratio)}
-                        </p>
+                        <MetricValueWithDetails
+                          value={formatPercent(latestLCR.lcr_ratio)}
+                          metricName="Liquidity Coverage Ratio (LCR)"
+                          targetTable="lcr_metrics"
+                          targetColumn="lcr_ratio"
+                          dataSource="Analytics"
+                          className={`text-2xl font-bold ${latestLCR.lcr_ratio >= 1.0 ? 'text-green-600' : 'text-red-600'}`}
+                        />
                         <div className="flex items-center gap-2 mt-2">
                           {latestLCR.is_compliant ? (
                             <CheckCircle className="w-4 h-4 text-green-600" />
@@ -295,12 +300,26 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
                       </div>
                       <div>
                         <p className="text-sm text-slate-600 mb-1">Total HQLA</p>
-                        <p className="text-2xl font-bold text-slate-900">{formatCurrency(latestLCR.total_hqla)}</p>
+                        <MetricValueWithDetails
+                          value={formatCurrency(latestLCR.total_hqla)}
+                          metricName="Total High-Quality Liquid Assets (HQLA)"
+                          targetTable="lcr_metrics"
+                          targetColumn="total_hqla"
+                          dataSource="Analytics"
+                          className="text-2xl font-bold text-slate-900"
+                        />
                         <p className="text-xs text-slate-500 mt-1">High-Quality Liquid Assets</p>
                       </div>
                       <div>
                         <p className="text-sm text-slate-600 mb-1">Net Cash Outflows (30d)</p>
-                        <p className="text-2xl font-bold text-slate-900">{formatCurrency(latestLCR.total_net_cash_outflows)}</p>
+                        <MetricValueWithDetails
+                          value={formatCurrency(latestLCR.total_net_cash_outflows)}
+                          metricName="Total Net Cash Outflows (30-day)"
+                          targetTable="lcr_metrics"
+                          targetColumn="total_net_cash_outflows"
+                          dataSource="Analytics"
+                          className="text-2xl font-bold text-slate-900"
+                        />
                         <p className="text-xs text-slate-500 mt-1">Stressed scenario</p>
                       </div>
                     </div>
@@ -414,9 +433,14 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
                         <p className="text-sm text-slate-600 mb-1">NSFR Ratio</p>
-                        <p className={`text-2xl font-bold ${latestNSFR.nsfr_ratio >= 1.0 ? 'text-green-600' : 'text-red-600'}`}>
-                          {formatPercent(latestNSFR.nsfr_ratio)}
-                        </p>
+                        <MetricValueWithDetails
+                          value={formatPercent(latestNSFR.nsfr_ratio)}
+                          metricName="Net Stable Funding Ratio (NSFR)"
+                          targetTable="nsfr_metrics"
+                          targetColumn="nsfr_ratio"
+                          dataSource="Analytics"
+                          className={`text-2xl font-bold ${latestNSFR.nsfr_ratio >= 1.0 ? 'text-green-600' : 'text-red-600'}`}
+                        />
                         <div className="flex items-center gap-2 mt-2">
                           {latestNSFR.is_compliant ? (
                             <CheckCircle className="w-4 h-4 text-green-600" />
@@ -431,12 +455,26 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
                       </div>
                       <div>
                         <p className="text-sm text-slate-600 mb-1">Available Stable Funding</p>
-                        <p className="text-2xl font-bold text-slate-900">{formatCurrency(latestNSFR.available_stable_funding)}</p>
+                        <MetricValueWithDetails
+                          value={formatCurrency(latestNSFR.available_stable_funding)}
+                          metricName="Available Stable Funding (ASF)"
+                          targetTable="nsfr_metrics"
+                          targetColumn="available_stable_funding"
+                          dataSource="Analytics"
+                          className="text-2xl font-bold text-slate-900"
+                        />
                         <p className="text-xs text-slate-500 mt-1">ASF</p>
                       </div>
                       <div>
                         <p className="text-sm text-slate-600 mb-1">Required Stable Funding</p>
-                        <p className="text-2xl font-bold text-slate-900">{formatCurrency(latestNSFR.required_stable_funding)}</p>
+                        <MetricValueWithDetails
+                          value={formatCurrency(latestNSFR.required_stable_funding)}
+                          metricName="Required Stable Funding (RSF)"
+                          targetTable="nsfr_metrics"
+                          targetColumn="required_stable_funding"
+                          dataSource="Analytics"
+                          className="text-2xl font-bold text-slate-900"
+                        />
                         <p className="text-xs text-slate-500 mt-1">RSF</p>
                       </div>
                     </div>
