@@ -14,7 +14,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const mockUser = {
-    id: 'mock-user-id',
+    id: '00000000-0000-0000-0000-000000000000',
     email: 'user@statestreet.com',
     app_metadata: {},
     user_metadata: {},
