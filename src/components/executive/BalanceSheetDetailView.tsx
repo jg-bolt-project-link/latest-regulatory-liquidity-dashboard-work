@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { BarChart3, TrendingUp, TrendingDown, Activity, ExternalLink, Info, ArrowLeft } from 'lucide-react';
 import { LegalEntityFilter } from '../shared/LegalEntityFilter';
+import { MetricValueWithDetails } from '../shared/MetricValueWithDetails';
 
 interface BalanceSheetMetric {
   id: string;
@@ -197,32 +198,70 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div>
                   <p className="text-sm text-slate-600 mb-1">Total Assets</p>
-                  <p className="text-2xl font-bold text-slate-900">{formatCurrency(latestBS.total_assets)}</p>
+                  <MetricValueWithDetails
+                    value={formatCurrency(latestBS.total_assets)}
+                    metricName="Total Assets"
+                    targetTable="balance_sheet_metrics"
+                    targetColumn="total_assets"
+                    dataSource="Analytics"
+                    className="text-2xl font-bold text-slate-900"
+                  />
                 </div>
                 <div>
                   <p className="text-sm text-slate-600 mb-1">Total Liabilities</p>
-                  <p className="text-2xl font-bold text-slate-900">{formatCurrency(latestBS.total_liabilities)}</p>
+                  <MetricValueWithDetails
+                    value={formatCurrency(latestBS.total_liabilities)}
+                    metricName="Total Liabilities"
+                    targetTable="balance_sheet_metrics"
+                    targetColumn="total_liabilities"
+                    dataSource="Analytics"
+                    className="text-2xl font-bold text-slate-900"
+                  />
                 </div>
                 <div>
                   <p className="text-sm text-slate-600 mb-1">Total Equity</p>
-                  <p className="text-2xl font-bold text-green-600">{formatCurrency(latestBS.total_equity)}</p>
+                  <MetricValueWithDetails
+                    value={formatCurrency(latestBS.total_equity)}
+                    metricName="Total Equity"
+                    targetTable="balance_sheet_metrics"
+                    targetColumn="total_equity"
+                    dataSource="Analytics"
+                    className="text-2xl font-bold text-green-600"
+                  />
                 </div>
                 <div>
                   <p className="text-sm text-slate-600 mb-1">Tier 1 Capital</p>
-                  <p className="text-2xl font-bold text-slate-900">{formatCurrency(latestBS.tier1_capital)}</p>
+                  <MetricValueWithDetails
+                    value={formatCurrency(latestBS.tier1_capital)}
+                    metricName="Tier 1 Capital"
+                    targetTable="balance_sheet_metrics"
+                    targetColumn="tier1_capital"
+                    dataSource="Analytics"
+                    className="text-2xl font-bold text-slate-900"
+                  />
                 </div>
                 <div>
                   <p className="text-sm text-slate-600 mb-1">Tier 1 Capital Ratio</p>
-                  <p className={`text-2xl font-bold ${latestBS.tier1_capital_ratio >= 0.06 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatPercent(latestBS.tier1_capital_ratio)}
-                  </p>
+                  <MetricValueWithDetails
+                    value={formatPercent(latestBS.tier1_capital_ratio)}
+                    metricName="Tier 1 Capital Ratio"
+                    targetTable="balance_sheet_metrics"
+                    targetColumn="tier1_capital_ratio"
+                    dataSource="Analytics"
+                    className={`text-2xl font-bold ${latestBS.tier1_capital_ratio >= 0.06 ? 'text-green-600' : 'text-red-600'}`}
+                  />
                   <p className="text-xs text-slate-500 mt-1">Minimum: 6%</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-600 mb-1">Leverage Ratio</p>
-                  <p className={`text-2xl font-bold ${latestBS.leverage_ratio >= 0.05 ? 'text-green-600' : 'text-amber-600'}`}>
-                    {formatPercent(latestBS.leverage_ratio)}
-                  </p>
+                  <MetricValueWithDetails
+                    value={formatPercent(latestBS.leverage_ratio)}
+                    metricName="Leverage Ratio"
+                    targetTable="balance_sheet_metrics"
+                    targetColumn="leverage_ratio"
+                    dataSource="Analytics"
+                    className={`text-2xl font-bold ${latestBS.leverage_ratio >= 0.05 ? 'text-green-600' : 'text-amber-600'}`}
+                  />
                   <p className="text-xs text-slate-500 mt-1">US G-SIB Minimum: 5%</p>
                 </div>
               </div>
@@ -235,16 +274,26 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <p className="text-sm text-slate-600 mb-1">EVE Change</p>
-                  <p className={`text-2xl font-bold ${latestIRRBB.eve_change_percent < -0.15 ? 'text-red-600' : latestIRRBB.eve_change_percent < 0 ? 'text-amber-600' : 'text-green-600'}`}>
-                    {formatPercent(latestIRRBB.eve_change_percent)}
-                  </p>
+                  <MetricValueWithDetails
+                    value={formatPercent(latestIRRBB.eve_change_percent)}
+                    metricName="Economic Value of Equity (EVE) Change"
+                    targetTable="interest_rate_risk_metrics"
+                    targetColumn="eve_change_percent"
+                    dataSource="Analytics"
+                    className={`text-2xl font-bold ${latestIRRBB.eve_change_percent < -0.15 ? 'text-red-600' : latestIRRBB.eve_change_percent < 0 ? 'text-amber-600' : 'text-green-600'}`}
+                  />
                   <p className="text-xs text-slate-500 mt-1">{formatCurrency(latestIRRBB.eve_change_amount)}</p>
                 </div>
                 <div>
                   <p className="text-sm text-slate-600 mb-1">NII Change</p>
-                  <p className={`text-2xl font-bold ${latestIRRBB.nii_change_percent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {formatPercent(latestIRRBB.nii_change_percent)}
-                  </p>
+                  <MetricValueWithDetails
+                    value={formatPercent(latestIRRBB.nii_change_percent)}
+                    metricName="Net Interest Income (NII) Change"
+                    targetTable="interest_rate_risk_metrics"
+                    targetColumn="nii_change_percent"
+                    dataSource="Analytics"
+                    className={`text-2xl font-bold ${latestIRRBB.nii_change_percent >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                  />
                   <p className="text-xs text-slate-500 mt-1">{formatCurrency(latestIRRBB.nii_change_amount)}</p>
                 </div>
               </div>

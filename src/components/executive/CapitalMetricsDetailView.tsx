@@ -3,6 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
 import { Shield, TrendingUp, AlertTriangle, CheckCircle, Info, ExternalLink, ArrowLeft } from 'lucide-react';
 import { LegalEntityFilter } from '../shared/LegalEntityFilter';
+import { MetricValueWithDetails } from '../shared/MetricValueWithDetails';
 
 interface BalanceSheetMetric {
   id: string;
