@@ -21,6 +21,7 @@ export function ChatAssistant() {
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -29,6 +30,19 @@ export function ChatAssistant() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isOpen && chatContainerRef.current && !chatContainerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
 
   const handleSend = async () => {
     if (!inputValue.trim() || isLoading) return;
@@ -112,7 +126,7 @@ export function ChatAssistant() {
       )}
 
       {isOpen && (
-        <div className="fixed bottom-4 right-4 w-96 h-[600px] bg-white rounded-xl shadow-2xl flex flex-col z-50 border border-slate-200">
+        <div ref={chatContainerRef} className="fixed bottom-4 right-4 w-96 h-[600px] bg-white rounded-xl shadow-2xl flex flex-col z-50 border border-slate-200">
           <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-blue-600 text-white rounded-t-xl">
             <div className="flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />
