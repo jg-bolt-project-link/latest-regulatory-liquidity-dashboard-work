@@ -13,6 +13,9 @@ interface MetricValueWithDetailsProps {
   dataSource: string;
   className?: string;
   priorValue?: string | number;
+  currentDate?: string;
+  priorDate?: string;
+  availablePeriods?: Array<{ date: string; value: string | number }>;
 }
 
 export function MetricValueWithDetails({
@@ -22,7 +25,10 @@ export function MetricValueWithDetails({
   targetColumn,
   dataSource,
   className = '',
-  priorValue
+  priorValue,
+  currentDate,
+  priorDate,
+  availablePeriods
 }: MetricValueWithDetailsProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [showRegulatory, setShowRegulatory] = useState(false);
@@ -109,6 +115,9 @@ export function MetricValueWithDetails({
           metricName={metricName}
           currentValue={value}
           priorValue={priorValue}
+          currentDate={currentDate}
+          priorDate={priorDate}
+          availablePeriods={availablePeriods}
           onClose={() => setShowChangeDrivers(false)}
         />
       )}

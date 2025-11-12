@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Droplets, AlertTriangle, CheckCircle, Activity, Info, ExternalLink, ArrowLeft } from 'lucide-react';
+import { Droplets, AlertTriangle, CheckCircle, Activity, Info, ExternalLink, ArrowLeft, FileDown } from 'lucide-react';
 import { LegalEntityFilter } from '../shared/LegalEntityFilter';
 import { MetricValueWithDetails } from '../shared/MetricValueWithDetails';
+import { exportLiquidityMetricsToPPT } from '../../utils/exportToPowerPoint';
 
 interface LCRMetric {
   id: string;
@@ -144,6 +145,38 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
           <h1 className="text-2xl font-bold text-slate-900">Liquidity Coverage & Stress Testing</h1>
           <p className="text-sm text-slate-600">LCR, NSFR, resolution liquidity, and stress test analysis</p>
         </div>
+        <button
+          onClick={() => {
+            const currentLCR = lcrMetrics[0];
+            const priorLCR = lcrMetrics.length > 1 ? lcrMetrics[1] : null;
+            const currentNSFR = nsfrMetrics[0];
+            const priorNSFR = nsfrMetrics.length > 1 ? nsfrMetrics[1] : null;
+
+            exportLiquidityMetricsToPPT({
+              currentLCR: currentLCR ? formatPercent(currentLCR.lcr_ratio) : 'N/A',
+              priorLCR: priorLCR ? formatPercent(priorLCR.lcr_ratio) : undefined,
+              lcrDelta: priorLCR ? `${(currentLCR!.lcr_ratio - priorLCR.lcr_ratio).toFixed(2)}%` : undefined,
+              currentNSFR: currentNSFR ? formatPercent(currentNSFR.nsfr_ratio) : 'N/A',
+              priorNSFR: priorNSFR ? formatPercent(priorNSFR.nsfr_ratio) : undefined,
+              nsfrDelta: priorNSFR ? `${(currentNSFR!.nsfr_ratio - priorNSFR.nsfr_ratio).toFixed(2)}%` : undefined,
+              currentHQLA: currentLCR ? formatCurrency(currentLCR.total_hqla) : 'N/A',
+              priorHQLA: priorLCR ? formatCurrency(priorLCR.total_hqla) : undefined,
+              hqlaDelta: priorLCR ? `${((currentLCR!.total_hqla - priorLCR.total_hqla) / priorLCR.total_hqla * 100).toFixed(1)}%` : undefined,
+              currentNetOutflows: currentLCR ? formatCurrency(currentLCR.total_net_cash_outflows) : 'N/A',
+              priorNetOutflows: priorLCR ? formatCurrency(priorLCR.total_net_cash_outflows) : undefined,
+              netOutflowsDelta: priorLCR ? `${((currentLCR!.total_net_cash_outflows - priorLCR.total_net_cash_outflows) / priorLCR.total_net_cash_outflows * 100).toFixed(1)}%` : undefined,
+              currentDate: currentLCR ? formatDate(currentLCR.report_date) : undefined,
+              priorDate: priorLCR ? formatDate(priorLCR.report_date) : undefined,
+              lcrStatus: currentLCR && currentLCR.lcr_ratio >= 110 ? 'compliant' : 'warning',
+              nsfrStatus: currentNSFR && currentNSFR.nsfr_ratio >= 105 ? 'compliant' : 'warning'
+            });
+          }}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          disabled={lcrMetrics.length === 0}
+        >
+          <FileDown className="w-4 h-4" />
+          <span>Export to PowerPoint</span>
+        </button>
         <div className="w-80">
           <LegalEntityFilter
             selectedEntityId={selectedEntityId}

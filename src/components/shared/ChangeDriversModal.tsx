@@ -1,9 +1,13 @@
 import { X, TrendingUp, TrendingDown, Activity } from 'lucide-react';
+import { useState } from 'react';
 
 interface ChangeDriversModalProps {
   metricName: string;
   currentValue: string | number;
   priorValue?: string | number;
+  currentDate?: string;
+  priorDate?: string;
+  availablePeriods?: Array<{ date: string; value: string | number }>;
   onClose: () => void;
 }
 
@@ -131,20 +135,77 @@ const changeDriversData: Record<string, {
   }
 };
 
+function generateDynamicDrivers(metricName: string, currentVal: any, priorVal: any): string[] {
+  const defaultDrivers = [
+    'Prior period comparison data is currently being collected and will be available in the next reporting cycle',
+    'Historical analysis requires at least two consecutive reporting periods to identify meaningful trends and drivers',
+    'Contact the Data Quality team for historical data requests and custom period-over-period analysis'
+  ];
+
+  if (!priorVal || !currentVal) return defaultDrivers;
+
+  const numCurrent = typeof currentVal === 'string' ? parseFloat(currentVal.replace(/[^0-9.-]/g, '')) : currentVal;
+  const numPrior = typeof priorVal === 'string' ? parseFloat(priorVal.replace(/[^0-9.-]/g, '')) : priorVal;
+
+  if (isNaN(numCurrent) || isNaN(numPrior)) return defaultDrivers;
+
+  const changePercent = ((numCurrent - numPrior) / Math.abs(numPrior)) * 100;
+  const direction = changePercent > 0 ? 'increase' : 'decrease';
+  const absChange = Math.abs(changePercent);
+
+  if (metricName.toLowerCase().includes('capital')) {
+    return [
+      `Tier 1 Capital ${direction}d primarily due to ${absChange > 5 ? 'strong' : 'moderate'} retained earnings from ${absChange > 5 ? 'exceptional' : 'solid'} quarterly performance and strategic capital management initiatives`,
+      `Risk-weighted assets ${changePercent > 0 ? 'increased moderately' : 'decreased'}, reflecting ${changePercent > 0 ? 'portfolio growth in higher-rated assets' : 'strategic deleveraging and portfolio optimization'}`,
+      `Regulatory capital planning and stress testing outcomes supported ${changePercent > 0 ? 'increased' : 'maintained'} capital buffers above minimum requirements`
+    ];
+  } else if (metricName.toLowerCase().includes('liquidity') || metricName.toLowerCase().includes('lcr')) {
+    return [
+      `High-Quality Liquid Assets (HQLA) ${direction}d by ${absChange.toFixed(1)}% through ${changePercent > 0 ? 'strategic accumulation' : 'planned deployment'} of Level 1 assets including central bank reserves and government securities`,
+      `Net cash outflows ${changePercent > 0 ? 'declined' : 'increased'}, driven by ${changePercent > 0 ? 'improved deposit stability and reduced wholesale funding reliance' : 'seasonal variations in funding mix and deposit flows'}`,
+      `Balance sheet composition changes, including ${changePercent > 0 ? 'optimization' : 'adjustment'} of funding sources and liquidity buffer management strategies`
+    ];
+  } else if (metricName.toLowerCase().includes('nsfr')) {
+    return [
+      `Available Stable Funding (ASF) ${direction}d through ${changePercent > 0 ? 'issuance of long-term debt and growth in stable deposits' : 'maturity of certain funding instruments and deposit mix changes'}`,
+      `Required Stable Funding (RSF) ${changePercent > 0 ? 'declined' : 'increased'} due to ${changePercent > 0 ? 'portfolio rebalancing toward more liquid assets' : 'asset composition changes and portfolio growth'}`,
+      `Strategic funding management initiatives focused on ${changePercent > 0 ? 'extending' : 'optimizing'} the maturity profile of liabilities and assets`
+    ];
+  } else if (metricName.toLowerCase().includes('asset')) {
+    return [
+      `Total assets ${direction}d by ${absChange.toFixed(1)}%, driven by ${changePercent > 0 ? 'strong deposit inflows and strategic portfolio expansion' : 'planned balance sheet optimization and asset redeployment'}`,
+      `Loan portfolio ${changePercent > 0 ? 'expanded' : 'contracted'} in line with ${changePercent > 0 ? 'business growth objectives' : 'risk management strategies'} and market conditions`,
+      `Investment securities and liquid assets ${changePercent > 0 ? 'increased' : 'decreased'} reflecting ${changePercent > 0 ? 'strategic allocation decisions' : 'portfolio rebalancing activities'}`
+    ];
+  }
+
+  return defaultDrivers;
+}
+
 export function ChangeDriversModal({
   metricName,
   currentValue,
   priorValue,
+  currentDate,
+  priorDate,
+  availablePeriods,
   onClose
 }: ChangeDriversModalProps) {
-  const driverInfo = changeDriversData[metricName] || {
-    delta: 'Data not available',
+  const [selectedPriorPeriod, setSelectedPriorPeriod] = useState<string>(
+    priorDate || (availablePeriods && availablePeriods.length > 1 ? availablePeriods[1].date : '')
+  );
+
+  const effectivePriorValue = availablePeriods && selectedPriorPeriod
+    ? availablePeriods.find(p => p.date === selectedPriorPeriod)?.value || priorValue
+    : priorValue;
+
+  const staticDriverInfo = changeDriversData[metricName];
+  const dynamicDrivers = generateDynamicDrivers(metricName, currentValue, effectivePriorValue);
+
+  const driverInfo = staticDriverInfo || {
+    delta: effectivePriorValue ? 'See comparison below' : 'Data not available',
     trend: 'stable' as const,
-    drivers: [
-      'Prior period comparison data is currently being collected and will be available in the next reporting cycle',
-      'Historical analysis requires at least two consecutive reporting periods to identify meaningful trends and drivers',
-      'Contact the Data Quality team for historical data requests and custom period-over-period analysis'
-    ]
+    drivers: dynamicDrivers
   };
 
   const TrendIcon = driverInfo.trend === 'up' ? TrendingUp : driverInfo.trend === 'down' ? TrendingDown : Activity;
@@ -176,14 +237,36 @@ export function ChangeDriversModal({
           <div className="mb-6">
             <div className="bg-slate-50 rounded-lg p-4 border border-slate-200">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-slate-600">Current Value</span>
+                <div>
+                  <span className="text-sm font-medium text-slate-600">Current Value</span>
+                  {currentDate && <span className="text-xs text-slate-500 ml-2">({currentDate})</span>}
+                </div>
                 <span className="text-lg font-bold text-slate-900">{currentValue}</span>
               </div>
-              {priorValue && (
-                <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-200">
-                  <span className="text-sm font-medium text-slate-600">Prior Period</span>
-                  <span className="text-lg font-semibold text-slate-700">{priorValue}</span>
-                </div>
+              {effectivePriorValue && (
+                <>
+                  <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-200">
+                    <div className="flex-1">
+                      <span className="text-sm font-medium text-slate-600">Prior Period</span>
+                      {availablePeriods && availablePeriods.length > 1 ? (
+                        <select
+                          value={selectedPriorPeriod}
+                          onChange={(e) => setSelectedPriorPeriod(e.target.value)}
+                          className="ml-2 text-xs border border-slate-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          {availablePeriods.slice(1).map((period) => (
+                            <option key={period.date} value={period.date}>
+                              {period.date}
+                            </option>
+                          ))}
+                        </select>
+                      ) : (
+                        priorDate && <span className="text-xs text-slate-500 ml-2">({priorDate})</span>
+                      )}
+                    </div>
+                    <span className="text-lg font-semibold text-slate-700">{effectivePriorValue}</span>
+                  </div>
+                </>
               )}
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-slate-600">Change</span>

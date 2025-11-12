@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Shield, TrendingUp, AlertTriangle, CheckCircle, Info, ExternalLink, X } from 'lucide-react';
+import { Shield, TrendingUp, AlertTriangle, CheckCircle, Info, ExternalLink, X, FileDown } from 'lucide-react';
 import { LegalEntityFilter } from '../shared/LegalEntityFilter';
 import { MetricValueWithDetails } from '../shared/MetricValueWithDetails';
 import { Breadcrumbs } from '../shared/Breadcrumbs';
+import { exportCapitalMetricsToPPT } from '../../utils/exportToPowerPoint';
 
 interface BalanceSheetMetric {
   id: string;
@@ -121,6 +122,39 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
           <h1 className="text-2xl font-bold text-slate-900">Capital Adequacy & Requirements</h1>
           <p className="text-sm text-slate-600">Regulatory capital, internal targets, and resolution capital metrics</p>
         </div>
+        <button
+          onClick={() => {
+            const currentBS = balanceSheetMetrics[0];
+            const priorBS = balanceSheetMetrics.length > 1 ? balanceSheetMetrics[1] : null;
+            const currentRC = resolutionCapitalMetrics[0];
+            const priorRC = resolutionCapitalMetrics.length > 1 ? resolutionCapitalMetrics[1] : null;
+
+            exportCapitalMetricsToPPT({
+              currentTier1Capital: currentBS ? formatCurrency(currentBS.tier1_capital) : 'N/A',
+              priorTier1Capital: priorBS ? formatCurrency(priorBS.tier1_capital) : undefined,
+              tier1CapitalDelta: priorBS ? `${((currentBS!.tier1_capital - priorBS.tier1_capital) / priorBS.tier1_capital * 100).toFixed(1)}%` : undefined,
+              currentTier1Ratio: currentBS ? formatPercent(currentBS.tier1_capital_ratio) : 'N/A',
+              priorTier1Ratio: priorBS ? formatPercent(priorBS.tier1_capital_ratio) : undefined,
+              tier1RatioDelta: priorBS ? `${(currentBS!.tier1_capital_ratio - priorBS.tier1_capital_ratio).toFixed(2)}%` : undefined,
+              currentLeverageRatio: currentBS ? formatPercent(currentBS.leverage_ratio) : 'N/A',
+              priorLeverageRatio: priorBS ? formatPercent(priorBS.leverage_ratio) : undefined,
+              leverageRatioDelta: priorBS ? `${(currentBS!.leverage_ratio - priorBS.leverage_ratio).toFixed(2)}%` : undefined,
+              currentRCAPRatio: currentRC ? formatPercent(currentRC.rcap_ratio) : 'N/A',
+              priorRCAPRatio: priorRC ? formatPercent(priorRC.rcap_ratio) : undefined,
+              rcapRatioDelta: priorRC ? `${(currentRC!.rcap_ratio - priorRC.rcap_ratio).toFixed(2)}%` : undefined,
+              currentDate: currentBS ? formatDate(currentBS.report_date) : undefined,
+              priorDate: priorBS ? formatDate(priorBS.report_date) : undefined,
+              tier1Status: currentBS && currentBS.tier1_capital_ratio >= 8 ? 'compliant' : 'warning',
+              leverageStatus: currentBS && currentBS.leverage_ratio >= 6 ? 'compliant' : 'warning',
+              rcapStatus: currentRC && currentRC.rcap_ratio >= 110 ? 'compliant' : 'warning'
+            });
+          }}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          disabled={balanceSheetMetrics.length === 0}
+        >
+          <FileDown className="w-4 h-4" />
+          <span>Export to PowerPoint</span>
+        </button>
         <div className="w-80">
           <LegalEntityFilter
             selectedEntityId={selectedEntityId}
