@@ -130,73 +130,6 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-        <div className="flex items-start gap-4">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Info className="w-6 h-6 text-blue-600" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-slate-900 mb-2">About This Metric</h3>
-            <p className="text-sm text-slate-700 mb-4">
-              Balance sheet metrics provide a comprehensive view of an institution's financial position, assets, liabilities, and equity composition.
-              Interest Rate Risk in the Banking Book (IRRBB) measures potential impacts on economic value of equity (EVE) and net interest income (NII) from interest rate changes.
-            </p>
-            <div className="space-y-2 text-sm">
-              <div>
-                <p className="font-medium text-slate-900 mb-1">Regulatory Requirements:</p>
-                <ul className="list-disc list-inside space-y-1 text-slate-700 ml-2">
-                  <li>Basel III capital requirements: Tier 1 capital ratio minimum of 6%</li>
-                  <li>Leverage ratio minimum of 3% (5% for US G-SIBs)</li>
-                  <li>IRRBB standards require institutions to measure and control interest rate risk</li>
-                  <li>Supervisory outlier test: EVE decline &gt; 15% of Tier 1 capital triggers enhanced monitoring</li>
-                </ul>
-              </div>
-              <div className="pt-3 border-t border-blue-200">
-                <p className="font-medium text-slate-900 mb-2">Regulatory Resources:</p>
-                <div className="space-y-1">
-                  <a
-                    href="https://www.bis.org/bcbs/publ/d368.htm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Basel Committee - Interest Rate Risk in the Banking Book (IRRBB)</span>
-                  </a>
-                  <a
-                    href="https://www.federalreserve.gov/supervisionreg/topics/capital.htm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Federal Reserve - Capital Requirements</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-        <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="text-sm text-amber-900">
-              <strong>Data Source:</strong> Representative sample data based on State Street Corporation's publicly available financial reports.
-              Balance sheet figures are modeled on <a
-                href="https://investors.statestreet.com/financial-information/quarterly-results/default.aspx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-amber-700"
-              >Q3 2024 10-Q filing</a>.
-              IRRBB metrics represent typical institutional risk sensitivities and are not sourced from actual State Street disclosures.
-            </p>
-          </div>
-        </div>
-      </div>
-
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <div className="text-slate-600">Loading metrics...</div>
@@ -340,6 +273,73 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
           </div>
         </>
       )}
+
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mt-6">
+        <div className="flex items-start gap-4">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Info className="w-6 h-6 text-blue-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-slate-900 mb-2">About This Metric</h3>
+            <p className="text-sm text-slate-700 mb-4">
+              Balance sheet metrics provide a comprehensive view of an institution's financial position, assets, liabilities, and equity composition.
+              Interest Rate Risk in the Banking Book (IRRBB) measures potential impacts on economic value of equity (EVE) and net interest income (NII) from interest rate changes.
+            </p>
+            <div className="space-y-2 text-sm">
+              <div>
+                <p className="font-medium text-slate-900 mb-1">Regulatory Requirements:</p>
+                <ul className="list-disc list-inside space-y-1 text-slate-700 ml-2">
+                  <li>Basel III capital requirements: Tier 1 capital ratio minimum of 6%</li>
+                  <li>Leverage ratio minimum of 3% (5% for US G-SIBs)</li>
+                  <li>IRRBB standards require institutions to measure and control interest rate risk</li>
+                  <li>Supervisory outlier test: EVE decline &gt; 15% of Tier 1 capital triggers enhanced monitoring</li>
+                </ul>
+              </div>
+              <div className="pt-3 border-t border-blue-200">
+                <p className="font-medium text-slate-900 mb-2">Regulatory Resources:</p>
+                <div className="space-y-1">
+                  <a
+                    href="https://www.bis.org/bcbs/publ/d368.htm"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Basel Committee - Interest Rate Risk in the Banking Book (IRRBB)</span>
+                  </a>
+                  <a
+                    href="https://www.federalreserve.gov/supervisionreg/topics/capital.htm"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Federal Reserve - Capital Requirements</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <div className="flex items-start gap-3">
+          <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm text-amber-900">
+              <strong>Data Source:</strong> Representative sample data based on State Street Corporation's publicly available financial reports.
+              Balance sheet figures are modeled on <a
+                href="https://investors.statestreet.com/financial-information/quarterly-results/default.aspx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-amber-700"
+              >Q3 2024 10-Q filing</a>.
+              IRRBB metrics represent typical institutional risk sensitivities and are not sourced from actual State Street disclosures.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

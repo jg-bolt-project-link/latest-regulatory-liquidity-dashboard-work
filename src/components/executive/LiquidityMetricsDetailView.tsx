@@ -152,84 +152,6 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-        <div className="flex items-start gap-4">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Info className="w-6 h-6 text-blue-600" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-slate-900 mb-2">About These Metrics</h3>
-            <p className="text-sm text-slate-700 mb-4">
-              The Liquidity Coverage Ratio (LCR) and Net Stable Funding Ratio (NSFR) are Basel III regulatory metrics designed to ensure banks maintain adequate liquidity.
-              Resolution liquidity metrics (RLAP/RLEN) ensure adequate liquidity for orderly resolution. Stress testing evaluates liquidity resilience under adverse scenarios.
-            </p>
-            <div className="space-y-2 text-sm">
-              <div>
-                <p className="font-medium text-slate-900 mb-1">Regulatory Requirements:</p>
-                <ul className="list-disc list-inside space-y-1 text-slate-700 ml-2">
-                  <li>LCR minimum requirement: 100% (HQLA must cover 30-day stressed net cash outflows)</li>
-                  <li>NSFR minimum requirement: 100% (available stable funding must exceed required stable funding)</li>
-                  <li>US G-SIBs face enhanced liquidity requirements and supervisory stress testing</li>
-                  <li>Daily LCR reporting required for Category I and II banking organizations</li>
-                  <li>RLAP (Resolution Liquidity Adequacy Position): Liquidity available in resolution</li>
-                  <li>RLEN (Resolution Liquidity Execution Need): Liquidity needed for resolution execution</li>
-                  <li>Internal stress testing must cover multiple scenarios including institution-specific and market-wide stresses</li>
-                </ul>
-              </div>
-              <div className="pt-3 border-t border-blue-200">
-                <p className="font-medium text-slate-900 mb-2">Regulatory Resources:</p>
-                <div className="space-y-1">
-                  <a
-                    href="https://www.bis.org/publ/bcbs238.htm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Basel III: The Liquidity Coverage Ratio (BCBS 238)</span>
-                  </a>
-                  <a
-                    href="https://www.bis.org/bcbs/publ/d295.htm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Basel III: The Net Stable Funding Ratio (BCBS 295)</span>
-                  </a>
-                  <a
-                    href="https://www.federalreserve.gov/supervisionreg/topics/liquidity_coverage_ratio.htm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Federal Reserve - Liquidity Coverage Ratio Rule</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-        <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="text-sm text-amber-900">
-              <strong>Data Source:</strong> Representative sample data modeled on typical institutional liquidity metrics.
-              While State Street Corporation publicly discloses LCR ratios in their <a
-                href="https://investors.statestreet.com/financial-information/quarterly-results/default.aspx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-amber-700"
-              >quarterly filings</a>, the detailed component breakdowns and stress test results shown here are representative data for demonstration purposes.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex gap-2 mb-4">
           <button
@@ -774,6 +696,84 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
             )}
           </>
         )}
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mt-6">
+        <div className="flex items-start gap-4">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Info className="w-6 h-6 text-blue-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-slate-900 mb-2">About These Metrics</h3>
+            <p className="text-sm text-slate-700 mb-4">
+              The Liquidity Coverage Ratio (LCR) and Net Stable Funding Ratio (NSFR) are Basel III regulatory metrics designed to ensure banks maintain adequate liquidity.
+              Resolution liquidity metrics (RLAP/RLEN) ensure adequate liquidity for orderly resolution. Stress testing evaluates liquidity resilience under adverse scenarios.
+            </p>
+            <div className="space-y-2 text-sm">
+              <div>
+                <p className="font-medium text-slate-900 mb-1">Regulatory Requirements:</p>
+                <ul className="list-disc list-inside space-y-1 text-slate-700 ml-2">
+                  <li>LCR minimum requirement: 100% (HQLA must cover 30-day stressed net cash outflows)</li>
+                  <li>NSFR minimum requirement: 100% (available stable funding must exceed required stable funding)</li>
+                  <li>US G-SIBs face enhanced liquidity requirements and supervisory stress testing</li>
+                  <li>Daily LCR reporting required for Category I and II banking organizations</li>
+                  <li>RLAP (Resolution Liquidity Adequacy Position): Liquidity available in resolution</li>
+                  <li>RLEN (Resolution Liquidity Execution Need): Liquidity needed for resolution execution</li>
+                  <li>Internal stress testing must cover multiple scenarios including institution-specific and market-wide stresses</li>
+                </ul>
+              </div>
+              <div className="pt-3 border-t border-blue-200">
+                <p className="font-medium text-slate-900 mb-2">Regulatory Resources:</p>
+                <div className="space-y-1">
+                  <a
+                    href="https://www.bis.org/publ/bcbs238.htm"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Basel III: The Liquidity Coverage Ratio (BCBS 238)</span>
+                  </a>
+                  <a
+                    href="https://www.bis.org/bcbs/publ/d295.htm"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Basel III: The Net Stable Funding Ratio (BCBS 295)</span>
+                  </a>
+                  <a
+                    href="https://www.federalreserve.gov/supervisionreg/topics/liquidity_coverage_ratio.htm"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Federal Reserve - Liquidity Coverage Ratio Rule</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <div className="flex items-start gap-3">
+          <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm text-amber-900">
+              <strong>Data Source:</strong> Representative sample data modeled on typical institutional liquidity metrics.
+              While State Street Corporation publicly discloses LCR ratios in their <a
+                href="https://investors.statestreet.com/financial-information/quarterly-results/default.aspx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-amber-700"
+              >quarterly filings</a>, the detailed component breakdowns and stress test results shown here are representative data for demonstration purposes.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

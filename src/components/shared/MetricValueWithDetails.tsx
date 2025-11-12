@@ -1,8 +1,9 @@
-import { Eye, FileText, Table } from 'lucide-react';
+import { Eye, FileText, Table, TrendingUp } from 'lucide-react';
 import { useState } from 'react';
 import { MetricDetailsModal } from './MetricDetailsModal';
 import { RegulatoryReferencesModal } from './RegulatoryReferencesModal';
 import { RawDataTableModal } from './RawDataTableModal';
+import { ChangeDriversModal } from './ChangeDriversModal';
 
 interface MetricValueWithDetailsProps {
   value: string | number;
@@ -11,6 +12,7 @@ interface MetricValueWithDetailsProps {
   targetColumn: string;
   dataSource: string;
   className?: string;
+  priorValue?: string | number;
 }
 
 export function MetricValueWithDetails({
@@ -19,11 +21,13 @@ export function MetricValueWithDetails({
   targetTable,
   targetColumn,
   dataSource,
-  className = ''
+  className = '',
+  priorValue
 }: MetricValueWithDetailsProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [showRegulatory, setShowRegulatory] = useState(false);
   const [showRawData, setShowRawData] = useState(false);
+  const [showChangeDrivers, setShowChangeDrivers] = useState(false);
 
   return (
     <>
@@ -60,6 +64,16 @@ export function MetricValueWithDetails({
           >
             <Table className="w-4 h-4 text-green-600 hover:text-green-700" />
           </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowChangeDrivers(true);
+            }}
+            className="flex-shrink-0 p-1 hover:bg-orange-100 rounded transition-colors"
+            title="View change drivers and analysis"
+          >
+            <TrendingUp className="w-4 h-4 text-orange-600 hover:text-orange-700" />
+          </button>
         </span>
       </span>
 
@@ -87,6 +101,15 @@ export function MetricValueWithDetails({
           targetTable={targetTable}
           targetColumn={targetColumn}
           onClose={() => setShowRawData(false)}
+        />
+      )}
+
+      {showChangeDrivers && (
+        <ChangeDriversModal
+          metricName={metricName}
+          currentValue={value}
+          priorValue={priorValue}
+          onClose={() => setShowChangeDrivers(false)}
         />
       )}
     </>

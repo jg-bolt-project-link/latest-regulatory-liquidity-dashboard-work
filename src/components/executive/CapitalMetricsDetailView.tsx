@@ -129,71 +129,6 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
         </div>
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-        <div className="flex items-start gap-4">
-          <div className="p-2 bg-blue-100 rounded-lg">
-            <Info className="w-6 h-6 text-blue-600" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-slate-900 mb-2">About These Metrics</h3>
-            <p className="text-sm text-slate-700 mb-4">
-              Capital metrics measure an institution's financial strength and ability to absorb losses. Regulatory capital ensures
-              compliance with Basel III requirements, while resolution capital metrics (RCAP/RCEN) ensure adequate resources for orderly resolution.
-            </p>
-            <div className="space-y-2 text-sm">
-              <div>
-                <p className="font-medium text-slate-900 mb-1">Key Capital Metrics:</p>
-                <ul className="list-disc list-inside space-y-1 text-slate-700 ml-2">
-                  <li><strong>Tier 1 Capital Ratio:</strong> Minimum 6% under Basel III (higher for G-SIBs with buffers)</li>
-                  <li><strong>Leverage Ratio:</strong> Minimum 3% (5% for US G-SIBs)</li>
-                  <li><strong>RCAP (Resolution Capital Adequacy Position):</strong> Capital available for recapitalization in resolution</li>
-                  <li><strong>RCEN (Resolution Capital Execution Need):</strong> Capital needed to execute resolution strategy</li>
-                </ul>
-              </div>
-              <div className="pt-3 border-t border-blue-200">
-                <p className="font-medium text-slate-900 mb-2">Regulatory Resources:</p>
-                <div className="space-y-1">
-                  <a
-                    href="https://www.bis.org/bcbs/publ/d424.htm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Basel III: Finalising Post-Crisis Reforms</span>
-                  </a>
-                  <a
-                    href="https://www.federalreserve.gov/supervisionreg/topics/capital.htm"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                    <span>Federal Reserve - Capital Requirements</span>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-        <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="text-sm text-amber-900">
-              <strong>Data Source:</strong> Regulatory capital ratios are based on State Street Corporation's <a
-                href="https://investors.statestreet.com/financial-information/quarterly-results/default.aspx"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline hover:text-amber-700"
-              >publicly disclosed quarterly reports</a>. Resolution capital metrics (RCAP/RCEN) are representative data for demonstration purposes.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div className="bg-white border border-slate-200 rounded-xl p-4">
         <div className="flex gap-2 mb-4">
           <button
@@ -475,6 +410,71 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
             )}
           </>
         )}
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mt-6">
+        <div className="flex items-start gap-4">
+          <div className="p-2 bg-blue-100 rounded-lg">
+            <Info className="w-6 h-6 text-blue-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-slate-900 mb-2">About These Metrics</h3>
+            <p className="text-sm text-slate-700 mb-4">
+              Capital metrics measure an institution's financial strength and ability to absorb losses. Regulatory capital ensures
+              compliance with Basel III requirements, while resolution capital metrics (RCAP/RCEN) ensure adequate resources for orderly resolution.
+            </p>
+            <div className="space-y-2 text-sm">
+              <div>
+                <p className="font-medium text-slate-900 mb-1">Key Capital Metrics:</p>
+                <ul className="list-disc list-inside space-y-1 text-slate-700 ml-2">
+                  <li><strong>Tier 1 Capital Ratio:</strong> Minimum 6% under Basel III (higher for G-SIBs with buffers)</li>
+                  <li><strong>Leverage Ratio:</strong> Minimum 3% (5% for US G-SIBs)</li>
+                  <li><strong>RCAP (Resolution Capital Adequacy Position):</strong> Capital available for recapitalization in resolution</li>
+                  <li><strong>RCEN (Resolution Capital Execution Need):</strong> Capital needed to execute resolution strategy</li>
+                </ul>
+              </div>
+              <div className="pt-3 border-t border-blue-200">
+                <p className="font-medium text-slate-900 mb-2">Regulatory Resources:</p>
+                <div className="space-y-1">
+                  <a
+                    href="https://www.bis.org/bcbs/publ/d424.htm"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Basel III: Finalising Post-Crisis Reforms</span>
+                  </a>
+                  <a
+                    href="https://www.federalreserve.gov/supervisionreg/topics/capital.htm"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-blue-600 hover:text-blue-700"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>Federal Reserve - Capital Requirements</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+        <div className="flex items-start gap-3">
+          <Info className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-sm text-amber-900">
+              <strong>Data Source:</strong> Regulatory capital ratios are based on State Street Corporation's <a
+                href="https://investors.statestreet.com/financial-information/quarterly-results/default.aspx"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-amber-700"
+              >publicly disclosed quarterly reports</a>. Resolution capital metrics (RCAP/RCEN) are representative data for demonstration purposes.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
