@@ -104,15 +104,15 @@ export function ChatAssistant() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 p-4 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all hover:scale-110 z-50"
+          className="fixed bottom-4 right-4 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-all hover:scale-110 z-50"
           title="Open Assistant"
         >
-          <MessageCircle className="w-6 h-6" />
+          <MessageCircle className="w-5 h-5" />
         </button>
       )}
 
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-white rounded-xl shadow-2xl flex flex-col z-50 border border-slate-200">
+        <div className="fixed bottom-4 right-4 w-96 h-[600px] bg-white rounded-xl shadow-2xl flex flex-col z-50 border border-slate-200">
           <div className="flex items-center justify-between p-4 border-b border-slate-200 bg-blue-600 text-white rounded-t-xl">
             <div className="flex items-center gap-2">
               <MessageCircle className="w-5 h-5" />
