@@ -250,6 +250,10 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
                           targetColumn="lcr_ratio"
                           dataSource="Analytics"
                           className={`text-2xl font-bold ${latestLCR.lcr_ratio >= 1.0 ? 'text-green-600' : 'text-red-600'}`}
+                          currentDate={formatDate(latestLCR.report_date)}
+                          priorValue={lcrMetrics.length > 1 ? formatPercent(lcrMetrics[1].lcr_ratio) : undefined}
+                          priorDate={lcrMetrics.length > 1 ? formatDate(lcrMetrics[1].report_date) : undefined}
+                          availablePeriods={lcrMetrics.map(m => ({ date: formatDate(m.report_date), value: formatPercent(m.lcr_ratio) }))}
                         />
                         <div className="flex items-center gap-2 mt-2">
                           {latestLCR.is_compliant ? (
@@ -272,6 +276,10 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
                           targetColumn="total_hqla"
                           dataSource="Analytics"
                           className="text-2xl font-bold text-slate-900"
+                          currentDate={formatDate(latestLCR.report_date)}
+                          priorValue={lcrMetrics.length > 1 ? formatCurrency(lcrMetrics[1].total_hqla) : undefined}
+                          priorDate={lcrMetrics.length > 1 ? formatDate(lcrMetrics[1].report_date) : undefined}
+                          availablePeriods={lcrMetrics.map(m => ({ date: formatDate(m.report_date), value: formatCurrency(m.total_hqla) }))}
                         />
                         <p className="text-xs text-slate-500 mt-1">High-Quality Liquid Assets</p>
                       </div>
@@ -284,6 +292,10 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
                           targetColumn="total_net_cash_outflows"
                           dataSource="Analytics"
                           className="text-2xl font-bold text-slate-900"
+                          currentDate={formatDate(latestLCR.report_date)}
+                          priorValue={lcrMetrics.length > 1 ? formatCurrency(lcrMetrics[1].total_net_cash_outflows) : undefined}
+                          priorDate={lcrMetrics.length > 1 ? formatDate(lcrMetrics[1].report_date) : undefined}
+                          availablePeriods={lcrMetrics.map(m => ({ date: formatDate(m.report_date), value: formatCurrency(m.total_net_cash_outflows) }))}
                         />
                         <p className="text-xs text-slate-500 mt-1">Stressed scenario</p>
                       </div>
@@ -405,6 +417,10 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
                           targetColumn="nsfr_ratio"
                           dataSource="Analytics"
                           className={`text-2xl font-bold ${latestNSFR.nsfr_ratio >= 1.0 ? 'text-green-600' : 'text-red-600'}`}
+                          currentDate={formatDate(latestNSFR.report_date)}
+                          priorValue={nsfrMetrics.length > 1 ? formatPercent(nsfrMetrics[1].nsfr_ratio) : undefined}
+                          priorDate={nsfrMetrics.length > 1 ? formatDate(nsfrMetrics[1].report_date) : undefined}
+                          availablePeriods={nsfrMetrics.map(m => ({ date: formatDate(m.report_date), value: formatPercent(m.nsfr_ratio) }))}
                         />
                         <div className="flex items-center gap-2 mt-2">
                           {latestNSFR.is_compliant ? (
@@ -427,6 +443,10 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
                           targetColumn="available_stable_funding"
                           dataSource="Analytics"
                           className="text-2xl font-bold text-slate-900"
+                          currentDate={formatDate(latestNSFR.report_date)}
+                          priorValue={nsfrMetrics.length > 1 ? formatCurrency(nsfrMetrics[1].available_stable_funding) : undefined}
+                          priorDate={nsfrMetrics.length > 1 ? formatDate(nsfrMetrics[1].report_date) : undefined}
+                          availablePeriods={nsfrMetrics.map(m => ({ date: formatDate(m.report_date), value: formatCurrency(m.available_stable_funding) }))}
                         />
                         <p className="text-xs text-slate-500 mt-1">ASF</p>
                       </div>
@@ -439,6 +459,10 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
                           targetColumn="required_stable_funding"
                           dataSource="Analytics"
                           className="text-2xl font-bold text-slate-900"
+                          currentDate={formatDate(latestNSFR.report_date)}
+                          priorValue={nsfrMetrics.length > 1 ? formatCurrency(nsfrMetrics[1].required_stable_funding) : undefined}
+                          priorDate={nsfrMetrics.length > 1 ? formatDate(nsfrMetrics[1].report_date) : undefined}
+                          availablePeriods={nsfrMetrics.map(m => ({ date: formatDate(m.report_date), value: formatCurrency(m.required_stable_funding) }))}
                         />
                         <p className="text-xs text-slate-500 mt-1">RSF</p>
                       </div>

@@ -181,6 +181,10 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
                     targetColumn="total_assets"
                     dataSource="Analytics"
                     className="text-2xl font-bold text-slate-900"
+                    currentDate={formatDate(latestBS.report_date)}
+                    priorValue={balanceSheetMetrics.length > 1 ? formatCurrency(balanceSheetMetrics[1].total_assets) : undefined}
+                    priorDate={balanceSheetMetrics.length > 1 ? formatDate(balanceSheetMetrics[1].report_date) : undefined}
+                    availablePeriods={balanceSheetMetrics.map(m => ({ date: formatDate(m.report_date), value: formatCurrency(m.total_assets) }))}
                   />
                 </div>
                 <div>
@@ -192,6 +196,10 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
                     targetColumn="total_liabilities"
                     dataSource="Analytics"
                     className="text-2xl font-bold text-slate-900"
+                    currentDate={formatDate(latestBS.report_date)}
+                    priorValue={balanceSheetMetrics.length > 1 ? formatCurrency(balanceSheetMetrics[1].total_liabilities) : undefined}
+                    priorDate={balanceSheetMetrics.length > 1 ? formatDate(balanceSheetMetrics[1].report_date) : undefined}
+                    availablePeriods={balanceSheetMetrics.map(m => ({ date: formatDate(m.report_date), value: formatCurrency(m.total_liabilities) }))}
                   />
                 </div>
                 <div>
@@ -203,6 +211,10 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
                     targetColumn="total_equity"
                     dataSource="Analytics"
                     className="text-2xl font-bold text-green-600"
+                    currentDate={formatDate(latestBS.report_date)}
+                    priorValue={balanceSheetMetrics.length > 1 ? formatCurrency(balanceSheetMetrics[1].total_equity) : undefined}
+                    priorDate={balanceSheetMetrics.length > 1 ? formatDate(balanceSheetMetrics[1].report_date) : undefined}
+                    availablePeriods={balanceSheetMetrics.map(m => ({ date: formatDate(m.report_date), value: formatCurrency(m.total_equity) }))}
                   />
                 </div>
                 <div>
@@ -214,6 +226,10 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
                     targetColumn="tier1_capital"
                     dataSource="Analytics"
                     className="text-2xl font-bold text-slate-900"
+                    currentDate={formatDate(latestBS.report_date)}
+                    priorValue={balanceSheetMetrics.length > 1 ? formatCurrency(balanceSheetMetrics[1].tier1_capital) : undefined}
+                    priorDate={balanceSheetMetrics.length > 1 ? formatDate(balanceSheetMetrics[1].report_date) : undefined}
+                    availablePeriods={balanceSheetMetrics.map(m => ({ date: formatDate(m.report_date), value: formatCurrency(m.tier1_capital) }))}
                   />
                 </div>
                 <div>
@@ -225,6 +241,10 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
                     targetColumn="tier1_capital_ratio"
                     dataSource="Analytics"
                     className={`text-2xl font-bold ${latestBS.tier1_capital_ratio >= 0.06 ? 'text-green-600' : 'text-red-600'}`}
+                    currentDate={formatDate(latestBS.report_date)}
+                    priorValue={balanceSheetMetrics.length > 1 ? formatPercent(balanceSheetMetrics[1].tier1_capital_ratio) : undefined}
+                    priorDate={balanceSheetMetrics.length > 1 ? formatDate(balanceSheetMetrics[1].report_date) : undefined}
+                    availablePeriods={balanceSheetMetrics.map(m => ({ date: formatDate(m.report_date), value: formatPercent(m.tier1_capital_ratio) }))}
                   />
                   <p className="text-xs text-slate-500 mt-1">Minimum: 6%</p>
                 </div>
@@ -237,6 +257,10 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
                     targetColumn="leverage_ratio"
                     dataSource="Analytics"
                     className={`text-2xl font-bold ${latestBS.leverage_ratio >= 0.05 ? 'text-green-600' : 'text-amber-600'}`}
+                    currentDate={formatDate(latestBS.report_date)}
+                    priorValue={balanceSheetMetrics.length > 1 ? formatPercent(balanceSheetMetrics[1].leverage_ratio) : undefined}
+                    priorDate={balanceSheetMetrics.length > 1 ? formatDate(balanceSheetMetrics[1].report_date) : undefined}
+                    availablePeriods={balanceSheetMetrics.map(m => ({ date: formatDate(m.report_date), value: formatPercent(m.leverage_ratio) }))}
                   />
                   <p className="text-xs text-slate-500 mt-1">US G-SIB Minimum: 5%</p>
                 </div>

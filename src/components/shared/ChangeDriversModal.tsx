@@ -182,6 +182,39 @@ function generateDynamicDrivers(metricName: string, currentVal: any, priorVal: a
   return defaultDrivers;
 }
 
+function calculateDelta(currentVal: any, priorVal: any): { deltaText: string; trend: 'up' | 'down' | 'stable' } {
+  if (!priorVal || !currentVal) return { deltaText: 'N/A', trend: 'stable' };
+
+  const numCurrent = typeof currentVal === 'string' ? parseFloat(currentVal.replace(/[^0-9.-]/g, '')) : currentVal;
+  const numPrior = typeof priorVal === 'string' ? parseFloat(priorVal.replace(/[^0-9.-]/g, '')) : priorVal;
+
+  if (isNaN(numCurrent) || isNaN(numPrior)) return { deltaText: 'N/A', trend: 'stable' };
+
+  const diff = numCurrent - numPrior;
+  const percentChange = (diff / Math.abs(numPrior)) * 100;
+
+  const isPercentage = typeof currentVal === 'string' && currentVal.includes('%');
+  const isCurrency = typeof currentVal === 'string' && (currentVal.includes('$') || currentVal.includes('B') || currentVal.includes('M'));
+
+  let deltaText = '';
+  if (isCurrency) {
+    const absChange = Math.abs(diff);
+    const sign = diff >= 0 ? '+' : '-';
+    if (absChange >= 1) {
+      deltaText = `${sign}$${absChange.toFixed(2)}B (${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(1)}%)`;
+    } else {
+      deltaText = `${sign}$${(absChange * 1000).toFixed(0)}M (${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(1)}%)`;
+    }
+  } else if (isPercentage) {
+    deltaText = `${diff >= 0 ? '+' : ''}${diff.toFixed(2)}%`;
+  } else {
+    deltaText = `${percentChange >= 0 ? '+' : ''}${percentChange.toFixed(1)}%`;
+  }
+
+  const trend = diff > 0.1 ? 'up' : diff < -0.1 ? 'down' : 'stable';
+  return { deltaText, trend };
+}
+
 export function ChangeDriversModal({
   metricName,
   currentValue,
@@ -199,12 +232,18 @@ export function ChangeDriversModal({
     ? availablePeriods.find(p => p.date === selectedPriorPeriod)?.value || priorValue
     : priorValue;
 
+  const effectivePriorDate = availablePeriods && selectedPriorPeriod
+    ? selectedPriorPeriod
+    : priorDate;
+
   const staticDriverInfo = changeDriversData[metricName];
   const dynamicDrivers = generateDynamicDrivers(metricName, currentValue, effectivePriorValue);
 
+  const calculatedDelta = calculateDelta(currentValue, effectivePriorValue);
+
   const driverInfo = staticDriverInfo || {
-    delta: effectivePriorValue ? 'See comparison below' : 'Data not available',
-    trend: 'stable' as const,
+    delta: calculatedDelta.deltaText,
+    trend: calculatedDelta.trend,
     drivers: dynamicDrivers
   };
 
@@ -261,7 +300,7 @@ export function ChangeDriversModal({
                           ))}
                         </select>
                       ) : (
-                        priorDate && <span className="text-xs text-slate-500 ml-2">({priorDate})</span>
+                        effectivePriorDate && <span className="text-xs text-slate-500 ml-2">({effectivePriorDate})</span>
                       )}
                     </div>
                     <span className="text-lg font-semibold text-slate-700">{effectivePriorValue}</span>

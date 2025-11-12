@@ -219,6 +219,10 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
                         targetColumn="tier1_capital"
                         dataSource="Analytics"
                         className="text-2xl font-bold text-slate-900"
+                        currentDate={formatDate(latestBS.report_date)}
+                        priorValue={balanceSheetMetrics.length > 1 ? formatCurrency(balanceSheetMetrics[1].tier1_capital) : undefined}
+                        priorDate={balanceSheetMetrics.length > 1 ? formatDate(balanceSheetMetrics[1].report_date) : undefined}
+                        availablePeriods={balanceSheetMetrics.map(m => ({ date: formatDate(m.report_date), value: formatCurrency(m.tier1_capital) }))}
                       />
                       <p className="text-xs text-slate-500 mt-1">Common equity + Additional Tier 1</p>
                     </div>
@@ -231,6 +235,10 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
                         targetColumn="tier1_capital_ratio"
                         dataSource="Analytics"
                         className={`text-2xl font-bold ${latestBS.tier1_capital_ratio >= 0.06 ? 'text-green-600' : 'text-red-600'}`}
+                        currentDate={formatDate(latestBS.report_date)}
+                        priorValue={balanceSheetMetrics.length > 1 ? formatPercent(balanceSheetMetrics[1].tier1_capital_ratio) : undefined}
+                        priorDate={balanceSheetMetrics.length > 1 ? formatDate(balanceSheetMetrics[1].report_date) : undefined}
+                        availablePeriods={balanceSheetMetrics.map(m => ({ date: formatDate(m.report_date), value: formatPercent(m.tier1_capital_ratio) }))}
                       />
                       <p className="text-xs text-slate-500 mt-1">Minimum: 6.0% (Basel III)</p>
                     </div>
@@ -243,6 +251,10 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
                         targetColumn="leverage_ratio"
                         dataSource="Analytics"
                         className={`text-2xl font-bold ${latestBS.leverage_ratio >= 0.05 ? 'text-green-600' : 'text-amber-600'}`}
+                        currentDate={formatDate(latestBS.report_date)}
+                        priorValue={balanceSheetMetrics.length > 1 ? formatPercent(balanceSheetMetrics[1].leverage_ratio) : undefined}
+                        priorDate={balanceSheetMetrics.length > 1 ? formatDate(balanceSheetMetrics[1].report_date) : undefined}
+                        availablePeriods={balanceSheetMetrics.map(m => ({ date: formatDate(m.report_date), value: formatPercent(m.leverage_ratio) }))}
                       />
                       <p className="text-xs text-slate-500 mt-1">US G-SIB Minimum: 5.0%</p>
                     </div>
@@ -363,6 +375,10 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
                           targetColumn="rcap_ratio"
                           dataSource="Analytics"
                           className={`text-3xl font-bold ${latestRC.rcap_surplus_deficit >= 0 ? 'text-green-700' : 'text-red-700'}`}
+                          currentDate={formatDate(latestRC.report_date)}
+                          priorValue={resolutionCapitalMetrics.length > 1 ? formatPercent(resolutionCapitalMetrics[1].rcap_ratio) : undefined}
+                          priorDate={resolutionCapitalMetrics.length > 1 ? formatDate(resolutionCapitalMetrics[1].report_date) : undefined}
+                          availablePeriods={resolutionCapitalMetrics.map(m => ({ date: formatDate(m.report_date), value: formatPercent(m.rcap_ratio) }))}
                         />
                         <div className="mt-4 space-y-2">
                           <div className="flex justify-between text-xs">
