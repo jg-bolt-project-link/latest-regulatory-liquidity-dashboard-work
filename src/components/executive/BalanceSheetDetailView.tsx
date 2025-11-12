@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { BarChart3, TrendingUp, TrendingDown, Activity, ExternalLink, Info, ArrowLeft } from 'lucide-react';
+import { BarChart3, TrendingUp, TrendingDown, Activity, ExternalLink, Info, X } from 'lucide-react';
 import { LegalEntityFilter } from '../shared/LegalEntityFilter';
 import { MetricValueWithDetails } from '../shared/MetricValueWithDetails';
+import { Breadcrumbs } from '../shared/Breadcrumbs';
 
 interface BalanceSheetMetric {
   id: string;
@@ -100,13 +101,23 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-start justify-between mb-4">
+        <Breadcrumbs
+          items={[
+            { label: 'Executive Dashboard', onClick: () => onNavigate?.('dashboard') },
+            { label: 'Balance Sheet & Interest Rate Risk' }
+          ]}
+        />
         <button
           onClick={() => onNavigate?.('dashboard')}
           className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+          title="Close"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <X className="w-5 h-5 text-slate-600" />
         </button>
+      </div>
+
+      <div className="flex items-center gap-4 mb-6">
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-slate-900">Balance Sheet & Interest Rate Risk</h1>
           <p className="text-sm text-slate-600">Comprehensive balance sheet composition and IRRBB analysis</p>

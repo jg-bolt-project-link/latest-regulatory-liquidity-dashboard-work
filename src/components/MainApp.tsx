@@ -12,6 +12,7 @@ import { IntradayLiquidityView } from './executive/IntradayLiquidityView';
 import { DataQualityDashboardNew } from './DataQualityDashboardNew';
 import { FR2052aDashboard } from './FR2052aDashboard';
 import { FR2052aValidation } from './FR2052aValidation';
+import { ChatAssistant } from './shared/ChatAssistant';
 import {
   LayoutDashboard,
   FileText,
@@ -150,6 +151,8 @@ export function MainApp() {
           {renderContent()}
         </div>
       </main>
+
+      <ChatAssistant />
     </div>
   );
 }

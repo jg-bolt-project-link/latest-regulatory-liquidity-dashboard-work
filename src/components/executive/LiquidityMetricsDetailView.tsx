@@ -123,13 +123,23 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-start justify-between mb-4">
+        <Breadcrumbs
+          items={[
+            { label: 'Executive Dashboard', onClick: () => onNavigate?.('dashboard') },
+            { label: 'Liquidity Coverage & Stress Testing' }
+          ]}
+        />
         <button
           onClick={() => onNavigate?.('dashboard')}
           className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+          title="Close"
         >
-          <ArrowLeft className="w-5 h-5" />
+          <X className="w-5 h-5 text-slate-600" />
         </button>
+      </div>
+
+      <div className="flex items-center gap-4 mb-6">
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-slate-900">Liquidity Coverage & Stress Testing</h1>
           <p className="text-sm text-slate-600">LCR, NSFR, resolution liquidity, and stress test analysis</p>
