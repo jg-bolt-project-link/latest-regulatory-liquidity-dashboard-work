@@ -324,28 +324,27 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
             <p className="text-sm text-slate-600">Comprehensive liquidity and regulatory overview</p>
           </div>
         </div>
-        <button
-          onClick={handleSeedData}
-          disabled={seeding}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 shadow-lg font-semibold"
-          title="Generate sample data including FR 2052a, LCR, and NSFR calculations"
-        >
-          <Database className="w-5 h-5" />
-          {seeding ? 'Generating Data...' : 'Seed Sample Data'}
-        </button>
       </div>
 
       {!hasData && !loading && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-6">
+        <div className="bg-blue-50 border-2 border-blue-300 rounded-xl p-6 mb-6">
           <div className="flex items-start gap-4">
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <div className="p-3 bg-blue-100 rounded-lg">
               <Database className="w-6 h-6 text-blue-600" />
             </div>
             <div className="flex-1">
               <h3 className="font-semibold text-slate-900 mb-2">No Data Found</h3>
-              <p className="text-sm text-slate-600">
-                Click <span className="font-semibold text-blue-700">"Seed Sample Data"</span> above to generate comprehensive State Street Corporation sample data including FR 2052a reporting, LCR/NSFR calculations, and all dashboard metrics.
+              <p className="text-sm text-slate-700 mb-3">
+                To populate this dashboard with comprehensive State Street Corporation sample data, navigate to the
+                <span className="font-semibold text-blue-700"> Data Setup </span>
+                page and generate sample data.
               </p>
+              <button
+                onClick={() => onNavigate?.('data-setup')}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+              >
+                Go to Data Setup
+              </button>
             </div>
           </div>
         </div>

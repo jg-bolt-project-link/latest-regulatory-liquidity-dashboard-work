@@ -12,6 +12,7 @@ import { IntradayLiquidityView } from './executive/IntradayLiquidityView';
 import { DataQualityDashboardNew } from './DataQualityDashboardNew';
 import { FR2052aDetailView } from './executive/FR2052aDetailView';
 import { FR2052aValidation } from './FR2052aValidation';
+import { DataSetup } from './DataSetup';
 import { ChatAssistant } from './shared/ChatAssistant';
 import { ScreenValidator } from './shared/ScreenValidator';
 import {
@@ -30,7 +31,8 @@ import {
   Database,
   Menu,
   X,
-  FileCheck
+  FileCheck,
+  Settings
 } from 'lucide-react';
 
 type ViewType =
@@ -45,6 +47,7 @@ type ViewType =
   | 'cash-flow'
   | 'intraday-liquidity'
   | 'data-quality'
+  | 'data-setup'
   | 'fr2052a'
   | 'fr2052a-validation';
 
@@ -61,6 +64,7 @@ export function MainApp() {
 
   const navigationItems = [
     { id: 'dashboard', label: 'Executive Dashboard', icon: LayoutDashboard },
+    { id: 'data-setup', label: 'Data Setup', icon: Settings },
     { id: 'balance-sheet', label: 'Balance Sheet', icon: TrendingUp },
     { id: 'capital-metrics', label: 'Capital Metrics', icon: Shield },
     { id: 'liquidity-metrics', label: 'Liquidity Metrics', icon: Droplets },
@@ -91,6 +95,8 @@ export function MainApp() {
         return <IntradayLiquidityView onNavigate={setActiveView} />;
       case 'data-quality':
         return <DataQualityDashboardNew onClose={() => setActiveView('dashboard')} />;
+      case 'data-setup':
+        return <DataSetup />;
       case 'fr2052a':
         return <FR2052aDetailView onNavigate={setActiveView} />;
       case 'fr2052a-validation':

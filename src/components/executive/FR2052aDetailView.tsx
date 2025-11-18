@@ -270,35 +270,38 @@ export function FR2052aDetailView({ onNavigate }: FR2052aDetailViewProps) {
             To view FR 2052a liquidity reporting data, you need to generate sample data first.
           </p>
           <p className="text-sm text-amber-700 mb-6 max-w-2xl mx-auto">
-            Navigate to the <span className="font-semibold">Executive Dashboard</span> and click the prominent
-            <span className="font-bold text-blue-700"> "Seed Sample Data" </span>
-            button at the top of the page. This will generate:
+            Navigate to the <span className="font-semibold text-blue-700">Data Setup</span> page from the sidebar
+            and click <span className="font-bold text-blue-700">"Generate All Data"</span>. This will create:
           </p>
           <div className="bg-white rounded-lg p-4 mb-6 max-w-xl mx-auto text-left">
             <ul className="space-y-2 text-sm text-slate-700">
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span><span className="font-semibold">1,000+</span> FR 2052a line items per reporting period</span>
+                <span><span className="font-semibold">6,000+</span> FR 2052a line items across 6 reporting periods</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>LCR and NSFR calculations for <span className="font-semibold">6 periods</span></span>
+                <span>LCR and NSFR calculations with validation</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-                <span>Complete product, maturity, and counterparty breakdowns</span>
+                <span>Product categories, maturity buckets, counterparty types</span>
               </li>
               <li className="flex items-start gap-2">
                 <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
                 <span>HQLA classification and cash flow projections</span>
               </li>
+              <li className="flex items-start gap-2">
+                <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
+                <span>Automatic validation of generated data</span>
+              </li>
             </ul>
           </div>
           <button
-            onClick={() => onNavigate?.('dashboard')}
+            onClick={() => onNavigate?.('data-setup')}
             className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg font-semibold"
           >
-            Go to Executive Dashboard
+            Go to Data Setup
           </button>
         </div>
       ) : (
