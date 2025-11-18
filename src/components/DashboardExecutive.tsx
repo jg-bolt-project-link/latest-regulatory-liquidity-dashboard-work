@@ -17,6 +17,7 @@ import {
   FileText
 } from 'lucide-react';
 import { seedDashboardData, seedStateStreetData } from '../utils/seedStateStreetData';
+import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
 import { MetricCardWithQuality } from './shared/MetricCardWithQuality';
 
 interface DashboardMetrics {
@@ -264,16 +265,26 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
     if (!user) return;
     setSeeding(true);
     try {
-      const [dashboardResult, regulatoryResult] = await Promise.all([
+      const [dashboardResult, regulatoryResult, fr2052aResult] = await Promise.all([
         seedDashboardData(user.id),
-        seedStateStreetData(user.id)
+        seedStateStreetData(user.id),
+        seedFR2052aWithCalculations(user.id)
       ]);
 
-      if (dashboardResult.success && regulatoryResult.success) {
+      if (dashboardResult.success && regulatoryResult.success && fr2052aResult.success) {
         await loadMetrics();
-        alert('All sample data loaded successfully!');
+        const fr2052aStats = fr2052aResult.results;
+        alert(
+          `All data loaded successfully!\n\n` +
+          `FR 2052a Data Generated:\n` +
+          `- ${fr2052aStats.totalRecords.toLocaleString()} line items\n` +
+          `- ${fr2052aStats.totalEntities} entities\n` +
+          `- ${fr2052aStats.totalPeriods} reporting periods\n` +
+          `- ${fr2052aStats.lcrCalculations.length} LCR calculations\n` +
+          `- ${fr2052aStats.nsfrCalculations.length} NSFR calculations`
+        );
       } else {
-        console.error('Seed errors:', { dashboardResult, regulatoryResult });
+        console.error('Seed errors:', { dashboardResult, regulatoryResult, fr2052aResult });
         alert('Error loading data. Check console for details.');
       }
     } catch (error) {
