@@ -52,32 +52,32 @@ export function DataSetup() {
     });
 
     const { count: lcrCount } = await supabase
-      .from('lcr_metrics')
+      .from('fr2052a_lcr_metrics')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id);
 
     results.push({
-      category: 'LCR Calculations',
+      category: 'FR2052a-Dependent LCR',
       expected: 12,
       actual: lcrCount || 0,
       passed: (lcrCount || 0) >= 6,
       message: lcrCount && lcrCount >= 6
-        ? `✓ Generated ${lcrCount} LCR calculations`
+        ? `✓ Generated ${lcrCount} FR2052a-dependent LCR calculations`
         : `✗ Expected at least 6 calculations, found ${lcrCount || 0}`
     });
 
     const { count: nsfrCount } = await supabase
-      .from('nsfr_metrics')
+      .from('fr2052a_nsfr_metrics')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id);
 
     results.push({
-      category: 'NSFR Calculations',
+      category: 'FR2052a-Dependent NSFR',
       expected: 12,
       actual: nsfrCount || 0,
       passed: (nsfrCount || 0) >= 6,
       message: nsfrCount && nsfrCount >= 6
-        ? `✓ Generated ${nsfrCount} NSFR calculations`
+        ? `✓ Generated ${nsfrCount} FR2052a-dependent NSFR calculations`
         : `✗ Expected at least 6 calculations, found ${nsfrCount || 0}`
     });
 
@@ -112,39 +112,39 @@ export function DataSetup() {
     });
 
     const { data: lcrData } = await supabase
-      .from('lcr_metrics')
+      .from('fr2052a_lcr_metrics')
       .select('lcr_ratio')
       .eq('user_id', user.id)
       .order('report_date', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     results.push({
-      category: 'LCR Ratio Calculated',
+      category: 'FR2052a LCR Ratio',
       expected: 1,
       actual: lcrData?.lcr_ratio ? 1 : 0,
       passed: lcrData?.lcr_ratio !== null && lcrData?.lcr_ratio !== undefined,
       message: lcrData?.lcr_ratio
-        ? `✓ Latest LCR ratio: ${(lcrData.lcr_ratio * 100).toFixed(2)}%`
-        : `✗ LCR ratio not calculated`
+        ? `✓ Latest FR2052a LCR ratio: ${(lcrData.lcr_ratio * 100).toFixed(2)}%`
+        : `✗ FR2052a LCR ratio not calculated`
     });
 
     const { data: nsfrData } = await supabase
-      .from('nsfr_metrics')
+      .from('fr2052a_nsfr_metrics')
       .select('nsfr_ratio')
       .eq('user_id', user.id)
       .order('report_date', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
     results.push({
-      category: 'NSFR Ratio Calculated',
+      category: 'FR2052a NSFR Ratio',
       expected: 1,
       actual: nsfrData?.nsfr_ratio ? 1 : 0,
       passed: nsfrData?.nsfr_ratio !== null && nsfrData?.nsfr_ratio !== undefined,
       message: nsfrData?.nsfr_ratio
-        ? `✓ Latest NSFR ratio: ${(nsfrData.nsfr_ratio * 100).toFixed(2)}%`
-        : `✗ NSFR ratio not calculated`
+        ? `✓ Latest FR2052a NSFR ratio: ${(nsfrData.nsfr_ratio * 100).toFixed(2)}%`
+        : `✗ FR2052a NSFR ratio not calculated`
     });
 
     return results;

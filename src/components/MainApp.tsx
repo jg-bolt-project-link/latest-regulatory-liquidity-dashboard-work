@@ -13,6 +13,10 @@ import { DataQualityDashboardNew } from './DataQualityDashboardNew';
 import { FR2052aDetailView } from './executive/FR2052aDetailView';
 import { FR2052aValidation } from './FR2052aValidation';
 import { DataSetup } from './DataSetup';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
+import { seedStateStreetData } from '../utils/seedStateStreetData';
+import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
 import { ChatAssistant } from './shared/ChatAssistant';
 import { ScreenValidator } from './shared/ScreenValidator';
 import {
@@ -52,10 +56,48 @@ type ViewType =
   | 'fr2052a-validation';
 
 export function MainApp() {
+  const { user } = useAuth();
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showValidator, setShowValidator] = useState(true);
   const [validationPassed, setValidationPassed] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
+
+  useEffect(() => {
+    const initializeData = async () => {
+      if (!user || hasInitialized || isInitializing) return;
+
+      const { count } = await supabase
+        .from('fr2052a_data_rows')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      if (!count || count === 0) {
+        console.log('No FR 2052a data found. Auto-generating sample data...');
+        setIsInitializing(true);
+
+        try {
+          console.log('Step 1: Creating legal entities...');
+          await seedStateStreetData(user.id);
+
+          console.log('Step 2: Generating FR 2052a data and calculations...');
+          await seedFR2052aWithCalculations(user.id);
+
+          console.log('FR 2052a data generation complete!');
+          setHasInitialized(true);
+        } catch (error) {
+          console.error('Error during auto-initialization:', error);
+        } finally {
+          setIsInitializing(false);
+        }
+      } else {
+        setHasInitialized(true);
+      }
+    };
+
+    initializeData();
+  }, [user, hasInitialized, isInitializing]);
 
   const handleValidationComplete = (allPassed: boolean) => {
     setValidationPassed(allPassed);

@@ -110,17 +110,19 @@ export async function seedFR2052aWithCalculations(userId: string) {
         derivatives_outflows: lcrResult.details.derivativesOutflows,
         other_contractual_outflows: lcrResult.details.otherContractualOutflows,
         other_contingent_outflows: lcrResult.details.otherContingentOutflows,
-        capped_inflows: lcrResult.details.cappedInflows
+        capped_inflows: lcrResult.details.cappedInflows,
+        source_system: 'FR2052a',
+        fr2052a_record_count: dbRows.length
       };
 
       const { error: lcrError } = await supabase
-        .from('lcr_metrics')
+        .from('fr2052a_lcr_metrics')
         .upsert(lcrData, {
           onConflict: 'user_id,legal_entity_id,report_date'
         });
 
       if (lcrError) {
-        console.error(`  Error saving LCR metrics:`, lcrError);
+        console.error(`  Error saving FR2052a-dependent LCR metrics:`, lcrError);
         console.error(`  LCR Data being inserted:`, JSON.stringify(lcrData, null, 2));
       } else {
         results.lcrCalculations.push(lcrResult);
@@ -143,17 +145,19 @@ export async function seedFR2052aWithCalculations(userId: string) {
         rsf_loans: nsfrResult.details.loansRSF,
         rsf_other_assets: nsfrResult.details.otherAssetsRSF,
         asf_surplus_deficit: nsfrResult.availableStableFunding - nsfrResult.requiredStableFunding,
-        is_compliant: nsfrResult.isCompliant
+        is_compliant: nsfrResult.isCompliant,
+        source_system: 'FR2052a',
+        fr2052a_record_count: dbRows.length
       };
 
       const { error: nsfrError } = await supabase
-        .from('nsfr_metrics')
+        .from('fr2052a_nsfr_metrics')
         .upsert(nsfrData, {
           onConflict: 'user_id,legal_entity_id,report_date'
         });
 
       if (nsfrError) {
-        console.error(`  Error saving NSFR metrics:`, nsfrError);
+        console.error(`  Error saving FR2052a-dependent NSFR metrics:`, nsfrError);
         console.error(`  NSFR Data being inserted:`, JSON.stringify(nsfrData, null, 2));
       } else {
         results.nsfrCalculations.push(nsfrResult);
