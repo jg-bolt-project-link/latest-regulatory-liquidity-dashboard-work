@@ -121,6 +121,7 @@ export async function seedFR2052aWithCalculations(userId: string) {
 
       if (lcrError) {
         console.error(`  Error saving LCR metrics:`, lcrError);
+        console.error(`  LCR Data being inserted:`, JSON.stringify(lcrData, null, 2));
       } else {
         results.lcrCalculations.push(lcrResult);
       }
@@ -153,6 +154,7 @@ export async function seedFR2052aWithCalculations(userId: string) {
 
       if (nsfrError) {
         console.error(`  Error saving NSFR metrics:`, nsfrError);
+        console.error(`  NSFR Data being inserted:`, JSON.stringify(nsfrData, null, 2));
       } else {
         results.nsfrCalculations.push(nsfrResult);
       }

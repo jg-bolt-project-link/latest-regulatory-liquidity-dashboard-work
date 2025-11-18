@@ -97,7 +97,7 @@ export function DataSetup() {
     });
 
     const { count: balanceSheetCount } = await supabase
-      .from('balance_sheet')
+      .from('balance_sheet_metrics')
       .select('*', { count: 'exact', head: true })
       .eq('user_id', user.id);
 
