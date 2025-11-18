@@ -10,7 +10,7 @@ import { CapitalMetricsDetailView } from './executive/CapitalMetricsDetailView';
 import { CashFlowAnalysisView } from './executive/CashFlowAnalysisView';
 import { IntradayLiquidityView } from './executive/IntradayLiquidityView';
 import { DataQualityDashboardNew } from './DataQualityDashboardNew';
-import { FR2052aDashboard } from './FR2052aDashboard';
+import { FR2052aDetailView } from './executive/FR2052aDetailView';
 import { FR2052aValidation } from './FR2052aValidation';
 import { ChatAssistant } from './shared/ChatAssistant';
 import { ScreenValidator } from './shared/ScreenValidator';
@@ -67,7 +67,7 @@ export function MainApp() {
     { id: 'cash-flow', label: 'Cash Flow Analysis', icon: Activity },
     { id: 'intraday-liquidity', label: 'Intraday Liquidity', icon: Clock },
     { id: 'data-quality', label: 'Data Quality', icon: CheckCircle },
-    { id: 'fr2052a', label: 'FR 2052a', icon: Database },
+    { id: 'fr2052a', label: 'FR 2052a Report', icon: Database },
     { id: 'fr2052a-validation', label: 'FR 2052a Validation', icon: FileCheck },
     { id: 'accounts', label: 'Accounts', icon: Wallet },
     { id: 'transactions', label: 'Transactions', icon: Receipt },
@@ -92,7 +92,7 @@ export function MainApp() {
       case 'data-quality':
         return <DataQualityDashboardNew onClose={() => setActiveView('dashboard')} />;
       case 'fr2052a':
-        return <FR2052aDashboard onClose={() => setActiveView('dashboard')} />;
+        return <FR2052aDetailView onNavigate={setActiveView} />;
       case 'fr2052a-validation':
         return <FR2052aValidation />;
       case 'accounts':

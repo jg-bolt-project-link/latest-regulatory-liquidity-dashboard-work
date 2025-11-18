@@ -58,7 +58,7 @@ export function ScreenValidator({ onValidationComplete, autoClose = true }: Scre
       { name: 'Reg K View', path: './regulatory/RegKView' },
       { name: 'Resolution Planning View', path: './regulatory/ResolutionPlanningView' },
       { name: 'Data Quality Dashboard', path: './DataQualityDashboard' },
-      { name: 'FR 2052a Dashboard', path: './FR2052aDashboard' },
+      { name: 'FR 2052a Dashboard', path: './executive/FR2052aDetailView' },
       { name: 'FR 2052a Validation', path: './FR2052aValidation' },
       { name: 'User Management', path: './UserManagement' },
       { name: 'Accounts', path: './Accounts' },
