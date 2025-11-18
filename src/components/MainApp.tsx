@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DashboardExecutive } from './DashboardExecutive';
 import { Accounts } from './Accounts';
 import { Transactions } from './Transactions';
@@ -13,6 +13,7 @@ import { DataQualityDashboardNew } from './DataQualityDashboardNew';
 import { FR2052aDashboard } from './FR2052aDashboard';
 import { FR2052aValidation } from './FR2052aValidation';
 import { ChatAssistant } from './shared/ChatAssistant';
+import { ScreenValidator } from './shared/ScreenValidator';
 import {
   LayoutDashboard,
   FileText,
@@ -50,6 +51,13 @@ type ViewType =
 export function MainApp() {
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showValidator, setShowValidator] = useState(true);
+  const [validationPassed, setValidationPassed] = useState(false);
+
+  const handleValidationComplete = (allPassed: boolean) => {
+    setValidationPassed(allPassed);
+    setShowValidator(false);
+  };
 
   const navigationItems = [
     { id: 'dashboard', label: 'Executive Dashboard', icon: LayoutDashboard },
@@ -101,7 +109,9 @@ export function MainApp() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
+    <>
+      {showValidator && <ScreenValidator onValidationComplete={handleValidationComplete} autoClose={true} />}
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
       <aside
         className={`${
           sidebarOpen ? 'w-64' : 'w-16'
@@ -154,5 +164,6 @@ export function MainApp() {
 
       <ChatAssistant />
     </div>
+    </>
   );
 }

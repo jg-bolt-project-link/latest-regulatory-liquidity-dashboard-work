@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Droplets, AlertTriangle, CheckCircle, Activity, Info, ExternalLink, ArrowLeft, FileDown } from 'lucide-react';
+import { Droplets, AlertTriangle, CheckCircle, Activity, Info, ExternalLink, ArrowLeft, FileDown, X } from 'lucide-react';
 import { LegalEntityFilter } from '../shared/LegalEntityFilter';
 import { MetricValueWithDetails } from '../shared/MetricValueWithDetails';
+import { Breadcrumbs } from '../shared/Breadcrumbs';
 import { exportLiquidityMetricsToPPT } from '../../utils/exportToPowerPoint';
 
 interface LCRMetric {
