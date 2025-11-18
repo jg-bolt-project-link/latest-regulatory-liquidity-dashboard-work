@@ -157,14 +157,28 @@ export function DataSetup() {
     setValidationResults([]);
 
     try {
-      const [dashboardResult, regulatoryResult, fr2052aResult] = await Promise.all([
-        seedDashboardData(user.id),
-        seedStateStreetData(user.id),
-        seedFR2052aWithCalculations(user.id)
-      ]);
+      console.log('Step 1: Creating legal entities and base data...');
+      const regulatoryResult = await seedStateStreetData(user.id);
+      if (!regulatoryResult.success) {
+        console.error('Failed to create legal entities:', regulatoryResult);
+        alert('Error creating legal entities. Check console for details.');
+        setLoading(false);
+        return;
+      }
 
-      if (!dashboardResult.success || !regulatoryResult.success || !fr2052aResult.success) {
-        console.error('Seed errors:', { dashboardResult, regulatoryResult, fr2052aResult });
+      console.log('Step 2: Generating FR 2052a data and calculations...');
+      const fr2052aResult = await seedFR2052aWithCalculations(user.id);
+      if (!fr2052aResult.success) {
+        console.error('Failed to generate FR 2052a data:', fr2052aResult);
+        alert('Error generating FR 2052a data. Check console for details.');
+        setLoading(false);
+        return;
+      }
+
+      console.log('Step 3: Generating dashboard data...');
+      const dashboardResult = await seedDashboardData(user.id);
+      if (!dashboardResult.success) {
+        console.error('Failed to generate dashboard data:', dashboardResult);
       }
 
       await new Promise(resolve => setTimeout(resolve, 2000));

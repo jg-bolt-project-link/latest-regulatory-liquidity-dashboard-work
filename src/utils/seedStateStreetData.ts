@@ -677,6 +677,9 @@ export async function seedDashboardData(userId: string) {
 
 export async function seedStateStreetData(userId: string) {
   try {
+    await supabase.from('fr2052a_data_rows').delete().eq('user_id', userId);
+    await supabase.from('lcr_metrics').delete().eq('user_id', userId);
+    await supabase.from('nsfr_metrics').delete().eq('user_id', userId);
     await supabase.from('data_lineage').delete().eq('user_id', userId);
     await supabase.from('data_quality_checks').delete().eq('user_id', userId);
     await supabase.from('data_feeds').delete().eq('user_id', userId);
@@ -687,8 +690,6 @@ export async function seedStateStreetData(userId: string) {
     await supabase.from('resolution_metrics').delete().eq('user_id', userId);
     await supabase.from('interest_rate_risk_metrics').delete().eq('user_id', userId);
     await supabase.from('balance_sheet_metrics').delete().eq('user_id', userId);
-    await supabase.from('nsfr_metrics').delete().eq('user_id', userId);
-    await supabase.from('lcr_metrics').delete().eq('user_id', userId);
   } catch (error) {
     console.log('Note: Some tables may not exist yet or have no data to delete');
   }
@@ -1046,8 +1047,6 @@ export async function seedStateStreetData(userId: string) {
 
   try {
     const results = await Promise.all([
-      supabase.from('lcr_metrics').insert(lcrData),
-      supabase.from('nsfr_metrics').insert(nsfrData),
       supabase.from('balance_sheet_metrics').insert(balanceSheetData),
       supabase.from('interest_rate_risk_metrics').insert(interestRateRiskData),
       supabase.from('resolution_metrics').insert(resolutionData),
