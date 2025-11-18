@@ -327,11 +327,11 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
         <button
           onClick={handleSeedData}
           disabled={seeding}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 shadow-sm"
-          title="Load or refresh sample data"
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50 shadow-lg font-semibold"
+          title="Generate sample data including FR 2052a, LCR, and NSFR calculations"
         >
-          <Database className="w-4 h-4" />
-          {seeding ? 'Refreshing...' : 'Refresh Data'}
+          <Database className="w-5 h-5" />
+          {seeding ? 'Generating Data...' : 'Seed Sample Data'}
         </button>
       </div>
 
@@ -344,7 +344,7 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
             <div className="flex-1">
               <h3 className="font-semibold text-slate-900 mb-2">No Data Found</h3>
               <p className="text-sm text-slate-600">
-                Click "Refresh Data" above to load State Street Corporation sample data and populate all dashboard metrics with institutional-grade information.
+                Click <span className="font-semibold text-blue-700">"Seed Sample Data"</span> above to generate comprehensive State Street Corporation sample data including FR 2052a reporting, LCR/NSFR calculations, and all dashboard metrics.
               </p>
             </div>
           </div>
