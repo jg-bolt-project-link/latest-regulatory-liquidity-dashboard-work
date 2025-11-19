@@ -17,13 +17,16 @@ import {
 interface FR2052aData {
   id: string;
   report_date: string;
-  product_id: string;
-  product_name: string;
-  product_category: string;
+  product: string;
+  sub_product: string;
+  counterparty: string;
   maturity_bucket: string;
-  outstanding_balance: number;
-  net_cash_flow: number;
+  amount: number;
+  projected_inflow: number;
+  projected_outflow: number;
   is_hqla: boolean;
+  asset_class: string;
+  legal_entity_id: string;
 }
 
 interface FR2052aQualityCheck {
@@ -53,38 +56,32 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
   const loadData = async () => {
     
 
-    const [dataResult, checksResult] = await Promise.all([
-      supabase
-        .from('fr2052a_data')
-        .select('*')
-        .is('user_id', null)
-        .order('report_date', { ascending: false })
-        .order('product_id')
-        .limit(100),
-      supabase
-        .from('fr2052a_quality_checks')
-        .select('*')
-        .is('user_id', null)
-        .order('report_date', { ascending: false })
-        .limit(20)
-    ]);
+    const { data: dataResult } = await supabase
+      .from('fr2052a_data_rows')
+      .select('*')
+      .is('user_id', null)
+      .order('report_date', { ascending: false })
+      .order('product')
+      .limit(100);
 
-    if (dataResult.data) setProductData(dataResult.data);
-    if (checksResult.data) setQualityChecks(checksResult.data);
+    const qualityChecks: FR2052aQualityCheck[] = [];
+
+    if (dataResult) setProductData(dataResult);
+    setQualityChecks(qualityChecks);
     setLoading(false);
   };
 
   const filteredData = productData.filter(item => {
-    const matchesSearch = item.product_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.product_name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === 'all' || item.product_category === categoryFilter;
+    const matchesSearch = item.product.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (item.sub_product || '').toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = categoryFilter === 'all' || item.product === categoryFilter;
     return matchesSearch && matchesCategory;
   });
 
-  const categories = ['all', ...Array.from(new Set(productData.map(d => d.product_category)))];
+  const categories = ['all', ...Array.from(new Set(productData.map(d => d.product)))];
 
-  const totalOutstanding = productData.reduce((sum, d) => sum + d.outstanding_balance, 0);
-  const hqlaAmount = productData.filter(d => d.is_hqla).reduce((sum, d) => sum + d.outstanding_balance, 0);
+  const totalOutstanding = productData.reduce((sum, d) => sum + (d.amount || 0), 0);
+  const hqlaAmount = productData.filter(d => d.is_hqla).reduce((sum, d) => sum + (d.amount || 0), 0);
   const passedChecks = qualityChecks.filter(c => c.status === 'passed').length;
   const criticalIssues = qualityChecks.filter(c => c.severity === 'critical' && c.status === 'failed').length;
 
@@ -344,11 +341,11 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
                   <table className="w-full">
                     <thead className="bg-slate-50 border-b border-slate-200">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Product ID</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Product Name</th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Category</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Product</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Sub-Product</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Counterparty</th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Maturity</th>
-                        <th className="px-6 py-3 text-right text-xs font-medium text-slate-600 uppercase">Balance</th>
+                        <th className="px-6 py-3 text-right text-xs font-medium text-slate-600 uppercase">Amount</th>
                         <th className="px-6 py-3 text-right text-xs font-medium text-slate-600 uppercase">Net Cash Flow</th>
                         <th className="px-6 py-3 text-center text-xs font-medium text-slate-600 uppercase">HQLA</th>
                       </tr>
@@ -356,21 +353,21 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
                     <tbody className="divide-y divide-slate-200">
                       {filteredData.map((item) => (
                         <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                          <td className="px-6 py-4 text-sm font-medium text-slate-900">{item.product_id}</td>
-                          <td className="px-6 py-4 text-sm text-slate-900">{item.product_name}</td>
+                          <td className="px-6 py-4 text-sm font-medium text-slate-900">{item.product}</td>
+                          <td className="px-6 py-4 text-sm text-slate-900">{item.sub_product || '-'}</td>
                           <td className="px-6 py-4">
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 capitalize">
-                              {item.product_category}
+                              {item.counterparty}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-sm text-slate-600">{item.maturity_bucket}</td>
                           <td className="px-6 py-4 text-right text-sm font-semibold text-slate-900">
-                            {formatCurrency(item.outstanding_balance)}
+                            {formatCurrency(item.amount || 0)}
                           </td>
                           <td className={`px-6 py-4 text-right text-sm font-semibold ${
-                            item.net_cash_flow >= 0 ? 'text-green-600' : 'text-red-600'
+                            ((item.projected_inflow || 0) - (item.projected_outflow || 0)) >= 0 ? 'text-green-600' : 'text-red-600'
                           }`}>
-                            {formatCurrency(item.net_cash_flow)}
+                            {formatCurrency((item.projected_inflow || 0) - (item.projected_outflow || 0))}
                           </td>
                           <td className="px-6 py-4 text-center">
                             {item.is_hqla && (
