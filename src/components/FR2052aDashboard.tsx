@@ -44,8 +44,10 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
   const { user } = useAuth();
   const [productData, setProductData] = useState<FR2052aData[]>([]);
   const [qualityChecks, setQualityChecks] = useState<FR2052aQualityCheck[]>([]);
+  const [validationErrors, setValidationErrors] = useState<any[]>([]);
+  const [submissions, setSubmissions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'data' | 'quality' | 'summary'>('summary');
+  const [activeTab, setActiveTab] = useState<'data' | 'quality' | 'summary' | 'validation'>('summary');
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
 
@@ -54,8 +56,6 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
   }, []);
 
   const loadData = async () => {
-    
-
     const { data: dataResult } = await supabase
       .from('fr2052a_data_rows')
       .select('*')
@@ -64,9 +64,23 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
       .order('product')
       .limit(100);
 
+    const { data: subsResult } = await supabase
+      .from('fr2052a_submissions')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    const { data: errorsResult } = await supabase
+      .from('fr2052a_validation_errors')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
     const qualityChecks: FR2052aQualityCheck[] = [];
 
     if (dataResult) setProductData(dataResult);
+    if (subsResult) setSubmissions(subsResult);
+    if (errorsResult) setValidationErrors(errorsResult);
     setQualityChecks(qualityChecks);
     setLoading(false);
   };
@@ -236,6 +250,16 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
               }`}
             >
               Quality Checks
+            </button>
+            <button
+              onClick={() => setActiveTab('validation')}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                activeTab === 'validation'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+              }`}
+            >
+              Validation ({validationErrors.length})
             </button>
           </div>
         </div>
@@ -440,6 +464,87 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
                   <div className="p-12 text-center">
                     <CheckCircle className="w-12 h-12 text-slate-300 mx-auto mb-4" />
                     <p className="text-slate-600">No quality checks available.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'validation' && (
+            <div className="space-y-4">
+              <div className="bg-white rounded-xl border border-slate-200 p-6 mb-4">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Validation Summary</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <p className="text-sm text-blue-600 font-medium">Total Submissions</p>
+                    <p className="text-2xl font-bold text-blue-900">{submissions.length}</p>
+                  </div>
+                  <div className="bg-red-50 rounded-lg p-4">
+                    <p className="text-sm text-red-600 font-medium">Validation Errors</p>
+                    <p className="text-2xl font-bold text-red-900">{validationErrors.length}</p>
+                  </div>
+                  <div className="bg-green-50 rounded-lg p-4">
+                    <p className="text-sm text-green-600 font-medium">Error Rate</p>
+                    <p className="text-2xl font-bold text-green-900">
+                      {productData.length > 0 ? ((validationErrors.length / productData.length) * 100).toFixed(2) : 0}%
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl border border-slate-200">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Severity</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Error Type</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Field</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Message</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Expected</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase">Actual</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {validationErrors.slice(0, 50).map((error) => (
+                        <tr key={error.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-6 py-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              error.severity === 'error' ? 'bg-red-100 text-red-800' :
+                              error.severity === 'warning' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-blue-100 text-blue-800'
+                            }`}>
+                              {error.severity}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-slate-900">{error.error_type}</td>
+                          <td className="px-6 py-4 text-sm font-medium text-slate-900">{error.field_name || '-'}</td>
+                          <td className="px-6 py-4 text-sm text-slate-600">{error.error_message}</td>
+                          <td className="px-6 py-4 text-sm text-slate-600 max-w-xs truncate">
+                            {error.expected_value || '-'}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-red-600 font-medium max-w-xs truncate">
+                            {error.actual_value || '-'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {validationErrors.length === 0 && (
+                  <div className="p-12 text-center">
+                    <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-4" />
+                    <p className="text-slate-900 font-semibold mb-2">All Validation Checks Passed!</p>
+                    <p className="text-slate-600">No errors found in FR 2052a data.</p>
+                  </div>
+                )}
+
+                {validationErrors.length > 50 && (
+                  <div className="p-4 bg-slate-50 border-t border-slate-200 text-center">
+                    <p className="text-sm text-slate-600">
+                      Showing first 50 of {validationErrors.length} validation errors
+                    </p>
                   </div>
                 )}
               </div>

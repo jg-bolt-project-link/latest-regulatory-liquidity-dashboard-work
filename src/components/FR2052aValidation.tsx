@@ -55,13 +55,26 @@ export function FR2052aValidation() {
       .order('rule_category', { ascending: true });
 
     const { data: subs } = await supabase
-      .from('fr2052a_file_submissions')
+      .from('fr2052a_submissions')
       .select('*')
-      .order('upload_timestamp', { ascending: false })
+      .order('created_at', { ascending: false })
       .limit(10);
 
     if (rules) setValidationRules(rules);
-    if (subs) setSubmissions(subs);
+    if (subs) {
+      const formattedSubs = subs.map(s => ({
+        id: s.id,
+        file_name: `FR2052a_${s.reporting_period}`,
+        upload_timestamp: s.created_at,
+        reporting_entity: s.legal_entity_id,
+        reporting_period: s.reporting_period,
+        submission_status: s.submission_status,
+        total_rows: 0,
+        valid_rows: 0,
+        error_rows: 0
+      }));
+      setSubmissions(formattedSubs);
+    }
 
     setLoading(false);
   };

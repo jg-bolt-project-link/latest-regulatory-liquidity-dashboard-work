@@ -257,7 +257,19 @@ export function DataSetup() {
         status: 'completed',
         message: `${fr2052aResult.results?.nsfrCalculations?.length || 0} NSFR calculations completed`
       });
-      updateWorkflowStep('verify-fr2052a', { status: 'completed', duration: Date.now() - step2Start });
+
+      // Show validation results
+      const validationResults = fr2052aResult.results?.validationResults || [];
+      const totalValidationErrors = validationResults.reduce((sum: number, r: any) => sum + (r.errors?.length || 0), 0);
+      const totalValidRows = validationResults.reduce((sum: number, r: any) => sum + (r.validRows || 0), 0);
+
+      updateWorkflowStep('verify-fr2052a', {
+        status: 'completed',
+        duration: Date.now() - step2Start,
+        message: totalValidationErrors > 0
+          ? `Validation complete: ${totalValidRows} valid rows, ${totalValidationErrors} errors found`
+          : `Validation complete: All ${totalValidRows} rows passed`
+      });
 
       console.log('✓ FR 2052a data generation completed successfully');
 

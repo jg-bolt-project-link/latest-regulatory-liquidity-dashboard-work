@@ -250,7 +250,43 @@ export async function seedFR2052aWithCalculations() {
   }
 
   console.log('✅ All data successfully generated and verified in database!');
-  return { success: true, results };
+
+  console.log('\nStep 4: Running validation checks on generated data...');
+  const { validateFR2052aData } = await import('./fr2052aValidation');
+  const validationResults: any[] = [];
+
+  for (const reportDate of reportDates) {
+    console.log(`  Validating data for ${reportDate}...`);
+    try {
+      const validationResult = await validateFR2052aData(reportDate);
+      validationResults.push({
+        reportDate,
+        ...validationResult
+      });
+      console.log(`    ✓ Validated ${validationResult.totalRows} rows: ${validationResult.validRows} valid, ${validationResult.errorRows} with errors`);
+    } catch (error) {
+      console.error(`    ✗ Validation failed for ${reportDate}:`, error);
+      validationResults.push({
+        reportDate,
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  }
+
+  console.log('\n=== Validation Summary ===');
+  const totalErrors = validationResults.reduce((sum, r) => sum + (r.errors?.length || 0), 0);
+  const totalValidRows = validationResults.reduce((sum, r) => sum + (r.validRows || 0), 0);
+  console.log(`Total validated rows: ${totalValidRows}`);
+  console.log(`Total validation errors: ${totalErrors}`);
+  console.log('==========================\n');
+
+  return {
+    success: true,
+    results: {
+      ...results,
+      validationResults
+    }
+  };
 }
 
 export async function testCalculations() {
