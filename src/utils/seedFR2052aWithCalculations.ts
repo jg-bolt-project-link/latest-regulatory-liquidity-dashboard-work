@@ -6,6 +6,42 @@ export async function seedFR2052aWithCalculations(userId: string) {
   console.log('=== FR 2052a Data Generation Started ===');
   console.log(`User ID: ${userId}`);
 
+  console.log('Step 0: Verifying tables exist...');
+
+  // Test if tables exist by querying them
+  const { error: fr2052aTestError } = await supabase
+    .from('fr2052a_data_rows')
+    .select('id')
+    .limit(1);
+
+  if (fr2052aTestError) {
+    console.error('❌ ERROR: fr2052a_data_rows table not accessible:', fr2052aTestError);
+    return { success: false, error: `Table fr2052a_data_rows error: ${fr2052aTestError.message}` };
+  }
+  console.log('✓ fr2052a_data_rows table exists');
+
+  const { error: lcrTestError } = await supabase
+    .from('fr2052a_lcr_metrics')
+    .select('id')
+    .limit(1);
+
+  if (lcrTestError) {
+    console.error('❌ ERROR: fr2052a_lcr_metrics table not accessible:', lcrTestError);
+    return { success: false, error: `Table fr2052a_lcr_metrics error: ${lcrTestError.message}` };
+  }
+  console.log('✓ fr2052a_lcr_metrics table exists');
+
+  const { error: nsfrTestError } = await supabase
+    .from('fr2052a_nsfr_metrics')
+    .select('id')
+    .limit(1);
+
+  if (nsfrTestError) {
+    console.error('❌ ERROR: fr2052a_nsfr_metrics table not accessible:', nsfrTestError);
+    return { success: false, error: `Table fr2052a_nsfr_metrics error: ${nsfrTestError.message}` };
+  }
+  console.log('✓ fr2052a_nsfr_metrics table exists');
+
   console.log('Step 1: Fetching legal entities...');
   const entities = await supabase
     .from('legal_entities')
