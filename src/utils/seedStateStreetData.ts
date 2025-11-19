@@ -1,9 +1,9 @@
 import { supabase } from '../lib/supabase';
 
-export async function seedLegalEntities(userId: string) {
+export async function seedLegalEntities() {
   const legalEntitiesData = [
     {
-      user_id: userId,
+      user_id: null,
       entity_code: 'SSC',
       entity_name: 'State Street Corporation',
       entity_type: 'parent',
@@ -14,7 +14,7 @@ export async function seedLegalEntities(userId: string) {
       description: 'Top-tier bank holding company'
     },
     {
-      user_id: userId,
+      user_id: null,
       entity_code: 'SSBT',
       entity_name: 'State Street Bank and Trust Company',
       entity_type: 'subsidiary',
@@ -25,7 +25,7 @@ export async function seedLegalEntities(userId: string) {
       description: 'Principal banking subsidiary providing custody and investment servicing'
     },
     {
-      user_id: userId,
+      user_id: null,
       entity_code: 'SSIF',
       entity_name: 'State Street Intermediate Funding LLC',
       entity_type: 'funding_entity',
@@ -36,7 +36,7 @@ export async function seedLegalEntities(userId: string) {
       description: 'Intermediate funding entity for capital and liquidity distribution'
     },
     {
-      user_id: userId,
+      user_id: null,
       entity_code: 'SSIH',
       entity_name: 'State Street International Holdings',
       entity_type: 'material_entity',
@@ -47,7 +47,7 @@ export async function seedLegalEntities(userId: string) {
       description: 'Edge corporation holding international subsidiaries'
     },
     {
-      user_id: userId,
+      user_id: null,
       entity_code: 'SSTCC',
       entity_name: 'State Street Trust Company Canada',
       entity_type: 'material_entity',
@@ -58,7 +58,7 @@ export async function seedLegalEntities(userId: string) {
       description: 'Canadian trust company for custody services'
     },
     {
-      user_id: userId,
+      user_id: null,
       entity_code: 'SSGA',
       entity_name: 'State Street Global Advisors',
       entity_type: 'material_entity',
@@ -69,7 +69,7 @@ export async function seedLegalEntities(userId: string) {
       description: 'Investment management division'
     },
     {
-      user_id: userId,
+      user_id: null,
       entity_code: 'SSBEL',
       entity_name: 'State Street Bank Europe Limited',
       entity_type: 'material_entity',
@@ -80,7 +80,7 @@ export async function seedLegalEntities(userId: string) {
       description: 'European banking operations'
     },
     {
-      user_id: userId,
+      user_id: null,
       entity_code: 'SSLUX',
       entity_name: 'State Street Bank International GmbH',
       entity_type: 'material_entity',
@@ -91,7 +91,7 @@ export async function seedLegalEntities(userId: string) {
       description: 'German banking subsidiary'
     },
     {
-      user_id: userId,
+      user_id: null,
       entity_code: 'SSAPAC',
       entity_name: 'State Street Australia Limited',
       entity_type: 'material_entity',
@@ -102,7 +102,7 @@ export async function seedLegalEntities(userId: string) {
       description: 'Asia-Pacific custody operations'
     },
     {
-      user_id: userId,
+      user_id: null,
       entity_code: 'SSTZ',
       entity_name: 'State Street Technology (Zhejiang) Co. Ltd',
       entity_type: 'material_entity',
@@ -132,10 +132,10 @@ export async function seedLegalEntities(userId: string) {
   return { entities: insertedEntities || [], entityMap };
 }
 
-export async function seedDataQualityData(userId: string) {
+export async function seedDataQualityData() {
   const dataFeedsData = [
     {
-      user_id: userId,
+      user_id: null,
       feed_name: 'Core Banking System',
       feed_type: 'core_banking',
       source_system: 'State Street Core',
@@ -150,7 +150,7 @@ export async function seedDataQualityData(userId: string) {
       notes: 'Primary source for account balances and transactions'
     },
     {
-      user_id: userId,
+      user_id: null,
       feed_name: 'Treasury Management System',
       feed_type: 'treasury',
       source_system: 'TMS Pro',
@@ -165,7 +165,7 @@ export async function seedDataQualityData(userId: string) {
       notes: 'Cash positions and liquidity forecasts'
     },
     {
-      user_id: userId,
+      user_id: null,
       feed_name: 'Market Data Feed',
       feed_type: 'market_data',
       source_system: 'Bloomberg',
@@ -180,7 +180,7 @@ export async function seedDataQualityData(userId: string) {
       notes: 'Real-time pricing and FX rates'
     },
     {
-      user_id: userId,
+      user_id: null,
       feed_name: 'Regulatory Reporting',
       feed_type: 'regulatory',
       source_system: 'Federal Reserve',
@@ -195,7 +195,7 @@ export async function seedDataQualityData(userId: string) {
       notes: 'FR 2052a and other regulatory submissions'
     },
     {
-      user_id: userId,
+      user_id: null,
       feed_name: 'Securities Reference Data',
       feed_type: 'market_data',
       source_system: 'DTCC',
@@ -210,7 +210,7 @@ export async function seedDataQualityData(userId: string) {
       notes: 'Securities master data and corporate actions'
     },
     {
-      user_id: userId,
+      user_id: null,
       feed_name: 'Payment Systems',
       feed_type: 'core_banking',
       source_system: 'Fedwire/CHIPS',
@@ -228,7 +228,7 @@ export async function seedDataQualityData(userId: string) {
 
   const qualityChecksData = [
     {
-      user_id: userId,
+      user_id: null,
       check_name: 'Balance Sheet Reconciliation',
       check_type: 'reconciliation',
       data_source: 'balance_sheet_metrics',
@@ -240,7 +240,7 @@ export async function seedDataQualityData(userId: string) {
       last_run_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
     },
     {
-      user_id: userId,
+      user_id: null,
       check_name: 'LCR HQLA Validation',
       check_type: 'input',
       data_source: 'lcr_metrics',
@@ -252,7 +252,7 @@ export async function seedDataQualityData(userId: string) {
       last_run_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
     },
     {
-      user_id: userId,
+      user_id: null,
       check_name: 'NSFR Component Check',
       check_type: 'transformation',
       data_source: 'nsfr_metrics',
@@ -264,7 +264,7 @@ export async function seedDataQualityData(userId: string) {
       last_run_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
     },
     {
-      user_id: userId,
+      user_id: null,
       check_name: 'Interest Rate Risk Data Quality',
       check_type: 'input',
       data_source: 'interest_rate_risk_metrics',
@@ -276,7 +276,7 @@ export async function seedDataQualityData(userId: string) {
       last_run_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString()
     },
     {
-      user_id: userId,
+      user_id: null,
       check_name: 'Resolution Liquidity Completeness',
       check_type: 'output',
       data_source: 'resolution_liquidity_metrics',
@@ -288,7 +288,7 @@ export async function seedDataQualityData(userId: string) {
       last_run_at: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
     },
     {
-      user_id: userId,
+      user_id: null,
       check_name: 'Stress Test Scenario Validation',
       check_type: 'transformation',
       data_source: 'liquidity_stress_tests',
@@ -301,7 +301,7 @@ export async function seedDataQualityData(userId: string) {
       last_run_at: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
     },
     {
-      user_id: userId,
+      user_id: null,
       check_name: 'Legal Entity Hierarchy',
       check_type: 'reconciliation',
       data_source: 'legal_entities',
@@ -313,7 +313,7 @@ export async function seedDataQualityData(userId: string) {
       last_run_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
     },
     {
-      user_id: userId,
+      user_id: null,
       check_name: 'Account Balance Cross-Check',
       check_type: 'reconciliation',
       data_source: 'accounts',
@@ -325,7 +325,7 @@ export async function seedDataQualityData(userId: string) {
       last_run_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
     },
     {
-      user_id: userId,
+      user_id: null,
       check_name: 'Transaction Category Mapping',
       check_type: 'transformation',
       data_source: 'transactions',
@@ -340,7 +340,7 @@ export async function seedDataQualityData(userId: string) {
 
   const lineageData = [
     {
-      user_id: userId,
+      user_id: null,
       source_system: 'Core Banking',
       source_table: 'accounts',
       source_column: 'current_balance',
@@ -353,7 +353,7 @@ export async function seedDataQualityData(userId: string) {
       is_critical: true
     },
     {
-      user_id: userId,
+      user_id: null,
       source_system: 'Core Banking',
       source_table: 'accounts',
       source_column: 'current_balance',
@@ -366,7 +366,7 @@ export async function seedDataQualityData(userId: string) {
       is_critical: true
     },
     {
-      user_id: userId,
+      user_id: null,
       source_system: 'Treasury Management',
       source_table: 'securities_holdings',
       source_column: 'market_value',
@@ -379,7 +379,7 @@ export async function seedDataQualityData(userId: string) {
       is_critical: true
     },
     {
-      user_id: userId,
+      user_id: null,
       source_system: 'Analytics',
       source_table: 'lcr_metrics',
       source_column: 'total_hqla',
@@ -392,7 +392,7 @@ export async function seedDataQualityData(userId: string) {
       is_critical: true
     },
     {
-      user_id: userId,
+      user_id: null,
       source_system: 'Analytics',
       source_table: 'balance_sheet_metrics',
       source_column: 'tier1_capital',
@@ -405,7 +405,7 @@ export async function seedDataQualityData(userId: string) {
       is_critical: true
     },
     {
-      user_id: userId,
+      user_id: null,
       source_system: 'Market Data',
       source_table: 'yield_curves',
       source_column: 'rate',
@@ -418,7 +418,7 @@ export async function seedDataQualityData(userId: string) {
       is_critical: true
     },
     {
-      user_id: userId,
+      user_id: null,
       source_system: 'Core Banking',
       source_table: 'deposits',
       source_column: 'balance',
@@ -431,7 +431,7 @@ export async function seedDataQualityData(userId: string) {
       is_critical: true
     },
     {
-      user_id: userId,
+      user_id: null,
       source_system: 'Payment Systems',
       source_table: 'fedwire_transactions',
       source_column: 'amount',
@@ -444,7 +444,7 @@ export async function seedDataQualityData(userId: string) {
       is_critical: true
     },
     {
-      user_id: userId,
+      user_id: null,
       source_system: 'Legal Entity Master',
       source_table: 'entity_structure',
       source_column: 'entity_id',
@@ -457,7 +457,7 @@ export async function seedDataQualityData(userId: string) {
       is_critical: true
     },
     {
-      user_id: userId,
+      user_id: null,
       source_system: 'Analytics',
       source_table: 'lcr_metrics',
       source_column: 'lcr_ratio',
@@ -483,10 +483,10 @@ export async function seedDataQualityData(userId: string) {
   console.log('Data quality data seeded:', dataFeedsData.length, 'feeds,', qualityChecksData.length, 'checks,', lineageData.length, 'lineage mappings');
 }
 
-export async function seedDashboardData(userId: string) {
+export async function seedDashboardData() {
   const accountsData = [
     {
-      user_id: userId,
+      user_id: null,
       name: 'Operating Account',
       account_type: 'checking',
       currency: 'USD',
@@ -495,7 +495,7 @@ export async function seedDashboardData(userId: string) {
       is_active: true
     },
     {
-      user_id: userId,
+      user_id: null,
       name: 'Money Market Fund',
       account_type: 'savings',
       currency: 'USD',
@@ -504,7 +504,7 @@ export async function seedDashboardData(userId: string) {
       is_active: true
     },
     {
-      user_id: userId,
+      user_id: null,
       name: 'Investment Portfolio',
       account_type: 'investment',
       currency: 'USD',
@@ -513,7 +513,7 @@ export async function seedDashboardData(userId: string) {
       is_active: true
     },
     {
-      user_id: userId,
+      user_id: null,
       name: 'Credit Facility',
       account_type: 'credit',
       currency: 'USD',
@@ -533,7 +533,7 @@ export async function seedDashboardData(userId: string) {
 
     if (i % 3 === 0) {
       transactionsData.push({
-        user_id: userId,
+        user_id: null,
         transaction_date: dateStr,
         description: 'Client Service Fees',
         amount: 750000 + Math.random() * 200000,
@@ -544,7 +544,7 @@ export async function seedDashboardData(userId: string) {
 
     if (i % 2 === 0) {
       transactionsData.push({
-        user_id: userId,
+        user_id: null,
         transaction_date: dateStr,
         description: 'Operational Expenses',
         amount: -(80000 + Math.random() * 60000),
@@ -555,7 +555,7 @@ export async function seedDashboardData(userId: string) {
 
     if (i % 4 === 0) {
       transactionsData.push({
-        user_id: userId,
+        user_id: null,
         transaction_date: dateStr,
         description: 'Securities Trading Revenue',
         amount: 300000 + Math.random() * 250000,
@@ -566,7 +566,7 @@ export async function seedDashboardData(userId: string) {
 
     if (i % 5 === 0) {
       transactionsData.push({
-        user_id: userId,
+        user_id: null,
         transaction_date: dateStr,
         description: 'Custody Fees',
         amount: 600000 + Math.random() * 150000,
@@ -577,7 +577,7 @@ export async function seedDashboardData(userId: string) {
 
     if (i % 7 === 1) {
       transactionsData.push({
-        user_id: userId,
+        user_id: null,
         transaction_date: dateStr,
         description: 'Technology Infrastructure',
         amount: -(70000 + Math.random() * 40000),
@@ -588,7 +588,7 @@ export async function seedDashboardData(userId: string) {
 
     if (i % 6 === 0) {
       transactionsData.push({
-        user_id: userId,
+        user_id: null,
         transaction_date: dateStr,
         description: 'Management Fees',
         amount: 450000 + Math.random() * 180000,
@@ -599,7 +599,7 @@ export async function seedDashboardData(userId: string) {
 
     if (i % 14 === 0) {
       transactionsData.push({
-        user_id: userId,
+        user_id: null,
         transaction_date: dateStr,
         description: 'Compensation & Benefits',
         amount: -(280000 + Math.random() * 80000),
@@ -610,7 +610,7 @@ export async function seedDashboardData(userId: string) {
 
     if (i % 5 === 2) {
       transactionsData.push({
-        user_id: userId,
+        user_id: null,
         transaction_date: dateStr,
         description: 'FX Trading Revenue',
         amount: 200000 + Math.random() * 150000,
@@ -621,7 +621,7 @@ export async function seedDashboardData(userId: string) {
 
     if (i % 10 === 0) {
       transactionsData.push({
-        user_id: userId,
+        user_id: null,
         transaction_date: dateStr,
         description: 'Regulatory Compliance',
         amount: -(50000 + Math.random() * 30000),
@@ -632,7 +632,7 @@ export async function seedDashboardData(userId: string) {
 
     if (i % 4 === 1) {
       transactionsData.push({
-        user_id: userId,
+        user_id: null,
         transaction_date: dateStr,
         description: 'Investment Advisory Fees',
         amount: 650000 + Math.random() * 180000,
@@ -675,34 +675,34 @@ export async function seedDashboardData(userId: string) {
   }
 }
 
-export async function seedStateStreetData(userId: string) {
+export async function seedStateStreetData() {
   try {
-    await supabase.from('fr2052a_data_rows').delete().eq('user_id', userId);
-    await supabase.from('fr2052a_lcr_metrics').delete().eq('user_id', userId);
-    await supabase.from('fr2052a_nsfr_metrics').delete().eq('user_id', userId);
-    await supabase.from('data_lineage').delete().eq('user_id', userId);
-    await supabase.from('data_quality_checks').delete().eq('user_id', userId);
-    await supabase.from('data_feeds').delete().eq('user_id', userId);
-    await supabase.from('legal_entities').delete().eq('user_id', userId);
-    await supabase.from('liquidity_stress_tests').delete().eq('user_id', userId);
-    await supabase.from('resolution_liquidity_metrics').delete().eq('user_id', userId);
-    await supabase.from('reg_k_metrics').delete().eq('user_id', userId);
-    await supabase.from('resolution_metrics').delete().eq('user_id', userId);
-    await supabase.from('interest_rate_risk_metrics').delete().eq('user_id', userId);
-    await supabase.from('balance_sheet_metrics').delete().eq('user_id', userId);
+    await supabase.from('fr2052a_data_rows').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('fr2052a_lcr_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('fr2052a_nsfr_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('data_lineage').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('data_quality_checks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('data_feeds').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('legal_entities').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('liquidity_stress_tests').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('resolution_liquidity_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('reg_k_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('resolution_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('interest_rate_risk_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('balance_sheet_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
   } catch (error) {
     console.log('Note: Some tables may not exist yet or have no data to delete');
   }
 
-  const { entities, entityMap } = await seedLegalEntities(userId);
+  const { entities, entityMap } = await seedLegalEntities();
   console.log('Seeded legal entities:', entities.length);
 
-  await seedDataQualityData(userId);
+  await seedDataQualityData();
   console.log('Seeded data quality data');
 
   const lcrData = [
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       hqla_level_1: 54800000000,
       hqla_level_2a: 6117647059,
@@ -714,7 +714,7 @@ export async function seedStateStreetData(userId: string) {
       notes: 'Q3 2024 - State Street Corporation LCR'
     },
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-06-30',
       hqla_level_1: 53200000000,
       hqla_level_2a: 5882352941,
@@ -726,7 +726,7 @@ export async function seedStateStreetData(userId: string) {
       notes: 'Q2 2024 - State Street Corporation LCR'
     },
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-03-31',
       hqla_level_1: 52100000000,
       hqla_level_2a: 5764705882,
@@ -741,7 +741,7 @@ export async function seedStateStreetData(userId: string) {
 
   const nsfrData = [
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       available_stable_funding: 198500000000,
       required_stable_funding: 160100000000,
@@ -752,7 +752,7 @@ export async function seedStateStreetData(userId: string) {
       notes: 'Q3 2024 - State Street Corporation NSFR'
     },
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-06-30',
       available_stable_funding: 195800000000,
       required_stable_funding: 158900000000,
@@ -763,7 +763,7 @@ export async function seedStateStreetData(userId: string) {
       notes: 'Q2 2024 - State Street Corporation NSFR'
     },
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-03-31',
       available_stable_funding: 193200000000,
       required_stable_funding: 157200000000,
@@ -777,7 +777,7 @@ export async function seedStateStreetData(userId: string) {
 
   const balanceSheetData = [
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       total_assets: 305800000000,
       total_liabilities: 278200000000,
@@ -799,7 +799,7 @@ export async function seedStateStreetData(userId: string) {
       notes: 'Q3 2024 - State Street Corporation Balance Sheet'
     },
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-06-30',
       total_assets: 302100000000,
       total_liabilities: 275200000000,
@@ -824,7 +824,7 @@ export async function seedStateStreetData(userId: string) {
 
   const interestRateRiskData = [
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       scenario_type: '+200bp Parallel Shift',
       nii_current: 5200000000,
@@ -839,7 +839,7 @@ export async function seedStateStreetData(userId: string) {
       notes: 'Q3 2024 - Asset sensitive position'
     },
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       scenario_type: '+100bp Parallel Shift',
       nii_current: 5200000000,
@@ -854,7 +854,7 @@ export async function seedStateStreetData(userId: string) {
       notes: 'Q3 2024 - Moderate rate increase'
     },
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       scenario_type: '-100bp Parallel Shift',
       nii_current: 5200000000,
@@ -872,7 +872,7 @@ export async function seedStateStreetData(userId: string) {
 
   const resolutionData = [
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       total_loss_absorbing_capacity: 35200000000,
       tlac_ratio: 0.217,
@@ -890,7 +890,7 @@ export async function seedStateStreetData(userId: string) {
 
   const regKData = [
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       total_foreign_exposures: 156800000000,
       country_risk_rating: 'Investment Grade',
@@ -905,7 +905,7 @@ export async function seedStateStreetData(userId: string) {
 
   const resolutionLiquidityData = [
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       rcap_amount: 28400000000,
       rcap_ratio: 1.175,
@@ -927,7 +927,7 @@ export async function seedStateStreetData(userId: string) {
       notes: 'Q3 2024 - All resolution metrics exceed minimum thresholds'
     },
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-06-30',
       rcap_amount: 27800000000,
       rcap_ratio: 1.165,
@@ -952,7 +952,7 @@ export async function seedStateStreetData(userId: string) {
 
   const stressTestData = [
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       scenario_name: 'Severe Market Stress - 30 Day',
       scenario_type: '30_day_short_term',
@@ -975,7 +975,7 @@ export async function seedStateStreetData(userId: string) {
       notes: '30-day severe stress - passes all internal thresholds with adequate buffer'
     },
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       scenario_name: 'Baseline Adverse - 30 Day',
       scenario_type: '30_day_short_term',
@@ -998,7 +998,7 @@ export async function seedStateStreetData(userId: string) {
       notes: '30-day baseline adverse - comfortable liquidity position maintained'
     },
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       scenario_name: 'Extended Crisis - 1 Year',
       scenario_type: '1_year_extended',
@@ -1021,7 +1021,7 @@ export async function seedStateStreetData(userId: string) {
       notes: '1-year extended crisis - survives full year with liquidity buffer intact'
     },
     {
-      user_id: userId,
+      user_id: null,
       report_date: '2024-09-30',
       scenario_name: 'Idiosyncratic Stress - 1 Year',
       scenario_type: '1_year_extended',

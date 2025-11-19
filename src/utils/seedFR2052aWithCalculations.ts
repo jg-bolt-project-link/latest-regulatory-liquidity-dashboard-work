@@ -2,9 +2,8 @@ import { supabase } from '../lib/supabase';
 import { generateComprehensiveFR2052aData } from './generateFR2052aData';
 import { FR2052aCalculationEngine } from './fr2052aCalculations';
 
-export async function seedFR2052aWithCalculations(userId: string) {
+export async function seedFR2052aWithCalculations() {
   console.log('=== FR 2052a Data Generation Started ===');
-  console.log(`User ID: ${userId}`);
 
   console.log('Step 0: Verifying tables exist...');
 
@@ -45,8 +44,7 @@ export async function seedFR2052aWithCalculations(userId: string) {
   console.log('Step 1: Fetching legal entities...');
   const entities = await supabase
     .from('legal_entities')
-    .select('id, entity_name')
-    .eq('user_id', userId);
+    .select('id, entity_name');
 
   if (entities.error) {
     console.error('ERROR fetching legal entities:', entities.error);
@@ -84,11 +82,11 @@ export async function seedFR2052aWithCalculations(userId: string) {
     for (const reportDate of reportDates) {
       console.log(`  Generating data for ${reportDate}...`);
 
-      const fr2052aData = generateComprehensiveFR2052aData(reportDate, userId, entity.id);
+      const fr2052aData = generateComprehensiveFR2052aData(reportDate, entity.id);
       console.log(`  Generated ${fr2052aData.length} FR 2052a line items`);
 
       const dbRows = fr2052aData.map(item => ({
-        user_id: userId,
+        user_id: null,
         legal_entity_id: entity.id,
         report_date: reportDate,
         table_name: 'FR2052a',
@@ -142,7 +140,7 @@ export async function seedFR2052aWithCalculations(userId: string) {
       console.log(`  ✓ NSFR calculated: ${(nsfrResult.nsfrRatio * 100).toFixed(2)}%`);
 
       const lcrData = {
-        user_id: userId,
+        user_id: null,
         legal_entity_id: entity.id,
         report_date: reportDate,
         lcr_ratio: lcrResult.lcrRatio,
@@ -170,7 +168,7 @@ export async function seedFR2052aWithCalculations(userId: string) {
       const { error: lcrError, data: lcrInserted } = await supabase
         .from('fr2052a_lcr_metrics')
         .upsert(lcrData, {
-          onConflict: 'user_id,legal_entity_id,report_date'
+          onConflict: 'legal_entity_id,report_date'
         })
         .select();
 
@@ -185,7 +183,7 @@ export async function seedFR2052aWithCalculations(userId: string) {
       results.lcrCalculations.push(lcrResult);
 
       const nsfrData = {
-        user_id: userId,
+        user_id: null,
         legal_entity_id: entity.id,
         report_date: reportDate,
         nsfr_ratio: nsfrResult.nsfrRatio,
@@ -210,7 +208,7 @@ export async function seedFR2052aWithCalculations(userId: string) {
       const { error: nsfrError, data: nsfrInserted } = await supabase
         .from('fr2052a_nsfr_metrics')
         .upsert(nsfrData, {
-          onConflict: 'user_id,legal_entity_id,report_date'
+          onConflict: 'legal_entity_id,report_date'
         })
         .select();
 

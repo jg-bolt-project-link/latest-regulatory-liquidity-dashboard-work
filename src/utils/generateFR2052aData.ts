@@ -1,6 +1,6 @@
 import { FR2052aLineItem } from './fr2052aCalculations';
 
-export function generateComprehensiveFR2052aData(reportDate: string, userId: string, legalEntityId: string): FR2052aLineItem[] {
+export function generateComprehensiveFR2052aData(reportDate: string, legalEntityId: string): FR2052aLineItem[] {
   const data: FR2052aLineItem[] = [];
   const baseAmount = 1000000;
 

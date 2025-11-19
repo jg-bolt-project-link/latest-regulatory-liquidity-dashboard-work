@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { seedDashboardData, seedStateStreetData } from '../utils/seedStateStreetData';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
@@ -25,21 +24,17 @@ interface ValidationResult {
 }
 
 export function DataSetup() {
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const [lastGenerated, setLastGenerated] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
 
   const validateGeneratedData = async (): Promise<ValidationResult[]> => {
-    if (!user) return [];
-
     const results: ValidationResult[] = [];
 
     const { count: fr2052aCount } = await supabase
       .from('fr2052a_data_rows')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
+      .select('*', { count: 'exact', head: true });
 
     results.push({
       category: 'FR 2052a Data Rows',
@@ -151,14 +146,13 @@ export function DataSetup() {
   };
 
   const handleGenerateAllData = async () => {
-    if (!user) return;
     setLoading(true);
     setShowResults(false);
     setValidationResults([]);
 
     try {
       console.log('Step 1: Creating legal entities and base data...');
-      const regulatoryResult = await seedStateStreetData(user.id);
+      const regulatoryResult = await seedStateStreetData();
       if (!regulatoryResult.success) {
         console.error('Failed to create legal entities:', regulatoryResult);
         alert('Error creating legal entities. Check console for details.');
@@ -167,7 +161,7 @@ export function DataSetup() {
       }
 
       console.log('Step 2: Generating FR 2052a data and calculations...');
-      const fr2052aResult = await seedFR2052aWithCalculations(user.id);
+      const fr2052aResult = await seedFR2052aWithCalculations();
       console.log('FR 2052a generation result:', fr2052aResult);
 
       if (!fr2052aResult.success) {
@@ -180,7 +174,7 @@ export function DataSetup() {
       console.log('✓ FR 2052a data generation completed successfully');
 
       console.log('Step 3: Generating dashboard data...');
-      const dashboardResult = await seedDashboardData(user.id);
+      const dashboardResult = await seedDashboardData();
       if (!dashboardResult.success) {
         console.error('Failed to generate dashboard data:', dashboardResult);
       }

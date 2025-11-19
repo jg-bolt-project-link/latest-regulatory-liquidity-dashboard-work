@@ -3,7 +3,6 @@ import { DashboardExecutive } from './DashboardExecutive';
 import { Accounts } from './Accounts';
 import { Transactions } from './Transactions';
 import { Reports } from './Reports';
-import { UserManagement } from './UserManagement';
 import { BalanceSheetDetailView } from './executive/BalanceSheetDetailView';
 import { LiquidityMetricsDetailView } from './executive/LiquidityMetricsDetailView';
 import { CapitalMetricsDetailView } from './executive/CapitalMetricsDetailView';
@@ -13,13 +12,11 @@ import { DataQualityDashboardNew } from './DataQualityDashboardNew';
 import { FR2052aDetailView } from './executive/FR2052aDetailView';
 import { FR2052aValidation } from './FR2052aValidation';
 import { DataSetup } from './DataSetup';
-import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { seedStateStreetData } from '../utils/seedStateStreetData';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
 import { ChatAssistant } from './shared/ChatAssistant';
 import { ScreenValidator } from './shared/ScreenValidator';
-import { AuthForm } from './AuthForm';
 import {
   LayoutDashboard,
   FileText,
@@ -45,7 +42,6 @@ type ViewType =
   | 'accounts'
   | 'transactions'
   | 'reports'
-  | 'users'
   | 'balance-sheet'
   | 'capital-metrics'
   | 'liquidity-metrics'
@@ -57,7 +53,6 @@ type ViewType =
   | 'fr2052a-validation';
 
 export function MainApp() {
-  const { user, loading } = useAuth();
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showValidator, setShowValidator] = useState(true);
@@ -67,12 +62,11 @@ export function MainApp() {
 
   useEffect(() => {
     const initializeData = async () => {
-      if (!user || hasInitialized || isInitializing) return;
+      if (hasInitialized || isInitializing) return;
 
       const { count } = await supabase
         .from('fr2052a_data_rows')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
+        .select('*', { count: 'exact', head: true });
 
       if (!count || count === 0) {
         console.log('No FR 2052a data found. Auto-generating sample data...');
@@ -80,10 +74,10 @@ export function MainApp() {
 
         try {
           console.log('Step 1: Creating legal entities...');
-          await seedStateStreetData(user.id);
+          await seedStateStreetData();
 
           console.log('Step 2: Generating FR 2052a data and calculations...');
-          await seedFR2052aWithCalculations(user.id);
+          await seedFR2052aWithCalculations();
 
           console.log('FR 2052a data generation complete!');
           setHasInitialized(true);
@@ -98,7 +92,7 @@ export function MainApp() {
     };
 
     initializeData();
-  }, [user, hasInitialized, isInitializing]);
+  }, [hasInitialized, isInitializing]);
 
   const handleValidationComplete = (allPassed: boolean) => {
     setValidationPassed(allPassed);
@@ -119,7 +113,6 @@ export function MainApp() {
     { id: 'accounts', label: 'Accounts', icon: Wallet },
     { id: 'transactions', label: 'Transactions', icon: Receipt },
     { id: 'reports', label: 'Reports', icon: FileText },
-    { id: 'users', label: 'User Management', icon: Users },
   ] as const;
 
   const renderContent = () => {
@@ -150,27 +143,10 @@ export function MainApp() {
         return <Transactions />;
       case 'reports':
         return <Reports />;
-      case 'users':
-        return <UserManagement />;
       default:
         return <DashboardExecutive onNavigate={setActiveView} />;
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return <AuthForm />;
-  }
 
   return (
     <>
