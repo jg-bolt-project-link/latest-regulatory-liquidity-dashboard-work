@@ -143,25 +143,14 @@ export async function seedFR2052aWithCalculations() {
         user_id: null,
         legal_entity_id: entity.id,
         report_date: reportDate,
-        lcr_ratio: lcrResult.lcrRatio,
+        hqla_level_1: lcrResult.level1Assets,
+        hqla_level_2a: lcrResult.level2aAssets,
+        hqla_level_2b: lcrResult.level2bAssets,
         total_hqla: lcrResult.totalHQLA,
-        level1_assets: lcrResult.level1Assets,
-        level2a_assets: lcrResult.level2aAssets,
-        level2b_assets: lcrResult.level2bAssets,
-        total_cash_outflows: lcrResult.totalCashOutflows,
-        total_cash_inflows: lcrResult.totalCashInflows,
         total_net_cash_outflows: lcrResult.netCashOutflows,
-        hqla_excess_shortfall: lcrResult.totalHQLA - lcrResult.netCashOutflows,
+        lcr_ratio: lcrResult.lcrRatio,
         is_compliant: lcrResult.isCompliant,
-        retail_deposit_outflows: lcrResult.details.retailDepositOutflows,
-        wholesale_funding_outflows: lcrResult.details.wholesaleFundingOutflows,
-        secured_funding_outflows: lcrResult.details.securedFundingOutflows,
-        derivatives_outflows: lcrResult.details.derivativesOutflows,
-        other_contractual_outflows: lcrResult.details.otherContractualOutflows,
-        other_contingent_outflows: lcrResult.details.otherContingentOutflows,
-        capped_inflows: lcrResult.details.cappedInflows,
-        source_system: 'FR2052a',
-        fr2052a_record_count: dbRows.length
+        notes: `FR2052a calculation - ${dbRows.length} records processed`
       };
 
       console.log(`  Step 2c: Saving LCR metrics to lcr_metrics...`);
@@ -186,22 +175,13 @@ export async function seedFR2052aWithCalculations() {
         user_id: null,
         legal_entity_id: entity.id,
         report_date: reportDate,
-        nsfr_ratio: nsfrResult.nsfrRatio,
         available_stable_funding: nsfrResult.availableStableFunding,
         required_stable_funding: nsfrResult.requiredStableFunding,
-        asf_capital: nsfrResult.details.capitalASF,
-        asf_retail_deposits: nsfrResult.details.retailDepositsASF,
-        asf_wholesale_funding: nsfrResult.details.wholesaleFundingASF,
-        asf_other_liabilities: nsfrResult.details.otherLiabilitiesASF,
-        rsf_level1_assets: nsfrResult.details.level1AssetsRSF,
-        rsf_level2a_assets: nsfrResult.details.level2aAssetsRSF,
-        rsf_level2b_assets: nsfrResult.details.level2bAssetsRSF,
-        rsf_loans: nsfrResult.details.loansRSF,
-        rsf_other_assets: nsfrResult.details.otherAssetsRSF,
-        asf_surplus_deficit: nsfrResult.availableStableFunding - nsfrResult.requiredStableFunding,
+        nsfr_ratio: nsfrResult.nsfrRatio,
         is_compliant: nsfrResult.isCompliant,
-        source_system: 'FR2052a',
-        fr2052a_record_count: dbRows.length
+        retail_deposits: nsfrResult.details.retailDepositsASF || 0,
+        wholesale_funding: nsfrResult.details.wholesaleFundingASF || 0,
+        notes: `FR2052a calculation - ${dbRows.length} records processed`
       };
 
       console.log(`  Step 2d: Saving NSFR metrics to nsfr_metrics...`);
