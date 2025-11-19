@@ -216,17 +216,17 @@ export async function seedFR2052aWithCalculations() {
   const { count: fr2052aCount } = await supabase
     .from('fr2052a_data_rows')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
+    .is('user_id', null);
 
   const { count: lcrCount } = await supabase
-    .from('fr2052a_lcr_metrics')
+    .from('lcr_metrics')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
+    .is('user_id', null);
 
   const { count: nsfrCount } = await supabase
-    .from('fr2052a_nsfr_metrics')
+    .from('nsfr_metrics')
     .select('*', { count: 'exact', head: true })
-    .eq('user_id', userId);
+    .is('user_id', null);
 
   console.log('\n=== Database Verification ===');
   console.log(`✓ FR 2052a rows in database: ${fr2052aCount || 0}`);
@@ -256,7 +256,7 @@ export async function seedFR2052aWithCalculations() {
 export async function testCalculations() {
   console.log('\n=== Testing FR 2052a Calculations ===\n');
 
-  const testData = generateComprehensiveFR2052aData('2024-12-31', 'test-user', 'test-entity');
+  const testData = generateComprehensiveFR2052aData('2024-12-31', 'test-entity');
   console.log(`Generated ${testData.length} test records (each $1M)`);
 
   const engine = new FR2052aCalculationEngine(testData);

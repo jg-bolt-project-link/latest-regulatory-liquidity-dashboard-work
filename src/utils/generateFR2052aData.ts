@@ -289,7 +289,7 @@ function getRSFFactor(category: string, subProduct: string, maturity: string, is
 }
 
 export interface FR2052aDataRow {
-  user_id: string;
+  user_id: null;
   legal_entity_id: string;
   report_date: string;
   product_id: string;
@@ -314,9 +314,9 @@ export interface FR2052aDataRow {
   internal_rating: string | null;
 }
 
-export function convertToDBFormat(items: FR2052aLineItem[], userId: string, legalEntityId: string): FR2052aDataRow[] {
+export function convertToDBFormat(items: FR2052aLineItem[], legalEntityId: string): FR2052aDataRow[] {
   return items.map(item => ({
-    user_id: userId,
+    user_id: null,
     legal_entity_id: legalEntityId,
     report_date: item.reportDate,
     product_id: item.productId,

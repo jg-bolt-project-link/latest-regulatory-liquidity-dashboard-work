@@ -643,8 +643,8 @@ export async function seedDashboardData() {
   }
 
   try {
-    await supabase.from('transactions').delete().eq('user_id', userId);
-    await supabase.from('accounts').delete().eq('user_id', userId);
+    await supabase.from('transactions').delete().is('user_id', null);
+    await supabase.from('accounts').delete().is('user_id', null);
 
     const accountsInsert = await supabase.from('accounts').insert(accountsData).select();
 
