@@ -45,30 +45,30 @@ export function RegulatoryDashboard() {
 
   useEffect(() => {
     loadComplianceStatus();
-  }, [user]);
+  }, []);
 
   const loadComplianceStatus = async () => {
-    if (!user) return;
+    
 
     const [lcrResult, nsfrResult, balanceSheetResult] = await Promise.all([
       supabase
         .from('lcr_metrics')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .order('report_date', { ascending: false })
         .limit(1)
         .maybeSingle(),
       supabase
         .from('nsfr_metrics')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .order('report_date', { ascending: false })
         .limit(1)
         .maybeSingle(),
       supabase
         .from('balance_sheet_metrics')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .order('report_date', { ascending: false })
         .limit(1)
         .maybeSingle(),
@@ -97,7 +97,7 @@ export function RegulatoryDashboard() {
   };
 
   const handleSeedData = async () => {
-    if (!user) return;
+    
     setSeeding(true);
     try {
       console.log('Seeding data for user:', user.id);

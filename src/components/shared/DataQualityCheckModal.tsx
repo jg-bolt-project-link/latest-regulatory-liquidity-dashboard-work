@@ -51,21 +51,21 @@ export function DataQualityCheckModal({
   }, [dataSource]);
 
   const loadQualityData = async () => {
-    if (!user) return;
+    
 
     try {
       const [checksResult, feedsResult] = await Promise.all([
         supabase
           .from('data_quality_checks')
           .select('*')
-          .eq('user_id', user.id)
+          .is('user_id', null)
           .eq('data_source', dataSource)
           .order('last_run_at', { ascending: false })
           .limit(10),
         supabase
           .from('data_feeds')
           .select('*')
-          .eq('user_id', user.id)
+          .is('user_id', null)
           .ilike('feed_name', `%${dataSource}%`)
           .order('last_run_at', { ascending: false })
           .limit(5)

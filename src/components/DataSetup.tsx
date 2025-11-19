@@ -52,7 +52,7 @@ export function DataSetup() {
     const { count: lcrCount } = await supabase
       .from('fr2052a_lcr_metrics')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
+      .is('user_id', null);
 
     results.push({
       category: 'FR2052a-Dependent LCR',
@@ -67,7 +67,7 @@ export function DataSetup() {
     const { count: nsfrCount } = await supabase
       .from('fr2052a_nsfr_metrics')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
+      .is('user_id', null);
 
     results.push({
       category: 'FR2052a-Dependent NSFR',
@@ -82,7 +82,7 @@ export function DataSetup() {
     const { count: entitiesCount } = await supabase
       .from('legal_entities')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
+      .is('user_id', null);
 
     results.push({
       category: 'Legal Entities',
@@ -97,7 +97,7 @@ export function DataSetup() {
     const { count: balanceSheetCount } = await supabase
       .from('balance_sheet_metrics')
       .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
+      .is('user_id', null);
 
     results.push({
       category: 'Balance Sheet Data',
@@ -112,7 +112,7 @@ export function DataSetup() {
     const { data: lcrData } = await supabase
       .from('fr2052a_lcr_metrics')
       .select('lcr_ratio')
-      .eq('user_id', user.id)
+      .is('user_id', null)
       .order('report_date', { ascending: false })
       .limit(1)
       .maybeSingle();
@@ -130,7 +130,7 @@ export function DataSetup() {
     const { data: nsfrData } = await supabase
       .from('fr2052a_nsfr_metrics')
       .select('nsfr_ratio')
-      .eq('user_id', user.id)
+      .is('user_id', null)
       .order('report_date', { ascending: false })
       .limit(1)
       .maybeSingle();

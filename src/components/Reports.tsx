@@ -24,15 +24,15 @@ export function Reports() {
 
   useEffect(() => {
     loadReports();
-  }, [user]);
+  }, []);
 
   const loadReports = async () => {
-    if (!user) return;
+    
 
     const { data } = await supabase
       .from('liquidity_reports')
       .select('*')
-      .eq('user_id', user.id)
+      .is('user_id', null)
       .order('report_date', { ascending: false });
 
     if (data) setReports(data);
@@ -40,12 +40,12 @@ export function Reports() {
   };
 
   const generateReport = async (reportType: string, notes: string) => {
-    if (!user) return;
+    
 
     const { data: accounts } = await supabase
       .from('accounts')
       .select('*')
-      .eq('user_id', user.id)
+      .is('user_id', null)
       .eq('is_active', true);
 
     if (!accounts) return;
@@ -63,7 +63,7 @@ export function Reports() {
     const quickRatio = totalLiabilities > 0 ? (totalAssets * 0.9) / totalLiabilities : null;
 
     const { error } = await supabase.from('liquidity_reports').insert({
-      user_id: user.id,
+      user_id: null,
       report_type: reportType,
       total_assets: totalAssets,
       total_liabilities: totalLiabilities,

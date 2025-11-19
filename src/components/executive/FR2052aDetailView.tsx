@@ -75,7 +75,7 @@ export function FR2052aDetailView({ onNavigate }: FR2052aDetailViewProps) {
 
   useEffect(() => {
     loadData();
-  }, [user, selectedEntityId]);
+  }, [selectedEntityId]);
 
   useEffect(() => {
     if (availableDates.length > 0 && !selectedDate) {
@@ -84,13 +84,12 @@ export function FR2052aDetailView({ onNavigate }: FR2052aDetailViewProps) {
   }, [availableDates]);
 
   const loadData = async () => {
-    if (!user) return;
     setLoading(true);
 
     let query = supabase
       .from('fr2052a_data_rows')
       .select('*')
-      .eq('user_id', user.id)
+      .is('user_id', null)
       .order('report_date', { ascending: false });
 
     if (selectedEntityId) {

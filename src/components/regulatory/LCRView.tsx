@@ -30,19 +30,19 @@ export function LCRView({ onBack }: LCRViewProps) {
 
   useEffect(() => {
     loadMetrics();
-  }, [user]);
+  }, []);
 
   const loadMetrics = async () => {
-    if (!user) return;
+    
 
     const { data, error } = await supabase
       .from('lcr_metrics')
       .select('*')
-      .eq('user_id', user.id)
+      .is('user_id', null)
       .order('report_date', { ascending: false })
       .limit(30);
 
-    console.log('LCR Metrics loaded:', { data, error, userId: user.id });
+    console.log('LCR Metrics loaded:', { data, error, 'N/A' });
 
     if (data) setMetrics(data);
     setLoading(false);
@@ -266,7 +266,7 @@ function LCRModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () =
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    
 
     const level1 = parseFloat(formData.hqla_level_1) || 0;
     const level2a = parseFloat(formData.hqla_level_2a) || 0;
@@ -277,7 +277,7 @@ function LCRModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () =
 
     setLoading(true);
     const { error } = await supabase.from('lcr_metrics').insert({
-      user_id: user.id,
+      user_id: null,
       report_date: formData.report_date,
       hqla_level_1: level1,
       hqla_level_2a: level2a,

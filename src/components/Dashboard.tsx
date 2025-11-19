@@ -49,22 +49,22 @@ export function Dashboard() {
 
   useEffect(() => {
     loadData();
-  }, [user]);
+  }, []);
 
   const loadData = async () => {
-    if (!user) return;
+    
 
     const [accountsResult, transactionsResult] = await Promise.all([
       supabase
         .from('accounts')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .eq('is_active', true)
         .order('created_at', { ascending: false }),
       supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .order('transaction_date', { ascending: false })
         .limit(10)
     ]);
@@ -80,10 +80,10 @@ export function Dashboard() {
   };
 
   const handleSeedData = async () => {
-    if (!user) return;
+    
     setSeeding(true);
     try {
-      const result = await seedDashboardData(user.id);
+      const result = await seedDashboardData();
       if (result.success) {
         await loadData();
         alert('Sample data loaded successfully!');
@@ -408,11 +408,11 @@ function AccountModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    
 
     setLoading(true);
     const { error } = await supabase.from('accounts').insert({
-      user_id: user.id,
+      user_id: null,
       name: formData.name,
       account_type: formData.account_type,
       currency: formData.currency,
@@ -525,14 +525,14 @@ function TransactionModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !formData.account_id) return;
+    if (!formData.account_id) return;
 
     setLoading(true);
     const amount = parseFloat(formData.amount);
     const adjustedAmount = formData.transaction_type === 'withdrawal' ? -Math.abs(amount) : Math.abs(amount);
 
     const { error } = await supabase.from('transactions').insert({
-      user_id: user.id,
+      user_id: null,
       account_id: formData.account_id,
       description: formData.description,
       amount: adjustedAmount,

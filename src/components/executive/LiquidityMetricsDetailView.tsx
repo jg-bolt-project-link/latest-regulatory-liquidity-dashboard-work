@@ -67,15 +67,15 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
 
   useEffect(() => {
     loadMetrics();
-  }, [user, selectedEntityId]);
+  }, [selectedEntityId]);
 
   const loadMetrics = async () => {
-    if (!user) return;
+    
 
-    let lcrQuery = supabase.from('lcr_metrics').select('*').eq('user_id', user.id);
-    let nsfrQuery = supabase.from('nsfr_metrics').select('*').eq('user_id', user.id);
-    let stressQuery = supabase.from('liquidity_stress_tests').select('*').eq('user_id', user.id);
-    let resolutionQuery = supabase.from('resolution_liquidity_metrics').select('*').eq('user_id', user.id);
+    let lcrQuery = supabase.from('lcr_metrics').select('*').is('user_id', null);
+    let nsfrQuery = supabase.from('nsfr_metrics').select('*').is('user_id', null);
+    let stressQuery = supabase.from('liquidity_stress_tests').select('*').is('user_id', null);
+    let resolutionQuery = supabase.from('resolution_liquidity_metrics').select('*').is('user_id', null);
 
     if (selectedEntityId) {
       lcrQuery = lcrQuery.eq('legal_entity_id', selectedEntityId);

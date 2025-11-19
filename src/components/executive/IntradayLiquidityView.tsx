@@ -28,16 +28,16 @@ export function IntradayLiquidityView({ onNavigate }: IntradayLiquidityViewProps
 
   useEffect(() => {
     loadIntradayData();
-  }, [user]);
+  }, []);
 
   const loadIntradayData = async () => {
-    if (!user) return;
+    
 
     try {
       const { data: accounts, error: accountsError } = await supabase
         .from('accounts')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .eq('is_active', true);
 
       if (accountsError) {

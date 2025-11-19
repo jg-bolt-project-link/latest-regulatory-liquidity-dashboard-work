@@ -39,13 +39,13 @@ export function DataLineageVisualization({
   }, [targetTable, targetColumn]);
 
   const loadLineageData = async () => {
-    if (!user) return;
+    
 
     try {
       const { data, error } = await supabase
         .from('data_lineage')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .eq('target_table', targetTable)
         .eq('target_column', targetColumn)
         .order('dependency_level', { ascending: true });

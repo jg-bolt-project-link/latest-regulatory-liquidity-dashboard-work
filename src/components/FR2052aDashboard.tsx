@@ -48,23 +48,23 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     loadData();
-  }, [user]);
+  }, []);
 
   const loadData = async () => {
-    if (!user) return;
+    
 
     const [dataResult, checksResult] = await Promise.all([
       supabase
         .from('fr2052a_data')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .order('report_date', { ascending: false })
         .order('product_id')
         .limit(100),
       supabase
         .from('fr2052a_quality_checks')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .order('report_date', { ascending: false })
         .limit(20)
     ]);

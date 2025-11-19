@@ -25,10 +25,10 @@ export function CashFlowAnalysisView({ onNavigate }: CashFlowAnalysisViewProps) 
 
   useEffect(() => {
     loadCashFlowData();
-  }, [user, selectedPeriod, selectedEntity]);
+  }, [selectedPeriod, selectedEntity]);
 
   const loadCashFlowData = async () => {
-    if (!user) return;
+    
 
     try {
       const daysMap = { '7d': 7, '30d': 30, '90d': 90, '1y': 365 };
@@ -39,7 +39,7 @@ export function CashFlowAnalysisView({ onNavigate }: CashFlowAnalysisViewProps) 
       const { data: transactions, error } = await supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .gte('transaction_date', startDate.toISOString())
         .order('transaction_date', { ascending: true });
 

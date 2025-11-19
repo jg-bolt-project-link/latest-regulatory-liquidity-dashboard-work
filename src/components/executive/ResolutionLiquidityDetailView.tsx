@@ -35,15 +35,15 @@ export function ResolutionLiquidityDetailView({ onNavigate }: ResolutionLiquidit
 
   useEffect(() => {
     loadMetrics();
-  }, [user]);
+  }, []);
 
   const loadMetrics = async () => {
-    if (!user) return;
+    
 
     const { data, error } = await supabase
       .from('resolution_liquidity_metrics')
       .select('*')
-      .eq('user_id', user.id)
+      .is('user_id', null)
       .order('report_date', { ascending: false })
       .limit(10);
 

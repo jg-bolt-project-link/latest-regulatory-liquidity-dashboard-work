@@ -23,15 +23,15 @@ export function Accounts() {
 
   useEffect(() => {
     loadAccounts();
-  }, [user]);
+  }, []);
 
   const loadAccounts = async () => {
-    if (!user) return;
+    
 
     const { data, error } = await supabase
       .from('accounts')
       .select('*')
-      .eq('user_id', user.id)
+      .is('user_id', null)
       .order('created_at', { ascending: false });
 
     console.log('Accounts loaded:', { data, error });
@@ -41,10 +41,10 @@ export function Accounts() {
   };
 
   const handleSeedData = async () => {
-    if (!user) return;
+    
     setSeeding(true);
     try {
-      const result = await seedDashboardData(user.id);
+      const result = await seedDashboardData();
       if (result.success) {
         await loadAccounts();
         alert('Sample accounts loaded successfully!');
@@ -268,14 +268,14 @@ function AccountModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    
 
     setLoading(true);
 
     const { error } = await supabase.from('accounts').insert([
       {
         ...formData,
-        user_id: user.id,
+        user_id: null,
         is_active: true,
       },
     ]);

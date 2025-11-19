@@ -29,21 +29,21 @@ export function Transactions() {
 
   useEffect(() => {
     loadData();
-  }, [user]);
+  }, []);
 
   const loadData = async () => {
-    if (!user) return;
+    
 
     const [transactionsResult, accountsResult] = await Promise.all([
       supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .order('transaction_date', { ascending: false }),
       supabase
         .from('accounts')
         .select('id, name, account_type')
-        .eq('user_id', user.id)
+        .is('user_id', null)
     ]);
 
     console.log('Transactions loaded:', {
@@ -273,14 +273,14 @@ function TransactionModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    
 
     setLoading(true);
 
     const { error } = await supabase.from('transactions').insert([
       {
         ...formData,
-        user_id: user.id,
+        user_id: null,
       },
     ]);
 

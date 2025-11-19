@@ -58,27 +58,27 @@ export function DataQualityDashboard({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     loadData();
-  }, [user]);
+  }, []);
 
   const loadData = async () => {
-    if (!user) return;
+    
 
     const [checksResult, feedsResult, lineageResult] = await Promise.all([
       supabase
         .from('data_quality_checks')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .order('last_run_at', { ascending: false })
         .limit(20),
       supabase
         .from('data_feeds')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .order('last_run_at', { ascending: false }),
       supabase
         .from('data_lineage')
         .select('*')
-        .eq('user_id', user.id)
+        .is('user_id', null)
         .order('dependency_level', { ascending: true })
     ]);
 

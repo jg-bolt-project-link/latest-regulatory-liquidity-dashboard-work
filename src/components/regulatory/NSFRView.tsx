@@ -29,19 +29,19 @@ export function NSFRView({ onBack }: NSFRViewProps) {
 
   useEffect(() => {
     loadMetrics();
-  }, [user]);
+  }, []);
 
   const loadMetrics = async () => {
-    if (!user) return;
+    
 
     const { data, error } = await supabase
       .from('nsfr_metrics')
       .select('*')
-      .eq('user_id', user.id)
+      .is('user_id', null)
       .order('report_date', { ascending: false })
       .limit(20);
 
-    console.log('NSFR Metrics loaded:', { data, error, userId: user.id });
+    console.log('NSFR Metrics loaded:', { data, error, 'N/A' });
 
     if (data) setMetrics(data);
     setLoading(false);
@@ -261,7 +261,7 @@ function NSFRModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
+    
 
     const asf = parseFloat(formData.available_stable_funding) || 0;
     const rsf = parseFloat(formData.required_stable_funding) || 0;
@@ -269,7 +269,7 @@ function NSFRModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () 
 
     setLoading(true);
     const { error } = await supabase.from('nsfr_metrics').insert({
-      user_id: user.id,
+      user_id: null,
       report_date: formData.report_date,
       available_stable_funding: asf,
       required_stable_funding: rsf,

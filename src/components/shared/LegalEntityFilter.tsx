@@ -26,15 +26,13 @@ export function LegalEntityFilter({ selectedEntityId, onEntityChange, showMateri
 
   useEffect(() => {
     loadEntities();
-  }, [user, showMaterialOnly]);
+  }, [showMaterialOnly]);
 
   const loadEntities = async () => {
-    if (!user) return;
-
     let query = supabase
       .from('legal_entities')
       .select('*')
-      .eq('user_id', user.id)
+      .is('user_id', null)
       .order('entity_code');
 
     if (showMaterialOnly) {

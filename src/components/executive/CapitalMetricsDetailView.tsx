@@ -45,20 +45,20 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
 
   useEffect(() => {
     loadMetrics();
-  }, [user, selectedEntityId]);
+  }, [selectedEntityId]);
 
   const loadMetrics = async () => {
-    if (!user) return;
+    
 
     let bsQuery = supabase
       .from('balance_sheet_metrics')
       .select('*')
-      .eq('user_id', user.id);
+      .is('user_id', null);
 
     let rcQuery = supabase
       .from('resolution_liquidity_metrics')
       .select('*')
-      .eq('user_id', user.id);
+      .is('user_id', null);
 
     if (selectedEntityId) {
       bsQuery = bsQuery.eq('legal_entity_id', selectedEntityId);

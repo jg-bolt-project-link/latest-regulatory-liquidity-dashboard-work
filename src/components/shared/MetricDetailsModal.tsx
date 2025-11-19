@@ -85,28 +85,28 @@ export function MetricDetailsModal({
   }, [targetTable, targetColumn]);
 
   const loadAllData = async () => {
-    if (!user) return;
+    
 
     try {
       const [checksResult, feedsResult, lineageResult] = await Promise.all([
         supabase
           .from('data_quality_checks')
           .select('*')
-          .eq('user_id', user.id)
+          .is('user_id', null)
           .eq('data_source', dataSource)
           .order('last_run_at', { ascending: false })
           .limit(10),
         supabase
           .from('data_feeds')
           .select('*')
-          .eq('user_id', user.id)
+          .is('user_id', null)
           .ilike('source_system', `%${dataSource}%`)
           .order('last_run_at', { ascending: false })
           .limit(5),
         supabase
           .from('data_lineage')
           .select('*')
-          .eq('user_id', user.id)
+          .is('user_id', null)
           .eq('target_table', targetTable)
           .eq('target_column', targetColumn)
           .order('dependency_level', { ascending: true })
