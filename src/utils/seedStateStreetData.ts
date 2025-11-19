@@ -121,15 +121,26 @@ export async function seedLegalEntities() {
 
   if (entitiesError) {
     console.error('Error seeding legal entities:', entitiesError);
-    return { entities: [], entityMap: {} };
+    console.error('Error details:', {
+      code: entitiesError.code,
+      message: entitiesError.message,
+      details: entitiesError.details,
+      hint: entitiesError.hint
+    });
+    throw new Error(`Failed to insert legal entities: ${entitiesError.message}`);
+  }
+
+  if (!insertedEntities || insertedEntities.length === 0) {
+    throw new Error('No legal entities were inserted');
   }
 
   const entityMap: Record<string, string> = {};
-  insertedEntities?.forEach(entity => {
+  insertedEntities.forEach(entity => {
     entityMap[entity.entity_code] = entity.id;
   });
 
-  return { entities: insertedEntities || [], entityMap };
+  console.log(`✓ Successfully inserted ${insertedEntities.length} legal entities`);
+  return { entities: insertedEntities, entityMap };
 }
 
 export async function seedDataQualityData() {
@@ -694,11 +705,30 @@ export async function seedStateStreetData() {
     console.log('Note: Some tables may not exist yet or have no data to delete');
   }
 
-  const { entities, entityMap } = await seedLegalEntities();
-  console.log('Seeded legal entities:', entities.length);
+  let entities, entityMap;
+  try {
+    const result = await seedLegalEntities();
+    entities = result.entities;
+    entityMap = result.entityMap;
+    console.log('✓ Seeded legal entities:', entities.length);
+  } catch (error) {
+    console.error('❌ Failed to seed legal entities:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to seed legal entities'
+    };
+  }
 
-  await seedDataQualityData();
-  console.log('Seeded data quality data');
+  try {
+    await seedDataQualityData();
+    console.log('✓ Seeded data quality data');
+  } catch (error) {
+    console.error('❌ Failed to seed data quality data:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to seed data quality data'
+    };
+  }
 
   const lcrData = [
     {
