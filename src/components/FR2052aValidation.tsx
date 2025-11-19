@@ -312,8 +312,35 @@ export function FR2052aValidation() {
     }
 
     return (
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="min-w-full divide-y divide-slate-200">
+      <div className="space-y-4">
+        {selectedSubmission && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <FileText className="h-5 w-5 text-blue-600" />
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    Currently Viewing: {selectedSubmission.file_name}
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    Period: {new Date(selectedSubmission.reporting_period).toLocaleDateString()} •
+                    Status: {selectedSubmission.submission_status} •
+                    {selectedSubmission.error_rows} errors
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedSubmission(null)}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Clear Selection
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <table className="min-w-full divide-y divide-slate-200">
           <thead className="bg-slate-50">
             <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
@@ -341,7 +368,12 @@ export function FR2052aValidation() {
           </thead>
           <tbody className="bg-white divide-y divide-slate-200">
             {submissions.map((submission) => (
-              <tr key={submission.id} className="hover:bg-slate-50">
+              <tr
+                key={submission.id}
+                className={`hover:bg-slate-50 transition-colors ${
+                  selectedSubmission?.id === submission.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
+                }`}
+              >
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
                   {submission.file_name}
                 </td>
@@ -416,6 +448,7 @@ export function FR2052aValidation() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     );
   };
@@ -548,9 +581,121 @@ export function FR2052aValidation() {
       {activeTab === 'rules' && renderRules()}
       {activeTab === 'submissions' && renderSubmissions()}
       {activeTab === 'errors' && renderErrors()}
-      {activeTab === 'lcr' && selectedSubmission && <LCRValidationScreen submissionId={selectedSubmission.id} />}
-      {activeTab === 'nsfr' && selectedSubmission && <NSFRValidationScreen submissionId={selectedSubmission.id} />}
-      {activeTab === 'executions' && selectedSubmission && <ValidationRuleExecutions submissionId={selectedSubmission.id} />}
+      {activeTab === 'lcr' && (
+        selectedSubmission ? (
+          <div className="space-y-4">
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">LCR Calculation Validation</h3>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Submission: {selectedSubmission.file_name} • Period: {new Date(selectedSubmission.reporting_period).toLocaleDateString()}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('submissions')}
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  ← Back to Submissions
+                </button>
+              </div>
+            </div>
+            <LCRValidationScreen submissionId={selectedSubmission.id} />
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <Calculator className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No Submission Selected</h3>
+            <p className="text-sm text-slate-600 mb-4">
+              Select a submission from the Submissions tab to view LCR calculation validation details.
+            </p>
+            <button
+              onClick={() => setActiveTab('submissions')}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Go to Submissions
+            </button>
+          </div>
+        )
+      )}
+      {activeTab === 'nsfr' && (
+        selectedSubmission ? (
+          <div className="space-y-4">
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">NSFR Calculation Validation</h3>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Submission: {selectedSubmission.file_name} • Period: {new Date(selectedSubmission.reporting_period).toLocaleDateString()}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('submissions')}
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  ← Back to Submissions
+                </button>
+              </div>
+            </div>
+            <NSFRValidationScreen submissionId={selectedSubmission.id} />
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <BarChart3 className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No Submission Selected</h3>
+            <p className="text-sm text-slate-600 mb-4">
+              Select a submission from the Submissions tab to view NSFR calculation validation details.
+            </p>
+            <button
+              onClick={() => setActiveTab('submissions')}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Go to Submissions
+            </button>
+          </div>
+        )
+      )}
+      {activeTab === 'executions' && (
+        selectedSubmission ? (
+          <div className="space-y-4">
+            <div className="bg-white rounded-lg shadow p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900">Rule Executions</h3>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Submission: {selectedSubmission.file_name} • Period: {new Date(selectedSubmission.reporting_period).toLocaleDateString()}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setActiveTab('submissions')}
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  ← Back to Submissions
+                </button>
+              </div>
+            </div>
+            <ValidationRuleExecutions submissionId={selectedSubmission.id} />
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <CheckCircle className="h-16 w-16 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No Submission Selected</h3>
+            <p className="text-sm text-slate-600 mb-4">
+              Select a submission from the Submissions tab to view rule execution details.
+            </p>
+            <p className="text-sm text-slate-700 bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto mb-4">
+              <strong>Rule Executions</strong> show which validation rules were applied to each submission,
+              how many rows were checked, passed, and failed for each rule, and the execution time.
+            </p>
+            <button
+              onClick={() => setActiveTab('submissions')}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Go to Submissions
+            </button>
+          </div>
+        )
+      )}
     </div>
   );
 }
