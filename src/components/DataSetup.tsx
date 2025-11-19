@@ -205,12 +205,11 @@ export function DataSetup() {
   };
 
   const handleRefreshDashboardData = async () => {
-    if (!user) return;
     setLoading(true);
     setShowResults(false);
 
     try {
-      const result = await seedDashboardData(user.id);
+      const result = await seedDashboardData();
 
       if (result.success) {
         await new Promise(resolve => setTimeout(resolve, 1000));
