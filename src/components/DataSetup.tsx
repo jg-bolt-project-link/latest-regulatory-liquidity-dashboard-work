@@ -299,8 +299,8 @@ export function DataSetup() {
         });
       }
 
+      console.log('Step 4: Running validation checks...');
       updateWorkflowStep('validate-all', { status: 'in_progress', message: 'Running validation checks...' });
-      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const validation = await validateGeneratedData();
       setValidationResults(validation);
