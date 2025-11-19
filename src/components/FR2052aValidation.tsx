@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
-import { FileUp, CheckCircle, XCircle, AlertTriangle, Database, FileText, TrendingUp } from 'lucide-react';
+import { FileUp, CheckCircle, XCircle, AlertTriangle, Database, FileText, TrendingUp, Calculator, BarChart3 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { seedAllFR2052aData } from '../utils/seedFR2052aData';
+import { LCRValidationScreen } from './validation/LCRValidationScreen';
+import { NSFRValidationScreen } from './validation/NSFRValidationScreen';
+import { ValidationRuleExecutions } from './validation/ValidationRuleExecutions';
 
 interface ValidationRule {
   id: string;
@@ -39,7 +42,7 @@ export function FR2052aValidation() {
   const [selectedSubmission, setSelectedSubmission] = useState<FileSubmission | null>(null);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'rules' | 'submissions' | 'errors'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'rules' | 'submissions' | 'errors' | 'lcr' | 'nsfr' | 'executions'>('overview');
   const [dataSeeded, setDataSeeded] = useState(false);
 
   useEffect(() => {
@@ -62,17 +65,33 @@ export function FR2052aValidation() {
 
     if (rules) setValidationRules(rules);
     if (subs) {
-      const formattedSubs = subs.map(s => ({
-        id: s.id,
-        file_name: `FR2052a_${s.reporting_period}`,
-        upload_timestamp: s.created_at,
-        reporting_entity: s.legal_entity_id,
-        reporting_period: s.reporting_period,
-        submission_status: s.submission_status,
-        total_rows: 0,
-        valid_rows: 0,
-        error_rows: 0
-      }));
+      // Get row counts for each submission
+      const formattedSubsPromises = subs.map(async (s) => {
+        const { count: totalRows } = await supabase
+          .from('fr2052a_data_rows')
+          .select('*', { count: 'exact', head: true })
+          .eq('report_date', s.reporting_period)
+          .is('user_id', null);
+
+        const { count: errorCount } = await supabase
+          .from('fr2052a_validation_errors')
+          .select('*', { count: 'exact', head: true })
+          .eq('submission_id', s.id);
+
+        return {
+          id: s.id,
+          file_name: `FR2052a_${s.reporting_period}`,
+          upload_timestamp: s.created_at,
+          reporting_entity: s.legal_entity_id,
+          reporting_period: s.reporting_period,
+          submission_status: s.submission_status,
+          total_rows: totalRows || 0,
+          valid_rows: (totalRows || 0) - (errorCount || 0),
+          error_rows: errorCount || 0
+        };
+      });
+
+      const formattedSubs = await Promise.all(formattedSubsPromises);
       setSubmissions(formattedSubs);
     }
 
@@ -350,16 +369,48 @@ export function FR2052aValidation() {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <button
-                    onClick={() => {
-                      setSelectedSubmission(submission);
-                      loadErrors(submission.id);
-                      setActiveTab('errors');
-                    }}
-                    className="text-blue-600 hover:text-blue-800 font-medium"
-                  >
-                    View Details
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => {
+                        setSelectedSubmission(submission);
+                        setActiveTab('executions');
+                      }}
+                      className="text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Rules
+                    </button>
+                    <span className="text-slate-300">|</span>
+                    <button
+                      onClick={() => {
+                        setSelectedSubmission(submission);
+                        loadErrors(submission.id);
+                        setActiveTab('errors');
+                      }}
+                      className="text-red-600 hover:text-red-800 font-medium"
+                    >
+                      Errors
+                    </button>
+                    <span className="text-slate-300">|</span>
+                    <button
+                      onClick={() => {
+                        setSelectedSubmission(submission);
+                        setActiveTab('lcr');
+                      }}
+                      className="text-green-600 hover:text-green-800 font-medium"
+                    >
+                      LCR
+                    </button>
+                    <span className="text-slate-300">|</span>
+                    <button
+                      onClick={() => {
+                        setSelectedSubmission(submission);
+                        setActiveTab('nsfr');
+                      }}
+                      className="text-orange-600 hover:text-orange-800 font-medium"
+                    >
+                      NSFR
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -473,6 +524,9 @@ export function FR2052aValidation() {
             { key: 'rules', label: 'Validation Rules', icon: Database },
             { key: 'submissions', label: 'Submissions', icon: FileText },
             { key: 'errors', label: 'Error Details', icon: AlertTriangle },
+            { key: 'executions', label: 'Rule Executions', icon: CheckCircle },
+            { key: 'lcr', label: 'LCR Validation', icon: Calculator },
+            { key: 'nsfr', label: 'NSFR Validation', icon: BarChart3 },
           ].map(({ key, label, icon: Icon }) => (
             <button
               key={key}
@@ -494,6 +548,9 @@ export function FR2052aValidation() {
       {activeTab === 'rules' && renderRules()}
       {activeTab === 'submissions' && renderSubmissions()}
       {activeTab === 'errors' && renderErrors()}
+      {activeTab === 'lcr' && selectedSubmission && <LCRValidationScreen submissionId={selectedSubmission.id} />}
+      {activeTab === 'nsfr' && selectedSubmission && <NSFRValidationScreen submissionId={selectedSubmission.id} />}
+      {activeTab === 'executions' && selectedSubmission && <ValidationRuleExecutions submissionId={selectedSubmission.id} />}
     </div>
   );
 }
