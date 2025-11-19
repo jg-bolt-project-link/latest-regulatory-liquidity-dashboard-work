@@ -20,26 +20,26 @@ export async function seedFR2052aWithCalculations() {
   console.log('✓ fr2052a_data_rows table exists');
 
   const { error: lcrTestError } = await supabase
-    .from('fr2052a_lcr_metrics')
+    .from('lcr_metrics')
     .select('id')
     .limit(1);
 
   if (lcrTestError) {
-    console.error('❌ ERROR: fr2052a_lcr_metrics table not accessible:', lcrTestError);
-    return { success: false, error: `Table fr2052a_lcr_metrics error: ${lcrTestError.message}` };
+    console.error('❌ ERROR: lcr_metrics table not accessible:', lcrTestError);
+    return { success: false, error: `Table lcr_metrics error: ${lcrTestError.message}` };
   }
-  console.log('✓ fr2052a_lcr_metrics table exists');
+  console.log('✓ lcr_metrics table exists');
 
   const { error: nsfrTestError } = await supabase
-    .from('fr2052a_nsfr_metrics')
+    .from('nsfr_metrics')
     .select('id')
     .limit(1);
 
   if (nsfrTestError) {
-    console.error('❌ ERROR: fr2052a_nsfr_metrics table not accessible:', nsfrTestError);
-    return { success: false, error: `Table fr2052a_nsfr_metrics error: ${nsfrTestError.message}` };
+    console.error('❌ ERROR: nsfr_metrics table not accessible:', nsfrTestError);
+    return { success: false, error: `Table nsfr_metrics error: ${nsfrTestError.message}` };
   }
-  console.log('✓ fr2052a_nsfr_metrics table exists');
+  console.log('✓ nsfr_metrics table exists');
 
   console.log('Step 1: Fetching legal entities...');
   const entities = await supabase
@@ -164,9 +164,9 @@ export async function seedFR2052aWithCalculations() {
         fr2052a_record_count: dbRows.length
       };
 
-      console.log(`  Step 2c: Saving LCR metrics to fr2052a_lcr_metrics...`);
+      console.log(`  Step 2c: Saving LCR metrics to lcr_metrics...`);
       const { error: lcrError, data: lcrInserted } = await supabase
-        .from('fr2052a_lcr_metrics')
+        .from('lcr_metrics')
         .upsert(lcrData, {
           onConflict: 'legal_entity_id,report_date'
         })
@@ -204,9 +204,9 @@ export async function seedFR2052aWithCalculations() {
         fr2052a_record_count: dbRows.length
       };
 
-      console.log(`  Step 2d: Saving NSFR metrics to fr2052a_nsfr_metrics...`);
+      console.log(`  Step 2d: Saving NSFR metrics to nsfr_metrics...`);
       const { error: nsfrError, data: nsfrInserted } = await supabase
-        .from('fr2052a_nsfr_metrics')
+        .from('nsfr_metrics')
         .upsert(nsfrData, {
           onConflict: 'legal_entity_id,report_date'
         })

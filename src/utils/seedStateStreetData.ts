@@ -678,8 +678,8 @@ export async function seedDashboardData() {
 export async function seedStateStreetData() {
   try {
     await supabase.from('fr2052a_data_rows').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('fr2052a_lcr_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('fr2052a_nsfr_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('lcr_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    await supabase.from('nsfr_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     await supabase.from('data_lineage').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     await supabase.from('data_quality_checks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
     await supabase.from('data_feeds').delete().neq('id', '00000000-0000-0000-0000-000000000000');
