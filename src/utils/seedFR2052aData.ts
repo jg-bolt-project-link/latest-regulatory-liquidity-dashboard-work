@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { seedFR2052aWithCalculations } from './seedFR2052aWithCalculations';
 
 export async function seedFR2052aEnumerations() {
   const enumerations = [
@@ -220,6 +221,19 @@ export async function seedAllFR2052aData() {
 
   console.log('Seeding FR 2052a entities...');
   await seedFR2052aEntities();
+
+  console.log('Generating FR 2052a data rows with LCR/NSFR calculations...');
+  const result = await seedFR2052aWithCalculations();
+
+  if (result.success) {
+    console.log('✓ FR 2052a data generation complete!');
+    console.log(`  Total records: ${result.results?.totalRecords || 0}`);
+    console.log(`  Entities: ${result.results?.totalEntities || 0}`);
+    console.log(`  Report periods: ${result.results?.totalPeriods || 0}`);
+  } else {
+    console.error('✗ FR 2052a data generation failed:', result.error);
+    throw new Error(`FR 2052a data generation failed: ${result.error}`);
+  }
 
   console.log('FR 2052a data seeding complete!');
 }
