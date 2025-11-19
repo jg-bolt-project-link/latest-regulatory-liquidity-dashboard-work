@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import {
   LayoutDashboard,
@@ -51,7 +50,6 @@ interface DashboardExecutiveProps {
 }
 
 export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {}) {
-  const { user } = useAuth();
   const [metrics, setMetrics] = useState<DashboardMetrics>({
     totalAssets: 0,
     totalLiabilities: 0,
@@ -83,11 +81,9 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
 
   useEffect(() => {
     loadMetrics();
-  }, [user]);
+  }, []);
 
   const loadMetrics = async () => {
-    if (!user) return;
-
     const [
       accountsResult,
       transactionsResult,
@@ -102,59 +98,50 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
       supabase
         .from('accounts')
         .select('*')
-        .eq('user_id', user.id)
         .eq('is_active', true),
       supabase
         .from('transactions')
         .select('*')
-        .eq('user_id', user.id)
         .order('transaction_date', { ascending: false })
         .limit(100),
       supabase
         .from('lcr_metrics')
         .select('*')
-        .eq('user_id', user.id)
         .order('report_date', { ascending: false })
         .limit(1)
         .maybeSingle(),
       supabase
         .from('nsfr_metrics')
         .select('*')
-        .eq('user_id', user.id)
         .order('report_date', { ascending: false })
         .limit(1)
         .maybeSingle(),
       supabase
         .from('balance_sheet_metrics')
         .select('*')
-        .eq('user_id', user.id)
         .order('report_date', { ascending: false })
         .limit(1)
         .maybeSingle(),
       supabase
         .from('interest_rate_risk_metrics')
         .select('*')
-        .eq('user_id', user.id)
         .order('report_date', { ascending: false })
         .limit(1)
         .maybeSingle(),
       supabase
         .from('resolution_liquidity_metrics')
         .select('*')
-        .eq('user_id', user.id)
         .order('report_date', { ascending: false })
         .limit(1)
         .maybeSingle(),
       supabase
         .from('liquidity_stress_tests')
         .select('*')
-        .eq('user_id', user.id)
         .order('report_date', { ascending: false })
         .limit(10),
       supabase
         .from('interest_rate_risk_metrics')
         .select('*')
-        .eq('user_id', user.id)
         .order('report_date', { ascending: false })
         .limit(10),
     ]);
@@ -262,13 +249,12 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
   };
 
   const handleSeedData = async () => {
-    if (!user) return;
     setSeeding(true);
     try {
       const [dashboardResult, regulatoryResult, fr2052aResult] = await Promise.all([
-        seedDashboardData(user.id),
-        seedStateStreetData(user.id),
-        seedFR2052aWithCalculations(user.id)
+        seedDashboardData(),
+        seedStateStreetData(),
+        seedFR2052aWithCalculations()
       ]);
 
       if (dashboardResult.success && regulatoryResult.success && fr2052aResult.success) {
