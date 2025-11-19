@@ -41,12 +41,14 @@ export async function seedFR2052aWithCalculations() {
   }
   console.log('✓ nsfr_metrics table exists');
 
-  console.log('Step 1: Fetching legal entities (optimized query)...');
+  console.log('Step 1: Fetching legal entities (limit for performance)...');
+  const startFetch = Date.now();
   const { data: entities, error: entitiesError } = await supabase
     .from('legal_entities')
     .select('id, entity_name')
     .is('user_id', null)
-    .limit(50);  // Reasonable limit for performance
+    .limit(3);  // Reduced to 3 entities for faster generation
+  console.log(`  Fetch took ${Date.now() - startFetch}ms`);
 
   if (entitiesError) {
     console.error('ERROR fetching legal entities:', entitiesError);
@@ -63,11 +65,8 @@ export async function seedFR2052aWithCalculations() {
   const reportDates = [
     '2024-12-31',
     '2024-11-30',
-    '2024-10-31',
-    '2024-09-30',
-    '2024-08-31',
-    '2024-07-31'
-  ];
+    '2024-10-31'
+  ];  // Reduced to 3 periods for faster generation
 
   const results = {
     totalRecords: 0,
@@ -78,14 +77,16 @@ export async function seedFR2052aWithCalculations() {
   };
 
   for (const entity of entities) {
-    console.log(`Processing entity: ${entity.entity_name}`);
+    console.log(`\nProcessing entity ${results.totalEntities + 1}/${entities.length}: ${entity.entity_name}`);
     results.totalEntities++;
 
     for (const reportDate of reportDates) {
-      console.log(`  Generating data for ${reportDate}...`);
+      const periodNum = results.totalPeriods + 1;
+      console.log(`  Period ${periodNum}/$(entities.length * reportDates.length)}: Generating data for ${reportDate}...`);
+      const genStart = Date.now();
 
       const fr2052aData = generateComprehensiveFR2052aData(reportDate, entity.id);
-      console.log(`  Generated ${fr2052aData.length} FR 2052a line items`);
+      console.log(`  Generated ${fr2052aData.length} FR 2052a line items (${Date.now() - genStart}ms)`);
 
       const dbRows = fr2052aData.map(item => ({
         user_id: null,
@@ -115,44 +116,52 @@ export async function seedFR2052aWithCalculations() {
         internal_rating: item.internalRating || null
       }));
 
-      console.log(`  Step 2a: Inserting ${dbRows.length} rows to database in batches...`);
+      console.log(`  Step 2a: Inserting ${dbRows.length} rows to database...`);
+      const insertStart = Date.now();
 
-      // Insert in batches of 500 for better performance
-      const batchSize = 500;
+      // Insert in batches of 1000 for better performance
+      const batchSize = 1000;
       let totalInserted = 0;
+      const totalBatches = Math.ceil(dbRows.length / batchSize);
 
       for (let i = 0; i < dbRows.length; i += batchSize) {
+        const batchNum = Math.floor(i / batchSize) + 1;
         const batch = dbRows.slice(i, i + batchSize);
+        const batchStart = Date.now();
+
         const { error: batchError } = await supabase
           .from('fr2052a_data_rows')
           .insert(batch);
 
         if (batchError) {
-          console.error(`  ❌ ERROR inserting batch ${Math.floor(i / batchSize) + 1}:`, batchError);
+          console.error(`  ❌ ERROR inserting batch ${batchNum}/${totalBatches}:`, batchError);
           return { success: false, error: batchError.message };
         }
 
         totalInserted += batch.length;
-        if (i + batchSize < dbRows.length) {
-          console.log(`  ... inserted ${totalInserted} / ${dbRows.length} rows`);
+        const batchTime = Date.now() - batchStart;
+        const avgTime = (Date.now() - insertStart) / batchNum;
+        const remaining = (totalBatches - batchNum) * avgTime;
+
+        if (totalBatches > 1) {
+          console.log(`  ... batch ${batchNum}/${totalBatches} (${batch.length} rows in ${batchTime}ms, ~${Math.round(remaining/1000)}s remaining)`);
         }
       }
 
       const insertError = null;
       const insertedData = null;  // Don't need to return data
 
-      console.log(`  ✓ Successfully inserted ${totalInserted} rows`);
+      console.log(`  ✓ Successfully inserted ${totalInserted} rows (total time: ${Math.round((Date.now() - insertStart)/1000)}s)`);
       results.totalRecords += dbRows.length;
       results.totalPeriods++;
 
       console.log(`  Step 2b: Calculating LCR and NSFR...`);
+      const calcStart = Date.now();
       const engine = new FR2052aCalculationEngine(fr2052aData);
 
       const lcrResult = engine.calculateLCR();
-      console.log(`  ✓ LCR calculated: ${(lcrResult.lcrRatio * 100).toFixed(2)}%`);
-
       const nsfrResult = engine.calculateNSFR();
-      console.log(`  ✓ NSFR calculated: ${(nsfrResult.nsfrRatio * 100).toFixed(2)}%`);
+      console.log(`  ✓ LCR: ${(lcrResult.lcrRatio * 100).toFixed(2)}%, NSFR: ${(nsfrResult.nsfrRatio * 100).toFixed(2)}% (${Date.now() - calcStart}ms)`);
 
       const lcrData = {
         user_id: null,
@@ -168,22 +177,20 @@ export async function seedFR2052aWithCalculations() {
         notes: `FR2052a calculation - ${dbRows.length} records processed`
       };
 
-      console.log(`  Step 2c: Saving LCR metrics to lcr_metrics...`);
-      const { error: lcrError, data: lcrInserted } = await supabase
+      console.log(`  Step 2c: Saving metrics...`);
+      const saveStart = Date.now();
+
+      const { error: lcrError } = await supabase
         .from('lcr_metrics')
         .upsert(lcrData, {
           onConflict: 'legal_entity_id,report_date'
-        })
-        .select();
+        });
 
       if (lcrError) {
-        console.error(`  ❌ ERROR saving FR2052a-dependent LCR metrics:`, lcrError);
-        console.error(`  Error code: ${lcrError.code}, Details: ${lcrError.details}`);
-        console.error(`  LCR Data being inserted:`, JSON.stringify(lcrData, null, 2));
+        console.error(`  ❌ ERROR saving LCR metrics:`, lcrError);
         return { success: false, error: lcrError.message };
       }
 
-      console.log(`  ✓ LCR metrics saved (${lcrInserted?.length || 1} record)`);
       results.lcrCalculations.push(lcrResult);
 
       const nsfrData = {
@@ -199,22 +206,18 @@ export async function seedFR2052aWithCalculations() {
         notes: `FR2052a calculation - ${dbRows.length} records processed`
       };
 
-      console.log(`  Step 2d: Saving NSFR metrics to nsfr_metrics...`);
-      const { error: nsfrError, data: nsfrInserted } = await supabase
+      const { error: nsfrError } = await supabase
         .from('nsfr_metrics')
         .upsert(nsfrData, {
           onConflict: 'legal_entity_id,report_date'
-        })
-        .select();
+        });
 
       if (nsfrError) {
-        console.error(`  ❌ ERROR saving FR2052a-dependent NSFR metrics:`, nsfrError);
-        console.error(`  Error code: ${nsfrError.code}, Details: ${nsfrError.details}`);
-        console.error(`  NSFR Data being inserted:`, JSON.stringify(nsfrData, null, 2));
+        console.error(`  ❌ ERROR saving NSFR metrics:`, nsfrError);
         return { success: false, error: nsfrError.message };
       }
 
-      console.log(`  ✓ NSFR metrics saved (${nsfrInserted?.length || 1} record)`);
+      console.log(`  ✓ Metrics saved (${Date.now() - saveStart}ms)`);
       results.nsfrCalculations.push(nsfrResult);
     }
   }
