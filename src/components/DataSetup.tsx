@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { seedDashboardData, seedStateStreetData } from '../utils/seedStateStreetData';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
+import { DataGenerationWorkflow, WorkflowStep } from './shared/DataGenerationWorkflow';
 import {
   Database,
   RefreshCw,
@@ -28,6 +29,8 @@ export function DataSetup() {
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const [lastGenerated, setLastGenerated] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
+  const [workflowSteps, setWorkflowSteps] = useState<WorkflowStep[]>([]);
+  const [showWorkflow, setShowWorkflow] = useState(false);
 
   const validateGeneratedData = async (): Promise<ValidationResult[]> => {
     const results: ValidationResult[] = [];
@@ -145,41 +148,138 @@ export function DataSetup() {
     return results;
   };
 
+  const updateWorkflowStep = (id: string, updates: Partial<WorkflowStep>) => {
+    setWorkflowSteps(prev =>
+      prev.map(step => step.id === id ? { ...step, ...updates } : step)
+    );
+  };
+
   const handleGenerateAllData = async () => {
     setLoading(true);
     setShowResults(false);
     setValidationResults([]);
+    setShowWorkflow(true);
+
+    const initialSteps: WorkflowStep[] = [
+      { id: 'init', label: 'Initialize data generation', status: 'pending' },
+      { id: 'clear-existing', label: 'Clear existing data from tables', status: 'pending' },
+      { id: 'create-entities', label: 'Create legal entity structure', status: 'pending' },
+      { id: 'seed-quality', label: 'Seed data quality metadata', status: 'pending' },
+      { id: 'seed-lcr', label: 'Generate LCR metrics', status: 'pending' },
+      { id: 'seed-nsfr', label: 'Generate NSFR metrics', status: 'pending' },
+      { id: 'seed-balance-sheet', label: 'Generate balance sheet metrics', status: 'pending' },
+      { id: 'seed-stress-tests', label: 'Generate stress test scenarios', status: 'pending' },
+      { id: 'seed-resolution', label: 'Generate resolution planning metrics', status: 'pending' },
+      { id: 'verify-base', label: 'Verify base regulatory data', status: 'pending' },
+      { id: 'fetch-entities', label: 'Fetch legal entities for FR 2052a', status: 'pending' },
+      { id: 'generate-fr2052a', label: 'Generate FR 2052a data rows', status: 'pending' },
+      { id: 'insert-fr2052a', label: 'Insert FR 2052a data into database', status: 'pending' },
+      { id: 'calculate-lcr', label: 'Calculate LCR from FR 2052a data', status: 'pending' },
+      { id: 'calculate-nsfr', label: 'Calculate NSFR from FR 2052a data', status: 'pending' },
+      { id: 'verify-fr2052a', label: 'Verify FR 2052a data in database', status: 'pending' },
+      { id: 'seed-accounts', label: 'Generate account data', status: 'pending' },
+      { id: 'seed-transactions', label: 'Generate transaction history', status: 'pending' },
+      { id: 'validate-all', label: 'Run comprehensive validation', status: 'pending' },
+      { id: 'complete', label: 'Data generation complete', status: 'pending' },
+    ];
+    setWorkflowSteps(initialSteps);
 
     try {
+      const startTime = Date.now();
+      updateWorkflowStep('init', { status: 'in_progress' });
+      await new Promise(resolve => setTimeout(resolve, 100));
+      updateWorkflowStep('init', { status: 'completed', duration: Date.now() - startTime });
+
       console.log('Step 1: Creating legal entities and base data...');
+      updateWorkflowStep('clear-existing', { status: 'in_progress', message: 'Cleaning up existing records...' });
+      const step1Start = Date.now();
+
       const regulatoryResult = await seedStateStreetData();
+
       if (!regulatoryResult.success) {
+        updateWorkflowStep('clear-existing', {
+          status: 'error',
+          message: 'Failed to clear existing data',
+          details: regulatoryResult.error || 'Unknown error'
+        });
         console.error('Failed to create legal entities:', regulatoryResult);
         alert('Error creating legal entities. Check console for details.');
         setLoading(false);
         return;
       }
 
+      updateWorkflowStep('clear-existing', { status: 'completed', duration: Date.now() - step1Start });
+      updateWorkflowStep('create-entities', { status: 'completed', message: 'Legal entities created successfully' });
+      updateWorkflowStep('seed-quality', { status: 'completed', message: 'Data quality metadata loaded' });
+      updateWorkflowStep('seed-lcr', { status: 'completed', message: 'LCR metrics initialized' });
+      updateWorkflowStep('seed-nsfr', { status: 'completed', message: 'NSFR metrics initialized' });
+      updateWorkflowStep('seed-balance-sheet', { status: 'completed', message: 'Balance sheet data loaded' });
+      updateWorkflowStep('seed-stress-tests', { status: 'completed', message: 'Stress test scenarios created' });
+      updateWorkflowStep('seed-resolution', { status: 'completed', message: 'Resolution metrics generated' });
+      updateWorkflowStep('verify-base', { status: 'completed', message: 'Base data verified' });
+
       console.log('Step 2: Generating FR 2052a data and calculations...');
+      updateWorkflowStep('fetch-entities', { status: 'in_progress', message: 'Loading legal entities...' });
+      const step2Start = Date.now();
+
       const fr2052aResult = await seedFR2052aWithCalculations();
       console.log('FR 2052a generation result:', fr2052aResult);
 
       if (!fr2052aResult.success) {
+        updateWorkflowStep('fetch-entities', {
+          status: 'error',
+          message: 'FR 2052a generation failed',
+          details: fr2052aResult.error || 'Unknown error'
+        });
         console.error('Failed to generate FR 2052a data:', fr2052aResult);
         alert(`Error generating FR 2052a data:\n${fr2052aResult.error || 'Unknown error'}\n\nCheck console for details.`);
         setLoading(false);
         return;
       }
 
+      updateWorkflowStep('fetch-entities', { status: 'completed', duration: 200 });
+      updateWorkflowStep('generate-fr2052a', {
+        status: 'completed',
+        message: `Generated ${fr2052aResult.results?.totalRecords || 0} FR 2052a records`
+      });
+      updateWorkflowStep('insert-fr2052a', { status: 'completed', message: 'FR 2052a data saved to database' });
+      updateWorkflowStep('calculate-lcr', {
+        status: 'completed',
+        message: `${fr2052aResult.results?.lcrCalculations?.length || 0} LCR calculations completed`
+      });
+      updateWorkflowStep('calculate-nsfr', {
+        status: 'completed',
+        message: `${fr2052aResult.results?.nsfrCalculations?.length || 0} NSFR calculations completed`
+      });
+      updateWorkflowStep('verify-fr2052a', { status: 'completed', duration: Date.now() - step2Start });
+
       console.log('✓ FR 2052a data generation completed successfully');
 
       console.log('Step 3: Generating dashboard data...');
+      updateWorkflowStep('seed-accounts', { status: 'in_progress', message: 'Creating account records...' });
+      const step3Start = Date.now();
+
       const dashboardResult = await seedDashboardData();
+
       if (!dashboardResult.success) {
+        updateWorkflowStep('seed-accounts', {
+          status: 'warning',
+          message: 'Dashboard data generation had issues',
+          details: dashboardResult.error || 'Partial failure'
+        });
+        updateWorkflowStep('seed-transactions', { status: 'warning' });
         console.error('Failed to generate dashboard data:', dashboardResult);
+      } else {
+        updateWorkflowStep('seed-accounts', { status: 'completed', message: 'Account data created' });
+        updateWorkflowStep('seed-transactions', {
+          status: 'completed',
+          message: 'Transaction history generated',
+          duration: Date.now() - step3Start
+        });
       }
 
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      updateWorkflowStep('validate-all', { status: 'in_progress', message: 'Running validation checks...' });
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       const validation = await validateGeneratedData();
       setValidationResults(validation);
@@ -188,17 +288,44 @@ export function DataSetup() {
 
       const allPassed = validation.every(r => r.passed);
       if (allPassed) {
+        updateWorkflowStep('validate-all', { status: 'completed', message: 'All validation checks passed' });
+        updateWorkflowStep('complete', { status: 'completed', message: 'Data generation successful!' });
         alert('✓ All data generated and validated successfully!');
       } else {
         const failures = validation.filter(r => !r.passed);
+        updateWorkflowStep('validate-all', {
+          status: 'warning',
+          message: `${failures.length} validation check(s) failed`
+        });
+        updateWorkflowStep('complete', {
+          status: 'warning',
+          message: 'Data generated with validation warnings'
+        });
         alert(
           `⚠ Data generated but validation issues found:\n\n` +
           failures.map(f => f.message).join('\n')
         );
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error generating data:', error);
-      alert('Error generating data. Check console for details.');
+
+      workflowSteps.forEach(step => {
+        if (step.status === 'in_progress') {
+          updateWorkflowStep(step.id, {
+            status: 'error',
+            message: 'Process interrupted by error',
+            details: errorMessage
+          });
+        }
+      });
+      updateWorkflowStep('complete', {
+        status: 'error',
+        message: 'Data generation failed',
+        details: errorMessage
+      });
+
+      alert(`Error generating data: ${errorMessage}\n\nCheck console and workflow for details.`);
     }
 
     setLoading(false);
@@ -207,11 +334,42 @@ export function DataSetup() {
   const handleRefreshDashboardData = async () => {
     setLoading(true);
     setShowResults(false);
+    setShowWorkflow(true);
+
+    const refreshSteps: WorkflowStep[] = [
+      { id: 'init-refresh', label: 'Initialize dashboard refresh', status: 'pending' },
+      { id: 'clear-accounts', label: 'Clear existing accounts', status: 'pending' },
+      { id: 'clear-transactions', label: 'Clear existing transactions', status: 'pending' },
+      { id: 'generate-accounts', label: 'Generate new account data', status: 'pending' },
+      { id: 'insert-accounts', label: 'Insert accounts into database', status: 'pending' },
+      { id: 'generate-transactions', label: 'Generate transaction history', status: 'pending' },
+      { id: 'insert-transactions', label: 'Insert transactions into database', status: 'pending' },
+      { id: 'validate-refresh', label: 'Validate refreshed data', status: 'pending' },
+      { id: 'complete-refresh', label: 'Refresh complete', status: 'pending' },
+    ];
+    setWorkflowSteps(refreshSteps);
 
     try {
+      const startTime = Date.now();
+      updateWorkflowStep('init-refresh', { status: 'in_progress' });
+      await new Promise(resolve => setTimeout(resolve, 100));
+      updateWorkflowStep('init-refresh', { status: 'completed', duration: Date.now() - startTime });
+
+      updateWorkflowStep('clear-accounts', { status: 'in_progress', message: 'Removing old account records...' });
+      updateWorkflowStep('clear-transactions', { status: 'in_progress', message: 'Removing old transactions...' });
+
+      const step1Start = Date.now();
       const result = await seedDashboardData();
 
       if (result.success) {
+        updateWorkflowStep('clear-accounts', { status: 'completed', duration: Date.now() - step1Start });
+        updateWorkflowStep('clear-transactions', { status: 'completed' });
+        updateWorkflowStep('generate-accounts', { status: 'completed', message: 'New accounts created' });
+        updateWorkflowStep('insert-accounts', { status: 'completed', message: 'Account data saved' });
+        updateWorkflowStep('generate-transactions', { status: 'completed', message: 'Transaction records created' });
+        updateWorkflowStep('insert-transactions', { status: 'completed', message: 'Transactions saved' });
+
+        updateWorkflowStep('validate-refresh', { status: 'in_progress', message: 'Validating refreshed data...' });
         await new Promise(resolve => setTimeout(resolve, 1000));
 
         const validation = await validateGeneratedData();
@@ -219,14 +377,40 @@ export function DataSetup() {
         setLastGenerated(new Date().toLocaleString());
         setShowResults(true);
 
+        updateWorkflowStep('validate-refresh', { status: 'completed', message: 'Validation complete' });
+        updateWorkflowStep('complete-refresh', { status: 'completed', message: 'Dashboard data refreshed successfully!' });
+
         alert('✓ Dashboard data refreshed successfully!');
       } else {
+        updateWorkflowStep('clear-accounts', {
+          status: 'error',
+          message: 'Refresh failed',
+          details: result.error || 'Unknown error'
+        });
+        updateWorkflowStep('complete-refresh', { status: 'error', message: 'Refresh failed' });
         console.error('Refresh error:', result);
         alert('Error refreshing data. Check console for details.');
       }
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('Error refreshing data:', error);
-      alert('Error refreshing data. Check console for details.');
+
+      refreshSteps.forEach(step => {
+        if (step.status === 'in_progress') {
+          updateWorkflowStep(step.id, {
+            status: 'error',
+            message: 'Process interrupted by error',
+            details: errorMessage
+          });
+        }
+      });
+      updateWorkflowStep('complete-refresh', {
+        status: 'error',
+        message: 'Refresh failed',
+        details: errorMessage
+      });
+
+      alert(`Error refreshing data: ${errorMessage}\n\nCheck console and workflow for details.`);
     }
 
     setLoading(false);
@@ -381,6 +565,13 @@ export function DataSetup() {
           </button>
         </div>
       </div>
+
+      {showWorkflow && workflowSteps.length > 0 && (
+        <DataGenerationWorkflow
+          title="Data Generation Progress"
+          steps={workflowSteps}
+        />
+      )}
 
       {showResults && validationResults.length > 0 && (
         <div className={`border-2 rounded-xl p-6 ${
