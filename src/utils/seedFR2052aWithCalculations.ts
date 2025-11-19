@@ -41,22 +41,24 @@ export async function seedFR2052aWithCalculations() {
   }
   console.log('✓ nsfr_metrics table exists');
 
-  console.log('Step 1: Fetching legal entities...');
-  const entities = await supabase
+  console.log('Step 1: Fetching legal entities (optimized query)...');
+  const { data: entities, error: entitiesError } = await supabase
     .from('legal_entities')
-    .select('id, entity_name');
+    .select('id, entity_name')
+    .is('user_id', null)
+    .limit(50);  // Reasonable limit for performance
 
-  if (entities.error) {
-    console.error('ERROR fetching legal entities:', entities.error);
-    return { success: false, error: entities.error.message };
+  if (entitiesError) {
+    console.error('ERROR fetching legal entities:', entitiesError);
+    return { success: false, error: entitiesError.message };
   }
 
-  if (!entities.data || entities.data.length === 0) {
+  if (!entities || entities.length === 0) {
     console.error('No legal entities found. Please create entities first.');
     return { success: false, error: 'No legal entities found' };
   }
 
-  console.log(`✓ Found ${entities.data.length} legal entities:`, entities.data.map(e => e.entity_name));
+  console.log(`✓ Found ${entities.length} legal entities:`, entities.map(e => e.entity_name));
 
   const reportDates = [
     '2024-12-31',
@@ -113,20 +115,33 @@ export async function seedFR2052aWithCalculations() {
         internal_rating: item.internalRating || null
       }));
 
-      console.log(`  Step 2a: Inserting ${dbRows.length} rows to database...`);
-      const { error: insertError, data: insertedData } = await supabase
-        .from('fr2052a_data_rows')
-        .insert(dbRows)
-        .select();
+      console.log(`  Step 2a: Inserting ${dbRows.length} rows to database in batches...`);
 
-      if (insertError) {
-        console.error(`  ❌ ERROR inserting FR 2052a data for ${reportDate}:`, insertError);
-        console.error(`  Error code: ${insertError.code}, Details: ${insertError.details}`);
-        console.error(`  Sample row being inserted:`, JSON.stringify(dbRows[0], null, 2));
-        return { success: false, error: insertError.message };
+      // Insert in batches of 500 for better performance
+      const batchSize = 500;
+      let totalInserted = 0;
+
+      for (let i = 0; i < dbRows.length; i += batchSize) {
+        const batch = dbRows.slice(i, i + batchSize);
+        const { error: batchError } = await supabase
+          .from('fr2052a_data_rows')
+          .insert(batch);
+
+        if (batchError) {
+          console.error(`  ❌ ERROR inserting batch ${Math.floor(i / batchSize) + 1}:`, batchError);
+          return { success: false, error: batchError.message };
+        }
+
+        totalInserted += batch.length;
+        if (i + batchSize < dbRows.length) {
+          console.log(`  ... inserted ${totalInserted} / ${dbRows.length} rows`);
+        }
       }
 
-      console.log(`  ✓ Successfully inserted ${insertedData?.length || dbRows.length} rows`);
+      const insertError = null;
+      const insertedData = null;  // Don't need to return data
+
+      console.log(`  ✓ Successfully inserted ${totalInserted} rows`);
       results.totalRecords += dbRows.length;
       results.totalPeriods++;
 
@@ -212,39 +227,51 @@ export async function seedFR2052aWithCalculations() {
   console.log(`NSFR Calculations: ${results.nsfrCalculations.length}`);
   console.log('================================================\n');
 
-  console.log('Step 3: Verifying data was saved to database...');
-  const { count: fr2052aCount } = await supabase
+  console.log('Step 3: Quick verification (spot check)...');
+
+  // Instead of counting all rows, just verify some recent data exists
+  const { data: sampleFR2052a, error: fr2052aError } = await supabase
     .from('fr2052a_data_rows')
-    .select('*', { count: 'exact', head: true })
-    .is('user_id', null);
+    .select('id')
+    .is('user_id', null)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  const { count: lcrCount } = await supabase
+  const { data: sampleLCR, error: lcrError } = await supabase
     .from('lcr_metrics')
-    .select('*', { count: 'exact', head: true })
-    .is('user_id', null);
+    .select('id')
+    .is('user_id', null)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  const { count: nsfrCount } = await supabase
+  const { data: sampleNSFR, error: nsfrError } = await supabase
     .from('nsfr_metrics')
-    .select('*', { count: 'exact', head: true })
-    .is('user_id', null);
+    .select('id')
+    .is('user_id', null)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
 
-  console.log('\n=== Database Verification ===');
-  console.log(`✓ FR 2052a rows in database: ${fr2052aCount || 0}`);
-  console.log(`✓ LCR metrics in database: ${lcrCount || 0}`);
-  console.log(`✓ NSFR metrics in database: ${nsfrCount || 0}`);
-  console.log('============================\n');
+  console.log('\n=== Quick Verification ===');
+  console.log(`✓ FR 2052a data exists: ${sampleFR2052a ? 'YES' : 'NO'}`);
+  console.log(`✓ LCR metrics exist: ${sampleLCR ? 'YES' : 'NO'}`);
+  console.log(`✓ NSFR metrics exist: ${sampleNSFR ? 'YES' : 'NO'}`);
+  console.log(`Expected records: ~${results.totalRecords}`);
+  console.log('==========================\n');
 
-  if (!fr2052aCount || fr2052aCount === 0) {
+  if (!sampleFR2052a) {
     console.error('❌ WARNING: No FR 2052a data found in database after generation!');
     return { success: false, error: 'Data generation failed - no records in database' };
   }
 
-  if (!lcrCount || lcrCount === 0) {
+  if (!sampleLCR) {
     console.error('❌ WARNING: No LCR metrics found in database after generation!');
     return { success: false, error: 'LCR calculation failed - no records in database' };
   }
 
-  if (!nsfrCount || nsfrCount === 0) {
+  if (!sampleNSFR) {
     console.error('❌ WARNING: No NSFR metrics found in database after generation!');
     return { success: false, error: 'NSFR calculation failed - no records in database' };
   }
