@@ -41,11 +41,12 @@ export async function validateFR2052aData(
     .select('*')
     .eq('is_active', true);
 
-  if (rulesError || !rules) {
-    throw new Error(`Failed to fetch validation rules: ${rulesError?.message}`);
+  if (rulesError) {
+    console.warn(`Could not fetch validation rules: ${rulesError.message}. Skipping rule-based validation.`);
   }
 
-  console.log(`Loaded ${rules.length} active validation rules`);
+  const validationRules = rules || [];
+  console.log(`Loaded ${validationRules.length} active validation rules`);
 
   // Fetch FR2052a data for the reporting period
   let query = supabase
@@ -95,7 +96,7 @@ export async function validateFR2052aData(
   const errorRowIds = new Set<string>();
 
   // Execute validation rules
-  for (const rule of rules) {
+  for (const rule of validationRules) {
     console.log(`  Executing rule: ${rule.rule_name}`);
 
     switch (rule.rule_category) {

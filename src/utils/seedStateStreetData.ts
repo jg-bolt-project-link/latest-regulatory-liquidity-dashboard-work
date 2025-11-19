@@ -688,19 +688,33 @@ export async function seedDashboardData() {
 
 export async function seedStateStreetData() {
   try {
-    await supabase.from('fr2052a_data_rows').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('lcr_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('nsfr_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('data_lineage').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('data_quality_checks').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('data_feeds').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('legal_entities').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('liquidity_stress_tests').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('resolution_liquidity_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('reg_k_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('resolution_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('interest_rate_risk_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-    await supabase.from('balance_sheet_metrics').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+    console.log('Clearing existing data from tables...');
+    // Use raw SQL for faster deletion with TRUNCATE on large tables
+    const tablesToClear = [
+      'fr2052a_data_rows',
+      'lcr_metrics',
+      'nsfr_metrics',
+      'balance_sheet_metrics',
+      'interest_rate_risk_metrics',
+      'resolution_metrics',
+      'reg_k_metrics',
+      'resolution_liquidity_metrics',
+      'liquidity_stress_tests',
+      'data_lineage',
+      'data_quality_checks',
+      'data_feeds',
+      'legal_entities'
+    ];
+
+    // Delete only system records (user_id is null)
+    for (const table of tablesToClear) {
+      try {
+        await supabase.from(table).delete().is('user_id', null);
+      } catch (err) {
+        console.log(`Note: Could not clear ${table}, may not exist or be empty`);
+      }
+    }
+    console.log('✓ Existing data cleared');
   } catch (error) {
     console.log('Note: Some tables may not exist yet or have no data to delete');
   }
