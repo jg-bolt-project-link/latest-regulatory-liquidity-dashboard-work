@@ -20,12 +20,24 @@ interface ValidationError {
   severity: 'error' | 'warning' | 'info';
 }
 
+interface RuleExecution {
+  ruleId: string;
+  ruleName: string;
+  category: string;
+  rowsChecked: number;
+  rowsPassed: number;
+  rowsFailed: number;
+  executionTimeMs: number;
+  notes?: string;
+}
+
 interface ValidationResult {
   submissionId: string;
   totalRows: number;
   validRows: number;
   errorRows: number;
   errors: ValidationError[];
+  ruleExecutions: RuleExecution[];
   passed: boolean;
 }
 
@@ -68,37 +80,54 @@ export async function validateFR2052aData(
 
   console.log(`Validating ${dataRows.length} data rows...`);
 
-  // Create submission record
-  const { data: submission, error: submissionError } = await supabase
+  // Look for existing submission record (created by data generation)
+  const { data: existingSubmissions } = await supabase
     .from('fr2052a_submissions')
-    .insert({
-      user_id: null,
-      submission_date: new Date().toISOString().split('T')[0],
-      reporting_period: reportingPeriod,
-      submission_type: 'automated_validation',
-      legal_entity_id: legalEntityId || 'all_entities',
-      total_hqla: 0,
-      total_outflows: 0,
-      total_inflows: 0,
-      net_cash_outflow: 0,
-      lcr_ratio: 0,
-      is_submitted: false,
-      submission_status: 'validating',
-      notes: `Automated validation run for ${reportingPeriod}`
-    })
-    .select()
-    .single();
+    .select('*')
+    .eq('reporting_period', reportingPeriod)
+    .is('user_id', null)
+    .order('created_at', { ascending: false })
+    .limit(1);
 
-  if (submissionError || !submission) {
-    throw new Error(`Failed to create submission: ${submissionError?.message}`);
+  let submission = existingSubmissions?.[0];
+
+  // Create submission only if it doesn't exist
+  if (!submission) {
+    const { data: newSubmission, error: submissionError } = await supabase
+      .from('fr2052a_submissions')
+      .insert({
+        user_id: null,
+        submission_date: new Date().toISOString().split('T')[0],
+        reporting_period: reportingPeriod,
+        submission_type: 'automated_validation',
+        legal_entity_id: legalEntityId || 'all_entities',
+        total_hqla: 0,
+        total_outflows: 0,
+        total_inflows: 0,
+        net_cash_outflow: 0,
+        lcr_ratio: 0,
+        is_submitted: false,
+        submission_status: 'validating',
+        notes: `Automated validation run for ${reportingPeriod}`
+      })
+      .select()
+      .maybeSingle();
+
+    if (submissionError || !newSubmission) {
+      throw new Error(`Failed to create submission: ${submissionError?.message}`);
+    }
+    submission = newSubmission;
   }
 
   const errors: ValidationError[] = [];
   const errorRowIds = new Set<string>();
+  const ruleExecutions: RuleExecution[] = [];
 
   // Execute validation rules
   for (const rule of validationRules) {
     console.log(`  Executing rule: ${rule.rule_name}`);
+    const ruleStartTime = Date.now();
+    const errorsBefore = errors.length;
 
     switch (rule.rule_category) {
       case 'enumeration':
@@ -128,6 +157,22 @@ export async function validateFR2052aData(
       default:
         console.log(`    Skipping rule category: ${rule.rule_category} (not implemented)`);
     }
+
+    // Track rule execution
+    const executionTime = Date.now() - ruleStartTime;
+    const errorsAfter = errors.length;
+    const errorCount = errorsAfter - errorsBefore;
+
+    ruleExecutions.push({
+      ruleId: rule.id,
+      ruleName: rule.rule_name,
+      category: rule.rule_category,
+      rowsChecked: dataRows.length,
+      rowsPassed: dataRows.length - errorCount,
+      rowsFailed: errorCount,
+      executionTimeMs: executionTime,
+      notes: errorCount > 0 ? `Found ${errorCount} validation errors` : 'All rows passed'
+    });
   }
 
   console.log(`Validation complete: ${errors.length} errors found`);
@@ -162,6 +207,7 @@ export async function validateFR2052aData(
     validRows,
     errorRows,
     errors,
+    ruleExecutions,
     passed
   };
 }

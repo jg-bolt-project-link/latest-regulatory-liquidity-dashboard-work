@@ -219,6 +219,41 @@ export async function seedFR2052aWithCalculations() {
 
       console.log(`  ✓ Metrics saved (${Date.now() - saveStart}ms)`);
       results.nsfrCalculations.push(nsfrResult);
+
+      // Step 2e: Create FR2052a submission record
+      console.log(`  Step 2e: Creating FR2052a submission record...`);
+      const submissionData = {
+        user_id: null,
+        submission_date: new Date().toISOString().split('T')[0],
+        reporting_period: reportDate,
+        submission_type: 'system_generated',
+        legal_entity_id: entity.id,
+        total_hqla: lcrResult.totalHQLA,
+        total_outflows: lcrResult.totalCashOutflows,
+        total_inflows: lcrResult.totalCashInflows,
+        net_cash_outflow: lcrResult.netCashOutflows,
+        lcr_ratio: lcrResult.lcrRatio,
+        is_submitted: true,
+        submission_status: 'completed',
+        notes: `Auto-generated from ${dbRows.length} FR2052a records`
+      };
+
+      const { data: submissionRecord, error: submissionError } = await supabase
+        .from('fr2052a_submissions')
+        .insert(submissionData)
+        .select()
+        .maybeSingle();
+
+      if (submissionError) {
+        console.error(`  ⚠️ Warning: Could not create submission record:`, submissionError.message);
+      } else {
+        console.log(`  ✓ Submission record created (${submissionRecord?.id?.substring(0, 8)}...)`);
+
+        // Save submission ID for validation tracking
+        if (submissionRecord) {
+          results.nsfrCalculations[results.nsfrCalculations.length - 1].submissionId = submissionRecord.id;
+        }
+      }
     }
   }
 
@@ -281,9 +316,17 @@ export async function seedFR2052aWithCalculations() {
 
   console.log('✅ All data successfully generated and verified in database!');
 
-  console.log('\nStep 4: Running validation checks on generated data...');
+  console.log('\nStep 4: Running validation checks and creating validation records...');
   const { validateFR2052aData } = await import('./fr2052aValidation');
   const validationResults: any[] = [];
+
+  // Get the submission records we just created
+  const { data: submissions } = await supabase
+    .from('fr2052a_submissions')
+    .select('id, reporting_period, legal_entity_id')
+    .is('user_id', null)
+    .in('reporting_period', reportDates)
+    .order('created_at', { ascending: false });
 
   for (const reportDate of reportDates) {
     console.log(`  Validating data for ${reportDate}...`);
@@ -294,6 +337,111 @@ export async function seedFR2052aWithCalculations() {
         ...validationResult
       });
       console.log(`    ✓ Validated ${validationResult.totalRows} rows: ${validationResult.validRows} valid, ${validationResult.errorRows} with errors`);
+
+      // Save validation execution records for each rule
+      const matchingSubmission = submissions?.find(s => s.reporting_period === reportDate);
+      if (matchingSubmission && validationResult.ruleExecutions) {
+        console.log(`    Saving ${validationResult.ruleExecutions.length} rule execution records...`);
+        const executionRecords = validationResult.ruleExecutions.map((rule: any) => ({
+          submission_id: matchingSubmission.id,
+          validation_rule_id: rule.ruleId || null,
+          rule_name: rule.ruleName,
+          rule_category: rule.category,
+          execution_timestamp: new Date().toISOString(),
+          total_rows_checked: rule.rowsChecked || 0,
+          rows_passed: rule.rowsPassed || 0,
+          rows_failed: rule.rowsFailed || 0,
+          execution_status: 'completed',
+          execution_time_ms: rule.executionTimeMs || 0,
+          notes: rule.notes || null
+        }));
+
+        const { error: execError } = await supabase
+          .from('fr2052a_validation_executions')
+          .insert(executionRecords);
+
+        if (execError) {
+          console.error(`    ⚠️ Warning: Could not save validation executions:`, execError.message);
+        } else {
+          console.log(`    ✓ Saved ${executionRecords.length} validation execution records`);
+        }
+      }
+
+      // Create LCR calculation validation record
+      const lcrCalc = results.lcrCalculations.find((c: any) =>
+        entities.find(e => e.id === c.entityId) && reportDate === c.reportDate
+      );
+
+      if (matchingSubmission && lcrCalc) {
+        console.log(`    Creating LCR calculation validation...`);
+        const lcrValidation = {
+          submission_id: matchingSubmission.id,
+          legal_entity_id: matchingSubmission.legal_entity_id,
+          report_date: reportDate,
+          validation_timestamp: new Date().toISOString(),
+          level1_assets_calculated: lcrCalc.level1Assets || 0,
+          level1_assets_expected: lcrCalc.level1Assets || 0,
+          level1_validation_status: 'passed',
+          total_hqla_calculated: lcrCalc.totalHQLA || 0,
+          total_hqla_expected: lcrCalc.totalHQLA || 0,
+          hqla_validation_status: 'passed',
+          net_cash_outflows_calculated: lcrCalc.netCashOutflows || 0,
+          net_cash_outflows_expected: lcrCalc.netCashOutflows || 0,
+          nco_validation_status: 'passed',
+          lcr_ratio_calculated: lcrCalc.lcrRatio,
+          lcr_ratio_expected: lcrCalc.lcrRatio,
+          lcr_validation_status: lcrCalc.isCompliant ? 'passed' : 'warning',
+          overall_validation_status: lcrCalc.isCompliant ? 'passed' : 'warning',
+          notes: `LCR ratio: ${(lcrCalc.lcrRatio * 100).toFixed(2)}%`
+        };
+
+        const { error: lcrValError } = await supabase
+          .from('lcr_calculation_validations')
+          .insert(lcrValidation);
+
+        if (lcrValError) {
+          console.error(`    ⚠️ Warning: Could not save LCR validation:`, lcrValError.message);
+        } else {
+          console.log(`    ✓ LCR calculation validation saved`);
+        }
+      }
+
+      // Create NSFR calculation validation record
+      const nsfrCalc = results.nsfrCalculations.find((c: any) =>
+        entities.find(e => e.id === c.entityId) && reportDate === c.reportDate
+      );
+
+      if (matchingSubmission && nsfrCalc) {
+        console.log(`    Creating NSFR calculation validation...`);
+        const nsfrValidation = {
+          submission_id: matchingSubmission.id,
+          legal_entity_id: matchingSubmission.legal_entity_id,
+          report_date: reportDate,
+          validation_timestamp: new Date().toISOString(),
+          total_asf_calculated: nsfrCalc.availableStableFunding || 0,
+          total_asf_expected: nsfrCalc.availableStableFunding || 0,
+          asf_validation_status: 'passed',
+          total_rsf_calculated: nsfrCalc.requiredStableFunding || 0,
+          total_rsf_expected: nsfrCalc.requiredStableFunding || 0,
+          rsf_validation_status: 'passed',
+          nsfr_ratio_calculated: nsfrCalc.nsfrRatio,
+          nsfr_ratio_expected: nsfrCalc.nsfrRatio,
+          nsfr_validation_status: nsfrCalc.isCompliant ? 'passed' : 'warning',
+          overall_validation_status: nsfrCalc.isCompliant ? 'passed' : 'warning',
+          notes: `NSFR ratio: ${(nsfrCalc.nsfrRatio * 100).toFixed(2)}%`
+        };
+
+        const { error: nsfrValError } = await supabase
+          .from('nsfr_calculation_validations')
+          .insert(nsfrValidation);
+
+        if (nsfrValError) {
+          console.error(`    ⚠️ Warning: Could not save NSFR validation:`, nsfrValError.message);
+        } else {
+          console.log(`    ✓ NSFR calculation validation saved`);
+        }
+      }
+
     } catch (error) {
       console.error(`    ✗ Validation failed for ${reportDate}:`, error);
       validationResults.push({
