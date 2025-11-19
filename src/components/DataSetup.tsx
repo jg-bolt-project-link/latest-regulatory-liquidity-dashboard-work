@@ -50,7 +50,7 @@ export function DataSetup() {
     });
 
     const { count: lcrCount } = await supabase
-      .from('fr2052a_lcr_metrics')
+      .from('lcr_metrics')
       .select('*', { count: 'exact', head: true })
       .is('user_id', null);
 
@@ -65,7 +65,7 @@ export function DataSetup() {
     });
 
     const { count: nsfrCount } = await supabase
-      .from('fr2052a_nsfr_metrics')
+      .from('nsfr_metrics')
       .select('*', { count: 'exact', head: true })
       .is('user_id', null);
 
@@ -110,7 +110,7 @@ export function DataSetup() {
     });
 
     const { data: lcrData } = await supabase
-      .from('fr2052a_lcr_metrics')
+      .from('lcr_metrics')
       .select('lcr_ratio')
       .is('user_id', null)
       .order('report_date', { ascending: false })
@@ -128,7 +128,7 @@ export function DataSetup() {
     });
 
     const { data: nsfrData } = await supabase
-      .from('fr2052a_nsfr_metrics')
+      .from('nsfr_metrics')
       .select('nsfr_ratio')
       .is('user_id', null)
       .order('report_date', { ascending: false })
@@ -197,10 +197,13 @@ export function DataSetup() {
       const regulatoryResult = await seedStateStreetData();
 
       if (!regulatoryResult.success) {
+        const errorDetails = typeof regulatoryResult.error === 'string'
+          ? regulatoryResult.error
+          : regulatoryResult.error?.message || JSON.stringify(regulatoryResult.error) || 'Unknown error';
         updateWorkflowStep('clear-existing', {
           status: 'error',
           message: 'Failed to clear existing data',
-          details: regulatoryResult.error || 'Unknown error'
+          details: errorDetails
         });
         console.error('Failed to create legal entities:', regulatoryResult);
         alert('Error creating legal entities. Check console for details.');
@@ -226,10 +229,13 @@ export function DataSetup() {
       console.log('FR 2052a generation result:', fr2052aResult);
 
       if (!fr2052aResult.success) {
+        const errorDetails = typeof fr2052aResult.error === 'string'
+          ? fr2052aResult.error
+          : fr2052aResult.error?.message || JSON.stringify(fr2052aResult.error) || 'Unknown error';
         updateWorkflowStep('fetch-entities', {
           status: 'error',
           message: 'FR 2052a generation failed',
-          details: fr2052aResult.error || 'Unknown error'
+          details: errorDetails
         });
         console.error('Failed to generate FR 2052a data:', fr2052aResult);
         alert(`Error generating FR 2052a data:\n${fr2052aResult.error || 'Unknown error'}\n\nCheck console for details.`);
@@ -262,10 +268,13 @@ export function DataSetup() {
       const dashboardResult = await seedDashboardData();
 
       if (!dashboardResult.success) {
+        const errorDetails = typeof dashboardResult.error === 'string'
+          ? dashboardResult.error
+          : dashboardResult.error?.message || JSON.stringify(dashboardResult.error) || 'Partial failure';
         updateWorkflowStep('seed-accounts', {
           status: 'warning',
           message: 'Dashboard data generation had issues',
-          details: dashboardResult.error || 'Partial failure'
+          details: errorDetails
         });
         updateWorkflowStep('seed-transactions', { status: 'warning' });
         console.error('Failed to generate dashboard data:', dashboardResult);
@@ -382,10 +391,13 @@ export function DataSetup() {
 
         alert('✓ Dashboard data refreshed successfully!');
       } else {
+        const errorDetails = typeof result.error === 'string'
+          ? result.error
+          : result.error?.message || JSON.stringify(result.error) || 'Unknown error';
         updateWorkflowStep('clear-accounts', {
           status: 'error',
           message: 'Refresh failed',
-          details: result.error || 'Unknown error'
+          details: errorDetails
         });
         updateWorkflowStep('complete-refresh', { status: 'error', message: 'Refresh failed' });
         console.error('Refresh error:', result);
