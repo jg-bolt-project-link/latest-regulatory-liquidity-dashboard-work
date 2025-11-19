@@ -77,7 +77,7 @@ export async function seedFR2052aWithCalculations() {
     nsfrCalculations: [] as any[]
   };
 
-  for (const entity of entities.data) {
+  for (const entity of entities) {
     console.log(`Processing entity: ${entity.entity_name}`);
     results.totalEntities++;
 

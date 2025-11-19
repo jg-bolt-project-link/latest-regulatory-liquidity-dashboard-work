@@ -64,11 +64,15 @@ export function MainApp() {
     const initializeData = async () => {
       if (hasInitialized || isInitializing) return;
 
-      const { count } = await supabase
+      // Quick check if data exists (avoid full count)
+      const { data: sampleData } = await supabase
         .from('fr2052a_data_rows')
-        .select('*', { count: 'exact', head: true });
+        .select('id')
+        .is('user_id', null)
+        .limit(1)
+        .maybeSingle();
 
-      if (!count || count === 0) {
+      if (!sampleData) {
         console.log('No FR 2052a data found. Auto-generating sample data...');
         setIsInitializing(true);
 

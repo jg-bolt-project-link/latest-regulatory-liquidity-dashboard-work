@@ -48,12 +48,13 @@ export async function validateFR2052aData(
   const validationRules = rules || [];
   console.log(`Loaded ${validationRules.length} active validation rules`);
 
-  // Fetch FR2052a data for the reporting period
+  // Fetch FR2052a data for the reporting period (with reasonable limit)
   let query = supabase
     .from('fr2052a_data_rows')
     .select('*')
     .eq('report_date', reportingPeriod)
-    .is('user_id', null);
+    .is('user_id', null)
+    .limit(10000);  // Reasonable limit for validation
 
   if (legalEntityId) {
     query = query.eq('legal_entity_id', legalEntityId);

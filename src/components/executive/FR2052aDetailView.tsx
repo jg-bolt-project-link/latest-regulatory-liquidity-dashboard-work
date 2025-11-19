@@ -86,11 +86,58 @@ export function FR2052aDetailView({ onNavigate }: FR2052aDetailViewProps) {
   const loadData = async () => {
     setLoading(true);
 
+    try {
+      // First, get available dates (much faster query)
+      let datesQuery = supabase
+        .from('fr2052a_data_rows')
+        .select('report_date')
+        .is('user_id', null)
+        .order('report_date', { ascending: false });
+
+      if (selectedEntityId) {
+        datesQuery = datesQuery.eq('legal_entity_id', selectedEntityId);
+      }
+
+      const { data: dateRows, error: datesError } = await datesQuery.limit(1000);
+
+      if (datesError) {
+        console.error('Error loading FR 2052a dates:', datesError.message);
+        setLoading(false);
+        return;
+      }
+
+      if (dateRows && dateRows.length > 0) {
+        const dates = Array.from(new Set(dateRows.map(r => r.report_date))).sort().reverse();
+        setAvailableDates(dates);
+
+        // Auto-select most recent date
+        if (!selectedDate && dates.length > 0) {
+          setSelectedDate(dates[0]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading FR 2052a data:', error);
+    }
+
+    setLoading(false);
+  };
+
+  // Load data for selected date on demand
+  useEffect(() => {
+    if (selectedDate) {
+      loadDateData();
+    }
+  }, [selectedDate, selectedEntityId]);
+
+  const loadDateData = async () => {
+    if (!selectedDate) return;
+
     let query = supabase
       .from('fr2052a_data_rows')
       .select('*')
       .is('user_id', null)
-      .order('report_date', { ascending: false });
+      .eq('report_date', selectedDate)
+      .limit(5000);  // Reasonable limit for one date
 
     if (selectedEntityId) {
       query = query.eq('legal_entity_id', selectedEntityId);
@@ -99,21 +146,16 @@ export function FR2052aDetailView({ onNavigate }: FR2052aDetailViewProps) {
     const { data: rows, error } = await query;
 
     if (error) {
-      console.error('Error loading FR 2052a data:', error);
-      setLoading(false);
+      console.error('Error loading date data:', error.message);
       return;
     }
 
     if (rows) {
       setData(rows);
-      const dates = Array.from(new Set(rows.map(r => r.report_date))).sort().reverse();
-      setAvailableDates(dates);
     }
-
-    setLoading(false);
   };
 
-  const filteredData = data.filter(row => row.report_date === selectedDate);
+  const filteredData = data;
 
   const productSummaries = (): ProductSummary[] => {
     const summaryMap = new Map<string, ProductSummary>();
