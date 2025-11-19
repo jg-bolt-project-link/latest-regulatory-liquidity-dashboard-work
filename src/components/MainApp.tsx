@@ -19,6 +19,7 @@ import { seedStateStreetData } from '../utils/seedStateStreetData';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
 import { ChatAssistant } from './shared/ChatAssistant';
 import { ScreenValidator } from './shared/ScreenValidator';
+import { AuthForm } from './AuthForm';
 import {
   LayoutDashboard,
   FileText,
@@ -56,13 +57,28 @@ type ViewType =
   | 'fr2052a-validation';
 
 export function MainApp() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showValidator, setShowValidator] = useState(true);
   const [validationPassed, setValidationPassed] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthForm />;
+  }
 
   useEffect(() => {
     const initializeData = async () => {
