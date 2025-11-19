@@ -3,17 +3,26 @@ import { generateComprehensiveFR2052aData } from './generateFR2052aData';
 import { FR2052aCalculationEngine } from './fr2052aCalculations';
 
 export async function seedFR2052aWithCalculations(userId: string) {
-  console.log('Starting FR 2052a data generation and calculations...');
+  console.log('=== FR 2052a Data Generation Started ===');
+  console.log(`User ID: ${userId}`);
 
+  console.log('Step 1: Fetching legal entities...');
   const entities = await supabase
     .from('legal_entities')
     .select('id, entity_name')
     .eq('user_id', userId);
 
+  if (entities.error) {
+    console.error('ERROR fetching legal entities:', entities.error);
+    return { success: false, error: entities.error.message };
+  }
+
   if (!entities.data || entities.data.length === 0) {
     console.error('No legal entities found. Please create entities first.');
     return { success: false, error: 'No legal entities found' };
   }
+
+  console.log(`✓ Found ${entities.data.length} legal entities:`, entities.data.map(e => e.entity_name));
 
   const reportDates = [
     '2024-12-31',
@@ -70,25 +79,31 @@ export async function seedFR2052aWithCalculations(userId: string) {
         internal_rating: item.internalRating || null
       }));
 
-      const { error: insertError } = await supabase
+      console.log(`  Step 2a: Inserting ${dbRows.length} rows to database...`);
+      const { error: insertError, data: insertedData } = await supabase
         .from('fr2052a_data_rows')
-        .insert(dbRows);
+        .insert(dbRows)
+        .select();
 
       if (insertError) {
-        console.error(`  Error inserting data for ${reportDate}:`, insertError);
-        continue;
+        console.error(`  ❌ ERROR inserting FR 2052a data for ${reportDate}:`, insertError);
+        console.error(`  Error code: ${insertError.code}, Details: ${insertError.details}`);
+        console.error(`  Sample row being inserted:`, JSON.stringify(dbRows[0], null, 2));
+        return { success: false, error: insertError.message };
       }
 
+      console.log(`  ✓ Successfully inserted ${insertedData?.length || dbRows.length} rows`);
       results.totalRecords += dbRows.length;
       results.totalPeriods++;
 
+      console.log(`  Step 2b: Calculating LCR and NSFR...`);
       const engine = new FR2052aCalculationEngine(fr2052aData);
 
       const lcrResult = engine.calculateLCR();
-      console.log(`  LCR: ${(lcrResult.lcrRatio * 100).toFixed(2)}%`);
+      console.log(`  ✓ LCR calculated: ${(lcrResult.lcrRatio * 100).toFixed(2)}%`);
 
       const nsfrResult = engine.calculateNSFR();
-      console.log(`  NSFR: ${(nsfrResult.nsfrRatio * 100).toFixed(2)}%`);
+      console.log(`  ✓ NSFR calculated: ${(nsfrResult.nsfrRatio * 100).toFixed(2)}%`);
 
       const lcrData = {
         user_id: userId,
@@ -115,18 +130,23 @@ export async function seedFR2052aWithCalculations(userId: string) {
         fr2052a_record_count: dbRows.length
       };
 
-      const { error: lcrError } = await supabase
+      console.log(`  Step 2c: Saving LCR metrics to fr2052a_lcr_metrics...`);
+      const { error: lcrError, data: lcrInserted } = await supabase
         .from('fr2052a_lcr_metrics')
         .upsert(lcrData, {
           onConflict: 'user_id,legal_entity_id,report_date'
-        });
+        })
+        .select();
 
       if (lcrError) {
-        console.error(`  Error saving FR2052a-dependent LCR metrics:`, lcrError);
+        console.error(`  ❌ ERROR saving FR2052a-dependent LCR metrics:`, lcrError);
+        console.error(`  Error code: ${lcrError.code}, Details: ${lcrError.details}`);
         console.error(`  LCR Data being inserted:`, JSON.stringify(lcrData, null, 2));
-      } else {
-        results.lcrCalculations.push(lcrResult);
+        return { success: false, error: lcrError.message };
       }
+
+      console.log(`  ✓ LCR metrics saved (${lcrInserted?.length || 1} record)`);
+      results.lcrCalculations.push(lcrResult);
 
       const nsfrData = {
         user_id: userId,
@@ -150,18 +170,23 @@ export async function seedFR2052aWithCalculations(userId: string) {
         fr2052a_record_count: dbRows.length
       };
 
-      const { error: nsfrError } = await supabase
+      console.log(`  Step 2d: Saving NSFR metrics to fr2052a_nsfr_metrics...`);
+      const { error: nsfrError, data: nsfrInserted } = await supabase
         .from('fr2052a_nsfr_metrics')
         .upsert(nsfrData, {
           onConflict: 'user_id,legal_entity_id,report_date'
-        });
+        })
+        .select();
 
       if (nsfrError) {
-        console.error(`  Error saving FR2052a-dependent NSFR metrics:`, nsfrError);
+        console.error(`  ❌ ERROR saving FR2052a-dependent NSFR metrics:`, nsfrError);
+        console.error(`  Error code: ${nsfrError.code}, Details: ${nsfrError.details}`);
         console.error(`  NSFR Data being inserted:`, JSON.stringify(nsfrData, null, 2));
-      } else {
-        results.nsfrCalculations.push(nsfrResult);
+        return { success: false, error: nsfrError.message };
       }
+
+      console.log(`  ✓ NSFR metrics saved (${nsfrInserted?.length || 1} record)`);
+      results.nsfrCalculations.push(nsfrResult);
     }
   }
 
@@ -173,6 +198,44 @@ export async function seedFR2052aWithCalculations(userId: string) {
   console.log(`NSFR Calculations: ${results.nsfrCalculations.length}`);
   console.log('================================================\n');
 
+  console.log('Step 3: Verifying data was saved to database...');
+  const { count: fr2052aCount } = await supabase
+    .from('fr2052a_data_rows')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  const { count: lcrCount } = await supabase
+    .from('fr2052a_lcr_metrics')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  const { count: nsfrCount } = await supabase
+    .from('fr2052a_nsfr_metrics')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId);
+
+  console.log('\n=== Database Verification ===');
+  console.log(`✓ FR 2052a rows in database: ${fr2052aCount || 0}`);
+  console.log(`✓ LCR metrics in database: ${lcrCount || 0}`);
+  console.log(`✓ NSFR metrics in database: ${nsfrCount || 0}`);
+  console.log('============================\n');
+
+  if (!fr2052aCount || fr2052aCount === 0) {
+    console.error('❌ WARNING: No FR 2052a data found in database after generation!');
+    return { success: false, error: 'Data generation failed - no records in database' };
+  }
+
+  if (!lcrCount || lcrCount === 0) {
+    console.error('❌ WARNING: No LCR metrics found in database after generation!');
+    return { success: false, error: 'LCR calculation failed - no records in database' };
+  }
+
+  if (!nsfrCount || nsfrCount === 0) {
+    console.error('❌ WARNING: No NSFR metrics found in database after generation!');
+    return { success: false, error: 'NSFR calculation failed - no records in database' };
+  }
+
+  console.log('✅ All data successfully generated and verified in database!');
   return { success: true, results };
 }
 

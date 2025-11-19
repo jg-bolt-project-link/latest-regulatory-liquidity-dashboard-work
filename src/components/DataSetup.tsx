@@ -168,12 +168,16 @@ export function DataSetup() {
 
       console.log('Step 2: Generating FR 2052a data and calculations...');
       const fr2052aResult = await seedFR2052aWithCalculations(user.id);
+      console.log('FR 2052a generation result:', fr2052aResult);
+
       if (!fr2052aResult.success) {
         console.error('Failed to generate FR 2052a data:', fr2052aResult);
-        alert('Error generating FR 2052a data. Check console for details.');
+        alert(`Error generating FR 2052a data:\n${fr2052aResult.error || 'Unknown error'}\n\nCheck console for details.`);
         setLoading(false);
         return;
       }
+
+      console.log('✓ FR 2052a data generation completed successfully');
 
       console.log('Step 3: Generating dashboard data...');
       const dashboardResult = await seedDashboardData(user.id);
