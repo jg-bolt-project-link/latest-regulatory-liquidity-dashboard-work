@@ -25,6 +25,9 @@ interface FileSubmission {
   total_rows: number;
   valid_rows: number;
   error_rows: number;
+  data_validation_executed?: boolean;
+  lcr_validation_executed?: boolean;
+  nsfr_validation_executed?: boolean;
 }
 
 interface ValidationError {
@@ -44,6 +47,9 @@ export function FR2052aValidation() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'rules' | 'submissions' | 'errors' | 'lcr' | 'nsfr' | 'executions'>('overview');
   const [dataSeeded, setDataSeeded] = useState(false);
+  const [isExecutingValidation, setIsExecutingValidation] = useState(false);
+  const [executionStep, setExecutionStep] = useState('');
+  const [executingSubmissionId, setExecutingSubmissionId] = useState<string | null>(null);
   const [visibleColumns, setVisibleColumns] = useState({
     fileName: true,
     entity: true,
@@ -110,10 +116,30 @@ export function FR2052aValidation() {
         errorCountsBySubmission.set(error.submission_id, current + 1);
       });
 
-      // Format submissions with pre-fetched counts
+      // Check validation status for each submission
+      const validationStatusPromises = subs.map(async (s) => {
+        const [dataVal, lcrVal, nsfrVal] = await Promise.all([
+          supabase.from('fr2052a_validation_executions').select('id').eq('submission_id', s.id).limit(1),
+          supabase.from('lcr_calculation_validations').select('id').eq('submission_id', s.id).limit(1),
+          supabase.from('nsfr_calculation_validations').select('id').eq('submission_id', s.id).limit(1)
+        ]);
+
+        return {
+          submissionId: s.id,
+          data_validation_executed: (dataVal.data?.length || 0) > 0,
+          lcr_validation_executed: (lcrVal.data?.length || 0) > 0,
+          nsfr_validation_executed: (nsfrVal.data?.length || 0) > 0
+        };
+      });
+
+      const validationStatuses = await Promise.all(validationStatusPromises);
+      const validationStatusMap = new Map(validationStatuses.map(v => [v.submissionId, v]));
+
+      // Format submissions with pre-fetched counts and validation status
       const formattedSubs = subs.map(s => {
         const totalRows = rowCountsByPeriod.get(s.reporting_period) || 0;
         const errorCount = errorCountsBySubmission.get(s.id) || 0;
+        const valStatus = validationStatusMap.get(s.id);
 
         // Look up entity name from map
         const entity = entityMap.get(s.legal_entity_id);
@@ -133,7 +159,10 @@ export function FR2052aValidation() {
           submission_status: s.submission_status,
           total_rows: totalRows,
           valid_rows: totalRows - errorCount,
-          error_rows: errorCount
+          error_rows: errorCount,
+          data_validation_executed: valStatus?.data_validation_executed || false,
+          lcr_validation_executed: valStatus?.lcr_validation_executed || false,
+          nsfr_validation_executed: valStatus?.nsfr_validation_executed || false
         };
       });
 
@@ -148,6 +177,48 @@ export function FR2052aValidation() {
     await seedFR2052aWithCalculations();
     await loadData();
     setDataSeeded(true);
+  };
+
+  const handleExecuteValidations = async (submissionId: string) => {
+    setIsExecutingValidation(true);
+    setExecutingSubmissionId(submissionId);
+    setExecutionStep('Initializing validation execution...');
+
+    try {
+      const { executeValidationsForSubmission } = await import('../utils/executeValidations');
+
+      setExecutionStep('[1/3] Executing FR2052a data validation...');
+      await new Promise(resolve => setTimeout(resolve, 100)); // Allow UI to update
+
+      const result = await executeValidationsForSubmission(submissionId);
+
+      setExecutionStep('[3/3] Validation complete!');
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Reload data to show updated statuses
+      await loadData();
+
+      // Show success message
+      const message = `Validation Execution Complete!\n\n` +
+        `FR2052a Data: ${result.steps.dataValidation.passed ? '✓ PASSED' : '✗ FAILED'}\n` +
+        `  - Total Rows: ${result.steps.dataValidation.totalRows}\n` +
+        `  - Valid Rows: ${result.steps.dataValidation.validRows}\n` +
+        `  - Error Rows: ${result.steps.dataValidation.errorRows}\n\n` +
+        `LCR Validation: ${result.steps.lcrValidation.executed ? (result.steps.lcrValidation.passed ? '✓ PASSED' : '⚠ FAILED') : '- N/A'}\n` +
+        (result.steps.lcrValidation.executed ? `  - LCR Ratio: ${(result.steps.lcrValidation.ratio! * 100).toFixed(2)}%\n` : '') +
+        `\nNSFR Validation: ${result.steps.nsfrValidation.executed ? (result.steps.nsfrValidation.passed ? '✓ PASSED' : '⚠ FAILED') : '- N/A'}\n` +
+        (result.steps.nsfrValidation.executed ? `  - NSFR Ratio: ${(result.steps.nsfrValidation.ratio! * 100).toFixed(2)}%\n` : '');
+
+      alert(message);
+
+    } catch (error) {
+      console.error('Validation execution failed:', error);
+      alert(`Validation execution failed: ${error instanceof Error ? error.message : 'Unknown error'}\n\nCheck console for details.`);
+    } finally {
+      setIsExecutingValidation(false);
+      setExecutingSubmissionId(null);
+      setExecutionStep('');
+    }
   };
 
   const loadErrors = async (submissionId: string) => {
@@ -455,6 +526,12 @@ export function FR2052aValidation() {
                   Status
                 </th>
               )}
+              <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider min-w-[280px]">
+                Validation Status
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider min-w-[140px]">
+                Actions
+              </th>
               {visibleColumns.rows && (
                 <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider min-w-[100px]">
                   Total Rows
@@ -561,6 +638,58 @@ export function FR2052aValidation() {
                     </span>
                   </td>
                 )}
+                <td className="px-4 py-4">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-slate-600 w-16">Data:</span>
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded ${
+                        submission.data_validation_executed
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {submission.data_validation_executed ? '✓ Executed' : '⚠ Not Executed'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-slate-600 w-16">LCR:</span>
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded ${
+                        submission.lcr_validation_executed
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {submission.lcr_validation_executed ? '✓ Executed' : '⚠ Not Executed'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-slate-600 w-16">NSFR:</span>
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded ${
+                        submission.nsfr_validation_executed
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-orange-100 text-orange-800'
+                      }`}>
+                        {submission.nsfr_validation_executed ? '✓ Executed' : '⚠ Not Executed'}
+                      </span>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-4 py-4 whitespace-nowrap">
+                  <button
+                    onClick={() => handleExecuteValidations(submission.id)}
+                    disabled={isExecutingValidation && executingSubmissionId === submission.id}
+                    className={`px-3 py-2 text-xs font-medium rounded-lg transition-colors ${
+                      isExecutingValidation && executingSubmissionId === submission.id
+                        ? 'bg-slate-300 text-slate-500 cursor-not-allowed'
+                        : 'bg-blue-600 text-white hover:bg-blue-700'
+                    }`}
+                  >
+                    {isExecutingValidation && executingSubmissionId === submission.id
+                      ? 'Executing...'
+                      : submission.data_validation_executed && submission.lcr_validation_executed && submission.nsfr_validation_executed
+                      ? 'Re-Execute'
+                      : 'Execute Validations'
+                    }
+                  </button>
+                </td>
                 {visibleColumns.rows && (
                   <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-600">
                     {submission.total_rows.toLocaleString()}
@@ -711,6 +840,41 @@ export function FR2052aValidation() {
 
   return (
     <div>
+      {/* Validation Execution Progress Modal */}
+      {isExecutingValidation && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-8 max-w-md shadow-2xl">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-600 border-t-transparent"></div>
+              <div>
+                <h3 className="font-semibold text-lg text-slate-900">Executing Validations</h3>
+                <p className="text-sm text-slate-600 mt-1">{executionStep}</p>
+              </div>
+            </div>
+            <div className="mt-6 space-y-2">
+              <div className="flex items-center gap-2 text-sm">
+                <div className={`w-2 h-2 rounded-full ${executionStep.includes('[1/3]') ? 'bg-blue-600 animate-pulse' : executionStep.includes('[2/3]') || executionStep.includes('[3/3]') ? 'bg-green-600' : 'bg-slate-300'}`}></div>
+                <span className={executionStep.includes('[1/3]') ? 'text-blue-600 font-medium' : executionStep.includes('[2/3]') || executionStep.includes('[3/3]') ? 'text-green-600' : 'text-slate-500'}>
+                  FR2052a Data Validation
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <div className={`w-2 h-2 rounded-full ${executionStep.includes('[2/3]') ? 'bg-blue-600 animate-pulse' : executionStep.includes('[3/3]') ? 'bg-green-600' : 'bg-slate-300'}`}></div>
+                <span className={executionStep.includes('[2/3]') ? 'text-blue-600 font-medium' : executionStep.includes('[3/3]') ? 'text-green-600' : 'text-slate-500'}>
+                  LCR Calculation Validation
+                </span>
+              </div>
+              <div className="flex items-center gap-2 text-sm">
+                <div className={`w-2 h-2 rounded-full ${executionStep.includes('[3/3]') ? 'bg-blue-600 animate-pulse' : 'bg-slate-300'}`}></div>
+                <span className={executionStep.includes('[3/3]') ? 'text-blue-600 font-medium' : 'text-slate-500'}>
+                  NSFR Calculation Validation
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900 mb-2">FR 2052a Validation System</h1>
         <p className="text-slate-600">Comprehensive data quality and compliance validation for regulatory reporting</p>
