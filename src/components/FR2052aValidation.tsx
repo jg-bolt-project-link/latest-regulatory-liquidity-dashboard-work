@@ -83,18 +83,37 @@ export function FR2052aValidation() {
 
     if (rules) setValidationRules(rules);
     if (subs) {
-      // Get row counts for each submission
-      const formattedSubsPromises = subs.map(async (s) => {
-        const { count: totalRows } = await supabase
+      // Batch query all row counts by reporting period (much faster than individual queries)
+      const periods = [...new Set(subs.map(s => s.reporting_period))];
+      const rowCountsPromises = periods.map(async (period) => {
+        const { count } = await supabase
           .from('fr2052a_data_rows')
           .select('*', { count: 'exact', head: true })
-          .eq('report_date', s.reporting_period)
+          .eq('report_date', period)
           .is('user_id', null);
+        return { period, count: count || 0 };
+      });
+      const rowCountsResults = await Promise.all(rowCountsPromises);
+      const rowCountsByPeriod = new Map(rowCountsResults.map(r => [r.period, r.count]));
 
-        const { count: errorCount } = await supabase
-          .from('fr2052a_validation_errors')
-          .select('*', { count: 'exact', head: true })
-          .eq('submission_id', s.id);
+      // Batch query all error counts by submission (much faster than individual queries)
+      const submissionIds = subs.map(s => s.id);
+      const { data: errorCounts } = await supabase
+        .from('fr2052a_validation_errors')
+        .select('submission_id')
+        .in('submission_id', submissionIds);
+
+      // Count errors per submission
+      const errorCountsBySubmission = new Map<string, number>();
+      errorCounts?.forEach(error => {
+        const current = errorCountsBySubmission.get(error.submission_id) || 0;
+        errorCountsBySubmission.set(error.submission_id, current + 1);
+      });
+
+      // Format submissions with pre-fetched counts
+      const formattedSubs = subs.map(s => {
+        const totalRows = rowCountsByPeriod.get(s.reporting_period) || 0;
+        const errorCount = errorCountsBySubmission.get(s.id) || 0;
 
         // Look up entity name from map
         const entity = entityMap.get(s.legal_entity_id);
@@ -107,13 +126,12 @@ export function FR2052aValidation() {
           reporting_entity: entityName,
           reporting_period: s.reporting_period,
           submission_status: s.submission_status,
-          total_rows: totalRows || 0,
-          valid_rows: (totalRows || 0) - (errorCount || 0),
-          error_rows: errorCount || 0
+          total_rows: totalRows,
+          valid_rows: totalRows - errorCount,
+          error_rows: errorCount
         };
       });
 
-      const formattedSubs = await Promise.all(formattedSubsPromises);
       setSubmissions(formattedSubs);
     }
 
