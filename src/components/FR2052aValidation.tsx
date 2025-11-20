@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FileUp, CheckCircle, XCircle, AlertTriangle, Database, FileText, TrendingUp, Calculator, BarChart3, Eye, EyeOff, Settings } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { seedAllFR2052aData } from '../utils/seedFR2052aData';
+import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
 import { LCRValidationScreen } from './validation/LCRValidationScreen';
 import { NSFRValidationScreen } from './validation/NSFRValidationScreen';
 import { ValidationRuleExecutions } from './validation/ValidationRuleExecutions';
@@ -73,6 +73,14 @@ export function FR2052aValidation() {
       .order('created_at', { ascending: false })
       .limit(10);
 
+    // Get all legal entities for lookup
+    const { data: legalEntities } = await supabase
+      .from('legal_entities')
+      .select('id, entity_code, entity_name')
+      .is('user_id', null);
+
+    const entityMap = new Map(legalEntities?.map(e => [e.id, e]) || []);
+
     if (rules) setValidationRules(rules);
     if (subs) {
       // Get row counts for each submission
@@ -88,11 +96,15 @@ export function FR2052aValidation() {
           .select('*', { count: 'exact', head: true })
           .eq('submission_id', s.id);
 
+        // Look up entity name from map
+        const entity = entityMap.get(s.legal_entity_id);
+        const entityName = entity ? entity.entity_code : (s.legal_entity_id === 'all_entities' ? 'All Entities' : s.legal_entity_id);
+
         return {
           id: s.id,
           file_name: `FR2052a_${s.reporting_period}`,
           upload_timestamp: s.created_at,
-          reporting_entity: s.legal_entity_id,
+          reporting_entity: entityName,
           reporting_period: s.reporting_period,
           submission_status: s.submission_status,
           total_rows: totalRows || 0,
@@ -110,7 +122,7 @@ export function FR2052aValidation() {
 
   const handleSeedData = async () => {
     setLoading(true);
-    await seedAllFR2052aData();
+    await seedFR2052aWithCalculations();
     await loadData();
     setDataSeeded(true);
   };
@@ -561,22 +573,44 @@ export function FR2052aValidation() {
   };
 
   const renderErrors = () => {
-    if (!selectedSubmission) {
-      return (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <AlertTriangle className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-slate-900 mb-2">No Submission Selected</h3>
-          <p className="text-sm text-slate-600">Select a submission to view validation errors</p>
-        </div>
-      );
-    }
-
     return (
       <div className="space-y-6">
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">
-            Submission: {selectedSubmission.file_name}
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">Error Details</h3>
+            <div className="w-64">
+              <label className="block text-xs font-medium text-slate-700 mb-1">Select Submission</label>
+              <select
+                value={selectedSubmission?.id || ''}
+                onChange={(e) => {
+                  const submission = submissions.find(s => s.id === e.target.value);
+                  if (submission) {
+                    setSelectedSubmission(submission);
+                    loadErrors(submission.id);
+                  }
+                }}
+                className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Choose a submission...</option>
+                {submissions.map((sub) => (
+                  <option key={sub.id} value={sub.id}>
+                    {sub.file_name} - {new Date(sub.reporting_period).toLocaleDateString()}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {!selectedSubmission ? (
+            <div className="text-center py-8">
+              <AlertTriangle className="h-12 w-12 text-slate-400 mx-auto mb-3" />
+              <p className="text-sm text-slate-600">Select a submission to view validation errors</p>
+            </div>
+          ) : (
+            <>
+              <h4 className="text-base font-medium text-slate-900 mb-4">
+                {selectedSubmission.file_name}
+              </h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div>
               <p className="text-sm text-slate-600">Total Rows</p>
@@ -597,9 +631,11 @@ export function FR2052aValidation() {
               </p>
             </div>
           </div>
+          </>
+          )}
         </div>
 
-        {errors.length > 0 ? (
+        {selectedSubmission && errors.length > 0 ? (
           <div className="bg-white rounded-lg shadow overflow-hidden">
             <div className="divide-y divide-slate-200">
               {errors.map((error) => (
@@ -631,13 +667,13 @@ export function FR2052aValidation() {
               ))}
             </div>
           </div>
-        ) : (
+        ) : selectedSubmission ? (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-900 mb-2">No Errors Found</h3>
             <p className="text-sm text-slate-600">This submission passed all validation checks</p>
           </div>
-        )}
+        ) : null}
       </div>
     );
   };
@@ -689,119 +725,167 @@ export function FR2052aValidation() {
       {activeTab === 'submissions' && renderSubmissions()}
       {activeTab === 'errors' && renderErrors()}
       {activeTab === 'lcr' && (
-        selectedSubmission ? (
-          <div className="space-y-4">
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900">LCR Calculation Validation</h3>
+        <div className="space-y-4">
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">LCR Calculation Validation</h3>
+                {selectedSubmission && (
                   <p className="text-sm text-slate-600 mt-1">
                     Submission: {selectedSubmission.file_name} • Period: {new Date(selectedSubmission.reporting_period).toLocaleDateString()}
                   </p>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-64">
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Select Submission</label>
+                  <select
+                    value={selectedSubmission?.id || ''}
+                    onChange={(e) => {
+                      const submission = submissions.find(s => s.id === e.target.value);
+                      if (submission) setSelectedSubmission(submission);
+                    }}
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Choose a submission...</option>
+                    {submissions.map((sub) => (
+                      <option key={sub.id} value={sub.id}>
+                        {sub.file_name} - {new Date(sub.reporting_period).toLocaleDateString()}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <button
                   onClick={() => setActiveTab('submissions')}
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium mt-5"
                 >
-                  ← Back to Submissions
+                  ← Back
                 </button>
               </div>
             </div>
-            <LCRValidationScreen submissionId={selectedSubmission.id} />
           </div>
-        ) : (
+          {selectedSubmission ? (
+            <LCRValidationScreen submissionId={selectedSubmission.id} />
+          ) : (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <Calculator className="h-16 w-16 text-slate-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-900 mb-2">No Submission Selected</h3>
             <p className="text-sm text-slate-600 mb-4">
-              Select a submission from the Submissions tab to view LCR calculation validation details.
+              Use the dropdown above to select a submission to view LCR calculation validation details.
             </p>
-            <button
-              onClick={() => setActiveTab('submissions')}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Go to Submissions
-            </button>
           </div>
-        )
+          )}
+        </div>
       )}
       {activeTab === 'nsfr' && (
-        selectedSubmission ? (
-          <div className="space-y-4">
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900">NSFR Calculation Validation</h3>
+        <div className="space-y-4">
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">NSFR Calculation Validation</h3>
+                {selectedSubmission && (
                   <p className="text-sm text-slate-600 mt-1">
                     Submission: {selectedSubmission.file_name} • Period: {new Date(selectedSubmission.reporting_period).toLocaleDateString()}
                   </p>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-64">
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Select Submission</label>
+                  <select
+                    value={selectedSubmission?.id || ''}
+                    onChange={(e) => {
+                      const submission = submissions.find(s => s.id === e.target.value);
+                      if (submission) setSelectedSubmission(submission);
+                    }}
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Choose a submission...</option>
+                    {submissions.map((sub) => (
+                      <option key={sub.id} value={sub.id}>
+                        {sub.file_name} - {new Date(sub.reporting_period).toLocaleDateString()}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <button
                   onClick={() => setActiveTab('submissions')}
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium mt-5"
                 >
-                  ← Back to Submissions
+                  ← Back
                 </button>
               </div>
             </div>
-            <NSFRValidationScreen submissionId={selectedSubmission.id} />
           </div>
-        ) : (
+          {selectedSubmission ? (
+            <NSFRValidationScreen submissionId={selectedSubmission.id} />
+          ) : (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <BarChart3 className="h-16 w-16 text-slate-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-900 mb-2">No Submission Selected</h3>
             <p className="text-sm text-slate-600 mb-4">
-              Select a submission from the Submissions tab to view NSFR calculation validation details.
+              Use the dropdown above to select a submission to view NSFR calculation validation details.
             </p>
-            <button
-              onClick={() => setActiveTab('submissions')}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Go to Submissions
-            </button>
           </div>
-        )
+          )}
+        </div>
       )}
       {activeTab === 'executions' && (
-        selectedSubmission ? (
-          <div className="space-y-4">
-            <div className="bg-white rounded-lg shadow p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-slate-900">Rule Executions</h3>
+        <div className="space-y-4">
+          <div className="bg-white rounded-lg shadow p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">Rule Executions</h3>
+                {selectedSubmission && (
                   <p className="text-sm text-slate-600 mt-1">
                     Submission: {selectedSubmission.file_name} • Period: {new Date(selectedSubmission.reporting_period).toLocaleDateString()}
                   </p>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-64">
+                  <label className="block text-xs font-medium text-slate-700 mb-1">Select Submission</label>
+                  <select
+                    value={selectedSubmission?.id || ''}
+                    onChange={(e) => {
+                      const submission = submissions.find(s => s.id === e.target.value);
+                      if (submission) setSelectedSubmission(submission);
+                    }}
+                    className="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Choose a submission...</option>
+                    {submissions.map((sub) => (
+                      <option key={sub.id} value={sub.id}>
+                        {sub.file_name} - {new Date(sub.reporting_period).toLocaleDateString()}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <button
                   onClick={() => setActiveTab('submissions')}
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium mt-5"
                 >
-                  ← Back to Submissions
+                  ← Back
                 </button>
               </div>
             </div>
-            <ValidationRuleExecutions submissionId={selectedSubmission.id} />
           </div>
-        ) : (
+          {selectedSubmission ? (
+            <ValidationRuleExecutions submissionId={selectedSubmission.id} />
+          ) : (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <CheckCircle className="h-16 w-16 text-slate-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-slate-900 mb-2">No Submission Selected</h3>
             <p className="text-sm text-slate-600 mb-4">
-              Select a submission from the Submissions tab to view rule execution details.
+              Use the dropdown above to select a submission to view rule execution details.
             </p>
-            <p className="text-sm text-slate-700 bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto mb-4">
+            <p className="text-sm text-slate-700 bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-2xl mx-auto">
               <strong>Rule Executions</strong> show which validation rules were applied to each submission,
               how many rows were checked, passed, and failed for each rule, and the execution time.
             </p>
-            <button
-              onClick={() => setActiveTab('submissions')}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Go to Submissions
-            </button>
           </div>
-        )
+          )}
+        </div>
       )}
     </div>
   );
