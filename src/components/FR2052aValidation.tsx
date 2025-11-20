@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FileUp, CheckCircle, XCircle, AlertTriangle, Database, FileText, TrendingUp, Calculator, BarChart3 } from 'lucide-react';
+import { FileUp, CheckCircle, XCircle, AlertTriangle, Database, FileText, TrendingUp, Calculator, BarChart3, Eye, EyeOff, Settings } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { seedAllFR2052aData } from '../utils/seedFR2052aData';
 import { LCRValidationScreen } from './validation/LCRValidationScreen';
@@ -44,6 +44,16 @@ export function FR2052aValidation() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'rules' | 'submissions' | 'errors' | 'lcr' | 'nsfr' | 'executions'>('overview');
   const [dataSeeded, setDataSeeded] = useState(false);
+  const [visibleColumns, setVisibleColumns] = useState({
+    fileName: true,
+    entity: true,
+    period: true,
+    status: true,
+    rows: true,
+    errors: true,
+    timestamp: false,
+    type: false
+  });
 
   useEffect(() => {
     loadData();
@@ -339,31 +349,97 @@ export function FR2052aValidation() {
           </div>
         )}
 
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <table className="min-w-full divide-y divide-slate-200">
+        <div className="bg-white rounded-lg shadow p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">Submissions ({submissions.length})</h3>
+            <div className="relative">
+              <button
+                onClick={() => {
+                  const dropdown = document.getElementById('column-dropdown');
+                  if (dropdown) dropdown.classList.toggle('hidden');
+                }}
+                className="flex items-center gap-2 px-3 py-2 text-sm bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors"
+              >
+                <Settings className="h-4 w-4" />
+                Columns
+              </button>
+              <div id="column-dropdown" className="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-slate-200 z-10">
+                <div className="p-3 border-b border-slate-200">
+                  <p className="text-xs font-semibold text-slate-700 uppercase">Show/Hide Columns</p>
+                </div>
+                <div className="p-2 max-h-64 overflow-y-auto">
+                  {[
+                    { key: 'fileName', label: 'File Name' },
+                    { key: 'entity', label: 'Entity' },
+                    { key: 'period', label: 'Period' },
+                    { key: 'status', label: 'Status' },
+                    { key: 'rows', label: 'Total Rows' },
+                    { key: 'errors', label: 'Errors' },
+                    { key: 'timestamp', label: 'Upload Time' },
+                    { key: 'type', label: 'Submission Type' }
+                  ].map(({ key, label }) => (
+                    <label key={key} className="flex items-center gap-2 px-2 py-2 hover:bg-slate-50 rounded cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={visibleColumns[key as keyof typeof visibleColumns]}
+                        onChange={(e) => setVisibleColumns({ ...visibleColumns, [key]: e.target.checked })}
+                        className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-slate-700">{label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200">
           <thead className="bg-slate-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                File Name
+              <th className="sticky left-0 z-10 bg-slate-50 px-3 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider w-32">
+                Quick Actions
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                Entity
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                Period
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                Rows
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                Errors
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
-                Actions
-              </th>
+              {visibleColumns.fileName && (
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider min-w-[200px]">
+                  File Name
+                </th>
+              )}
+              {visibleColumns.entity && (
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider min-w-[150px]">
+                  Entity
+                </th>
+              )}
+              {visibleColumns.period && (
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider min-w-[120px]">
+                  Period
+                </th>
+              )}
+              {visibleColumns.status && (
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider min-w-[120px]">
+                  Status
+                </th>
+              )}
+              {visibleColumns.rows && (
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider min-w-[100px]">
+                  Total Rows
+                </th>
+              )}
+              {visibleColumns.errors && (
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider min-w-[100px]">
+                  Errors
+                </th>
+              )}
+              {visibleColumns.timestamp && (
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider min-w-[150px]">
+                  Upload Time
+                </th>
+              )}
+              {visibleColumns.type && (
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider min-w-[150px]">
+                  Type
+                </th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-slate-200">
@@ -371,83 +447,114 @@ export function FR2052aValidation() {
               <tr
                 key={submission.id}
                 className={`hover:bg-slate-50 transition-colors ${
-                  selectedSubmission?.id === submission.id ? 'bg-blue-50 border-l-4 border-l-blue-600' : ''
+                  selectedSubmission?.id === submission.id ? 'bg-blue-50' : ''
                 }`}
               >
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">
-                  {submission.file_name}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                  {submission.reporting_entity}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                  {new Date(submission.reporting_period).toLocaleDateString()}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                    submission.submission_status === 'validated' ? 'bg-green-100 text-green-800' :
-                    submission.submission_status === 'rejected' ? 'bg-red-100 text-red-800' :
-                    'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {submission.submission_status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                  {submission.total_rows}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
-                  <span className={submission.error_rows > 0 ? 'text-red-600 font-semibold' : ''}>
-                    {submission.error_rows}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                  <div className="flex gap-2">
+                <td className="sticky left-0 z-10 bg-white px-3 py-4 whitespace-nowrap">
+                  <div className="flex items-center gap-1">
                     <button
                       onClick={() => {
                         setSelectedSubmission(submission);
                         setActiveTab('executions');
                       }}
-                      className="text-blue-600 hover:text-blue-800 font-medium"
+                      title="View Rule Executions"
+                      className="p-1.5 text-blue-600 hover:bg-blue-50 rounded transition-colors"
                     >
-                      Rules
+                      <CheckCircle className="h-4 w-4" />
                     </button>
-                    <span className="text-slate-300">|</span>
                     <button
                       onClick={() => {
                         setSelectedSubmission(submission);
                         loadErrors(submission.id);
                         setActiveTab('errors');
                       }}
-                      className="text-red-600 hover:text-red-800 font-medium"
+                      title="View Errors"
+                      className="p-1.5 text-red-600 hover:bg-red-50 rounded transition-colors"
                     >
-                      Errors
+                      <XCircle className="h-4 w-4" />
                     </button>
-                    <span className="text-slate-300">|</span>
                     <button
                       onClick={() => {
                         setSelectedSubmission(submission);
                         setActiveTab('lcr');
                       }}
-                      className="text-green-600 hover:text-green-800 font-medium"
+                      title="View LCR Validation"
+                      className="p-1.5 text-green-600 hover:bg-green-50 rounded transition-colors"
                     >
-                      LCR
+                      <Calculator className="h-4 w-4" />
                     </button>
-                    <span className="text-slate-300">|</span>
                     <button
                       onClick={() => {
                         setSelectedSubmission(submission);
                         setActiveTab('nsfr');
                       }}
-                      className="text-orange-600 hover:text-orange-800 font-medium"
+                      title="View NSFR Validation"
+                      className="p-1.5 text-orange-600 hover:bg-orange-50 rounded transition-colors"
                     >
-                      NSFR
+                      <BarChart3 className="h-4 w-4" />
                     </button>
                   </div>
                 </td>
+                {visibleColumns.fileName && (
+                  <td className="px-4 py-4 text-sm font-medium text-slate-900">
+                    <div className="max-w-[200px] truncate" title={submission.file_name}>
+                      {submission.file_name}
+                    </div>
+                  </td>
+                )}
+                {visibleColumns.entity && (
+                  <td className="px-4 py-4 text-sm text-slate-600">
+                    <div className="max-w-[150px] truncate" title={submission.reporting_entity}>
+                      {submission.reporting_entity}
+                    </div>
+                  </td>
+                )}
+                {visibleColumns.period && (
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-600">
+                    {new Date(submission.reporting_period).toLocaleDateString()}
+                  </td>
+                )}
+                {visibleColumns.status && (
+                  <td className="px-4 py-4 whitespace-nowrap">
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                      submission.submission_status === 'validated' ? 'bg-green-100 text-green-800' :
+                      submission.submission_status === 'rejected' ? 'bg-red-100 text-red-800' :
+                      submission.submission_status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                      'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {submission.submission_status}
+                    </span>
+                  </td>
+                )}
+                {visibleColumns.rows && (
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-600">
+                    {submission.total_rows.toLocaleString()}
+                  </td>
+                )}
+                {visibleColumns.errors && (
+                  <td className="px-4 py-4 whitespace-nowrap text-sm">
+                    <span className={submission.error_rows > 0 ? 'text-red-600 font-semibold' : 'text-slate-600'}>
+                      {submission.error_rows.toLocaleString()}
+                    </span>
+                  </td>
+                )}
+                {visibleColumns.timestamp && (
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-600">
+                    {new Date(submission.upload_timestamp).toLocaleString()}
+                  </td>
+                )}
+                {visibleColumns.type && (
+                  <td className="px-4 py-4 whitespace-nowrap text-sm text-slate-600">
+                    <span className="px-2 py-1 text-xs bg-slate-100 text-slate-700 rounded">
+                      System Generated
+                    </span>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>
         </table>
+          </div>
         </div>
       </div>
     );
