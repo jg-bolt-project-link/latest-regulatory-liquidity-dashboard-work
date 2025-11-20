@@ -350,23 +350,17 @@ export async function seedFR2052aWithCalculations() {
   }
 
   console.log('✅ All data successfully generated and verified in database!');
+  console.log('\nℹ️  Validations NOT executed automatically.');
+  console.log('   Execute validations on-demand from the FR2052a Validation screen.');
 
-  console.log('\nStep 4: Running validation checks and creating validation records...');
-  const { validateFR2052aData } = await import('./fr2052aValidation');
-  const validationResults: any[] = [];
+  /* VALIDATION EXECUTION MOVED TO executeValidationsForSubmission()
+     See src/utils/executeValidations.ts
+     Users can now execute validations via UI button */
 
-  // Get the submission records we just created
-  const { data: submissions } = await supabase
-    .from('fr2052a_submissions')
-    .select('id, reporting_period, legal_entity_id')
-    .is('user_id', null)
-    .in('reporting_period', reportDates)
-    .order('created_at', { ascending: false });
-
-  // Create validation records for each entity/date combination
+  /* OLD AUTO-VALIDATION CODE REMOVED - Now executed on-demand
+  const { data: submissions } = await supabase...;
   for (const entity of entities) {
     for (const reportDate of reportDates) {
-      console.log(`  Validating data for ${entity.entity_name} - ${reportDate}...`);
       try {
         const validationResult = await validateFR2052aData(reportDate, entity.id);
         validationResults.push({
@@ -494,18 +488,23 @@ export async function seedFR2052aWithCalculations() {
     }
   }
 
-  console.log('\n=== Validation Summary ===');
-  const totalErrors = validationResults.reduce((sum, r) => sum + (r.errors?.length || 0), 0);
-  const totalValidRows = validationResults.reduce((sum, r) => sum + (r.validRows || 0), 0);
-  console.log(`Total validated rows: ${totalValidRows}`);
-  console.log(`Total validation errors: ${totalErrors}`);
-  console.log('==========================\n');
+  */ // End of removed validation code block
+
+  console.log('\n=== FR 2052a Generation Summary ===');
+  console.log(`Total Entities: ${results.totalEntities}`);
+  console.log(`Total Periods: ${results.totalPeriods}`);
+  console.log(`Total Records: ${results.totalRecords}`);
+  console.log(`LCR Calculations: ${results.lcrCalculations.length}`);
+  console.log(`NSFR Calculations: ${results.nsfrCalculations.length}`);
+  console.log(`Submissions Created: ${results.totalEntities * results.totalPeriods}`);
+  console.log(`Validations: NOT EXECUTED (execute via UI)`);
+  console.log('=====================================\n');
 
   return {
     success: true,
     results: {
       ...results,
-      validationResults
+      message: 'Data generation complete. Execute validations from UI.'
     }
   };
 }
