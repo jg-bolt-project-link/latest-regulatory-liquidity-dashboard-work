@@ -119,9 +119,14 @@ export function FR2052aValidation() {
         const entity = entityMap.get(s.legal_entity_id);
         const entityName = entity ? entity.entity_code : (s.legal_entity_id === 'all_entities' ? 'All Entities' : s.legal_entity_id);
 
+        // Create descriptive file name with entity code for clarity
+        const fileName = entity
+          ? `FR2052a_${s.reporting_period}_${entity.entity_code}`
+          : `FR2052a_${s.reporting_period}`;
+
         return {
           id: s.id,
-          file_name: `FR2052a_${s.reporting_period}`,
+          file_name: fileName,
           upload_timestamp: s.created_at,
           reporting_entity: entityName,
           reporting_period: s.reporting_period,

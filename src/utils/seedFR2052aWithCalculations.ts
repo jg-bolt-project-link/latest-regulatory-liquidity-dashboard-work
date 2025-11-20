@@ -363,19 +363,25 @@ export async function seedFR2052aWithCalculations() {
     .in('reporting_period', reportDates)
     .order('created_at', { ascending: false });
 
-  for (const reportDate of reportDates) {
-    console.log(`  Validating data for ${reportDate}...`);
-    try {
-      const validationResult = await validateFR2052aData(reportDate);
-      validationResults.push({
-        reportDate,
-        ...validationResult
-      });
-      console.log(`    ✓ Validated ${validationResult.totalRows} rows: ${validationResult.validRows} valid, ${validationResult.errorRows} with errors`);
+  // Create validation records for each entity/date combination
+  for (const entity of entities) {
+    for (const reportDate of reportDates) {
+      console.log(`  Validating data for ${entity.entity_name} - ${reportDate}...`);
+      try {
+        const validationResult = await validateFR2052aData(reportDate, entity.id);
+        validationResults.push({
+          entityId: entity.id,
+          reportDate,
+          ...validationResult
+        });
+        console.log(`    ✓ Validated ${validationResult.totalRows} rows: ${validationResult.validRows} valid, ${validationResult.errorRows} with errors`);
 
-      // Save validation execution records for each rule
-      const matchingSubmission = submissions?.find(s => s.reporting_period === reportDate);
-      if (matchingSubmission && validationResult.ruleExecutions) {
+        // Find the matching submission for THIS entity and date
+        const matchingSubmission = submissions?.find(s =>
+          s.reporting_period === reportDate && s.legal_entity_id === entity.id
+        );
+
+        if (matchingSubmission && validationResult.ruleExecutions) {
         console.log(`    Saving ${validationResult.ruleExecutions.length} rule execution records...`);
         const executionRecords = validationResult.ruleExecutions.map((rule: any) => ({
           submission_id: matchingSubmission.id,
@@ -402,12 +408,12 @@ export async function seedFR2052aWithCalculations() {
         }
       }
 
-      // Create LCR calculation validation record
-      const lcrCalc = results.lcrCalculations.find((c: any) =>
-        entities.find(e => e.id === c.entityId) && reportDate === c.reportDate
-      );
+        // Create LCR calculation validation record
+        const lcrCalc = results.lcrCalculations.find((c: any) =>
+          c.entityId === entity.id && c.reportDate === reportDate
+        );
 
-      if (matchingSubmission && lcrCalc) {
+        if (matchingSubmission && lcrCalc) {
         console.log(`    Creating LCR calculation validation...`);
         const lcrValidation = {
           submission_id: matchingSubmission.id,
@@ -441,12 +447,12 @@ export async function seedFR2052aWithCalculations() {
         }
       }
 
-      // Create NSFR calculation validation record
-      const nsfrCalc = results.nsfrCalculations.find((c: any) =>
-        entities.find(e => e.id === c.entityId) && reportDate === c.reportDate
-      );
+        // Create NSFR calculation validation record
+        const nsfrCalc = results.nsfrCalculations.find((c: any) =>
+          c.entityId === entity.id && c.reportDate === reportDate
+        );
 
-      if (matchingSubmission && nsfrCalc) {
+        if (matchingSubmission && nsfrCalc) {
         console.log(`    Creating NSFR calculation validation...`);
         const nsfrValidation = {
           submission_id: matchingSubmission.id,
@@ -477,12 +483,14 @@ export async function seedFR2052aWithCalculations() {
         }
       }
 
-    } catch (error) {
-      console.error(`    ✗ Validation failed for ${reportDate}:`, error);
-      validationResults.push({
-        reportDate,
-        error: error instanceof Error ? error.message : String(error)
-      });
+      } catch (error) {
+        console.error(`    ✗ Validation failed for ${entity.entity_name} - ${reportDate}:`, error);
+        validationResults.push({
+          entityId: entity.id,
+          reportDate,
+          error: error instanceof Error ? error.message : String(error)
+        });
+      }
     }
   }
 
