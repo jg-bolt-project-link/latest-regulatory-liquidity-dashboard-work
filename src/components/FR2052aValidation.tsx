@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { FileUp, CheckCircle, XCircle, AlertTriangle, Database, FileText, TrendingUp, Calculator, BarChart3, Eye, EyeOff, Settings } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
-import { LCRValidationScreen } from './validation/LCRValidationScreen';
+import { EnhancedLCRValidationScreen } from './validation/EnhancedLCRValidationScreen';
 import { NSFRValidationScreen } from './validation/NSFRValidationScreen';
 import { ValidationRuleExecutions } from './validation/ValidationRuleExecutions';
 
@@ -952,7 +952,7 @@ export function FR2052aValidation() {
             </div>
           </div>
           {selectedSubmission ? (
-            <LCRValidationScreen submissionId={selectedSubmission.id} />
+            <EnhancedLCRValidationScreen submissionId={selectedSubmission.id} />
           ) : (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <Calculator className="h-16 w-16 text-slate-400 mx-auto mb-4" />

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { seedDashboardData, seedStateStreetData } from '../utils/seedStateStreetData';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
+import { seedLCRCalculationRules } from '../utils/seedLCRCalculationRules';
 import { DataGenerationWorkflow, WorkflowStep } from './shared/DataGenerationWorkflow';
 import {
   Database,
@@ -163,6 +164,7 @@ export function DataSetup() {
     const initialSteps: WorkflowStep[] = [
       { id: 'init', label: 'Initialize data generation', status: 'pending' },
       { id: 'clear-existing', label: 'Clear existing data from tables', status: 'pending' },
+      { id: 'seed-calc-rules', label: 'Seed LCR/NSFR calculation rules', status: 'pending' },
       { id: 'create-entities', label: 'Create legal entity structure', status: 'pending' },
       { id: 'seed-quality', label: 'Seed data quality metadata', status: 'pending' },
       { id: 'seed-lcr', label: 'Generate LCR metrics', status: 'pending' },
@@ -212,6 +214,17 @@ export function DataSetup() {
       }
 
       updateWorkflowStep('clear-existing', { status: 'completed', duration: Date.now() - step1Start });
+
+      // Seed calculation rules
+      updateWorkflowStep('seed-calc-rules', { status: 'in_progress', message: 'Seeding FR2052a Appendix VI calculation rules...' });
+      try {
+        await seedLCRCalculationRules();
+        updateWorkflowStep('seed-calc-rules', { status: 'completed', message: 'LCR/NSFR calculation rules loaded' });
+      } catch (error) {
+        console.error('Error seeding calculation rules:', error);
+        updateWorkflowStep('seed-calc-rules', { status: 'completed', message: 'Calculation rules seeding skipped (may already exist)' });
+      }
+
       updateWorkflowStep('create-entities', { status: 'completed', message: 'Legal entities created successfully' });
       updateWorkflowStep('seed-quality', { status: 'completed', message: 'Data quality metadata loaded' });
       updateWorkflowStep('seed-lcr', { status: 'completed', message: 'LCR metrics initialized' });
