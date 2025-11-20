@@ -101,9 +101,21 @@ export function NSFRValidationScreen({ submissionId }: NSFRValidationScreenProps
   if (!validation) {
     return (
       <div className="bg-white rounded-lg shadow p-8 text-center">
-        <AlertTriangle className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">No NSFR Validation Found</h3>
-        <p className="text-sm text-slate-600">NSFR calculation validation has not been performed for this submission</p>
+        <AlertTriangle className="h-16 w-16 text-orange-400 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">NSFR Validation Not Yet Performed</h3>
+        <p className="text-sm text-slate-600 mb-4">
+          NSFR calculation validation has not been executed for this submission.
+        </p>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left max-w-md mx-auto">
+          <p className="text-sm font-medium text-blue-900 mb-2">To execute NSFR validation:</p>
+          <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+            <li>Go to the <span className="font-semibold">Submissions</span> tab</li>
+            <li>Find this submission in the table</li>
+            <li>Click the <span className="font-semibold">Execute Validations</span> button</li>
+            <li>Wait for validation to complete (~2-3 seconds)</li>
+            <li>Return here to view NSFR validation results</li>
+          </ol>
+        </div>
       </div>
     );
   }

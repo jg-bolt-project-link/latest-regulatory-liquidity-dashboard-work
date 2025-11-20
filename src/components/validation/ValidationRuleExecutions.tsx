@@ -89,11 +89,21 @@ export function ValidationRuleExecutions({ submissionId }: ValidationRuleExecuti
   if (executions.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-8 text-center">
-        <AlertTriangle className="h-16 w-16 text-slate-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-slate-900 mb-2">No Validation Executions Found</h3>
-        <p className="text-sm text-slate-600">
-          Validation rules have not been executed for this submission
+        <AlertTriangle className="h-16 w-16 text-orange-400 mx-auto mb-4" />
+        <h3 className="text-lg font-semibold text-slate-900 mb-2">Data Validation Not Yet Performed</h3>
+        <p className="text-sm text-slate-600 mb-4">
+          FR2052a data validation has not been executed for this submission.
         </p>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left max-w-md mx-auto">
+          <p className="text-sm font-medium text-blue-900 mb-2">To execute data validation:</p>
+          <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+            <li>Go to the <span className="font-semibold">Submissions</span> tab</li>
+            <li>Find this submission in the table</li>
+            <li>Click the <span className="font-semibold">Execute Validations</span> button</li>
+            <li>Wait for validation to complete (~2-3 seconds)</li>
+            <li>Return here to view validation rule execution results</li>
+          </ol>
+        </div>
       </div>
     );
   }
