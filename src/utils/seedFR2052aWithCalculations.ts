@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { generateComprehensiveFR2052aData } from './generateFR2052aData';
 import { FR2052aCalculationEngine } from './fr2052aCalculations';
+import { EnhancedFR2052aCalculationEngine } from './enhancedFR2052aCalculations';
 
 // Map internal product categories to FR2052a Product enumerations
 function mapToFR2052aProduct(productCategory: string, counterpartyType: string): string {
@@ -402,13 +403,13 @@ export async function seedFR2052aWithCalculations() {
         }
       }
 
-        // Create LCR calculation validation record
+        // Create LCR calculation validation record with detailed components
         const lcrCalc = results.lcrCalculations.find((c: any) =>
           c.entityId === entity.id && c.reportDate === reportDate
         );
 
         if (matchingSubmission && lcrCalc) {
-        console.log(`    Creating LCR calculation validation...`);
+        console.log(`    Creating LCR calculation validation with component breakdown...`);
         const lcrValidation = {
           submission_id: matchingSubmission.id,
           legal_entity_id: matchingSubmission.legal_entity_id,
@@ -417,9 +418,26 @@ export async function seedFR2052aWithCalculations() {
           level1_assets_calculated: lcrCalc.level1Assets || 0,
           level1_assets_expected: lcrCalc.level1Assets || 0,
           level1_validation_status: 'passed',
+          level2a_assets_calculated: lcrCalc.level2aAssets || 0,
+          level2a_assets_expected: lcrCalc.level2aAssets || 0,
+          level2a_validation_status: 'passed',
+          level2b_assets_calculated: lcrCalc.level2bAssets || 0,
+          level2b_assets_expected: lcrCalc.level2bAssets || 0,
+          level2b_validation_status: 'passed',
           total_hqla_calculated: lcrCalc.totalHQLA || 0,
           total_hqla_expected: lcrCalc.totalHQLA || 0,
           hqla_validation_status: 'passed',
+          retail_outflows_calculated: lcrCalc.details?.retailDepositOutflows || 0,
+          wholesale_outflows_calculated: lcrCalc.details?.wholesaleFundingOutflows || 0,
+          secured_funding_outflows_calculated: lcrCalc.details?.securedFundingOutflows || 0,
+          derivatives_outflows_calculated: lcrCalc.details?.derivativesOutflows || 0,
+          other_outflows_calculated: (lcrCalc.details?.otherContractualOutflows || 0) + (lcrCalc.details?.otherContingentOutflows || 0),
+          total_outflows_calculated: lcrCalc.totalCashOutflows || 0,
+          outflows_validation_status: 'passed',
+          total_inflows_calculated: lcrCalc.totalCashInflows || 0,
+          capped_inflows_calculated: lcrCalc.details?.cappedInflows || 0,
+          inflow_cap_applied: (lcrCalc.totalCashInflows || 0) > ((lcrCalc.totalCashOutflows || 0) * 0.75),
+          inflows_validation_status: 'passed',
           net_cash_outflows_calculated: lcrCalc.netCashOutflows || 0,
           net_cash_outflows_expected: lcrCalc.netCashOutflows || 0,
           nco_validation_status: 'passed',
@@ -430,14 +448,35 @@ export async function seedFR2052aWithCalculations() {
           notes: `LCR ratio: ${(lcrCalc.lcrRatio * 100).toFixed(2)}%`
         };
 
-        const { error: lcrValError } = await supabase
+        const { data: insertedValidation, error: lcrValError } = await supabase
           .from('lcr_calculation_validations')
-          .insert(lcrValidation);
+          .insert(lcrValidation)
+          .select()
+          .single();
 
         if (lcrValError) {
           console.error(`    ⚠️ Warning: Could not save LCR validation:`, lcrValError.message);
-        } else {
-          console.log(`    ✓ LCR calculation validation saved`);
+        } else if (insertedValidation) {
+          console.log(`    ✓ LCR calculation validation saved (ID: ${insertedValidation.id})`);
+
+          // Now store detailed components using the enhanced engine
+          try {
+            console.log(`    Calculating and storing detailed component breakdowns...`);
+            const fr2052aDataForEntity = results.fr2052aRecords.filter((r: any) =>
+              r.entityId === entity.id && r.reportDate === reportDate
+            );
+
+            const enhancedEngine = new EnhancedFR2052aCalculationEngine(
+              fr2052aDataForEntity,
+              matchingSubmission.id,
+              matchingSubmission.legal_entity_id
+            );
+
+            await enhancedEngine.calculateAndStoreLCRWithComponents(insertedValidation.id);
+            console.log(`    ✓ Component breakdowns stored (HQLA, Outflows, Inflows)`);
+          } catch (componentError) {
+            console.error(`    ⚠️ Warning: Could not store component details:`, componentError);
+          }
         }
       }
 
