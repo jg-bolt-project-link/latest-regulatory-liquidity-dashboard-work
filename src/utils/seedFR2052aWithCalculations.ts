@@ -2,6 +2,41 @@ import { supabase } from '../lib/supabase';
 import { generateComprehensiveFR2052aData } from './generateFR2052aData';
 import { FR2052aCalculationEngine } from './fr2052aCalculations';
 
+// Map internal product categories to FR2052a Product enumerations
+function mapToFR2052aProduct(productCategory: string, counterpartyType: string): string {
+  // FR2052a Product enumerations: Asset, Derivative, Retail, Secured, Unsecured, Wholesale
+  const categoryMap: { [key: string]: string } = {
+    'deposits': counterpartyType.includes('retail') ? 'Retail' : 'Wholesale',
+    'loans': 'Asset',
+    'securities': 'Asset',
+    'derivatives': 'Derivative',
+    'secured_funding': 'Secured',
+    'credit_facilities': 'Unsecured',
+    'liquidity_facilities': 'Wholesale',
+    'capital': 'Asset',
+    'other_assets': 'Asset',
+    'other_liabilities': 'Unsecured'
+  };
+  return categoryMap[productCategory] || 'Asset';
+}
+
+// Map internal maturity buckets to FR2052a MaturityBucket enumerations
+function mapToFR2052aMaturityBucket(maturityBucket: string): string {
+  // FR2052a MaturityBucket enumerations: Overnight, 2-3 Days, 4-7 Days, 8-14 Days,
+  // 15-30 Days, 31-90 Days, 91-180 Days, 181-365 Days, >365 Days, Open
+  const maturityMap: { [key: string]: string } = {
+    'overnight': 'Overnight',
+    '2-7days': '4-7 Days',
+    '8-30days': '8-14 Days',  // Split between 8-14 and 15-30
+    '31-90days': '31-90 Days',
+    '91-180days': '91-180 Days',
+    '181-365days': '181-365 Days',
+    'gt_1year': '>365 Days',
+    'open': 'Open'
+  };
+  return maturityMap[maturityBucket] || 'Open';
+}
+
 export async function seedFR2052aWithCalculations() {
   console.log('=== FR 2052a Data Generation Started ===');
 
@@ -94,11 +129,11 @@ export async function seedFR2052aWithCalculations() {
         report_date: reportDate,
         table_name: 'FR2052a',
         reporting_entity: entity.entity_name,
-        product: item.productCategory,
+        product: mapToFR2052aProduct(item.productCategory, item.counterpartyType),
         sub_product: item.subProduct || null,
         sub_product2: item.assetClass || null,
         counterparty: item.counterpartyType,
-        maturity_bucket: item.maturityBucket,
+        maturity_bucket: mapToFR2052aMaturityBucket(item.maturityBucket),
         currency: item.currency,
         amount: item.outstandingBalance,
         market_value: item.outstandingBalance,
