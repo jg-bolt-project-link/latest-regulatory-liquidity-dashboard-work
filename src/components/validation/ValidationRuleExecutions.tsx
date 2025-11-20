@@ -32,13 +32,15 @@ export function ValidationRuleExecutions({ submissionId }: ValidationRuleExecuti
 
   const loadExecutions = async () => {
     setLoading(true);
+    setExecutions([]); // Clear previous data immediately
+
     const { data } = await supabase
       .from('fr2052a_validation_executions')
       .select('*')
       .eq('submission_id', submissionId)
       .order('execution_timestamp', { ascending: false });
 
-    if (data) setExecutions(data);
+    setExecutions(data || []);
     setLoading(false);
   };
 

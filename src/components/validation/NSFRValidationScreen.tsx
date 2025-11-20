@@ -57,6 +57,8 @@ export function NSFRValidationScreen({ submissionId }: NSFRValidationScreenProps
 
   const loadValidation = async () => {
     setLoading(true);
+    setValidation(null); // Clear previous data immediately
+
     const { data } = await supabase
       .from('nsfr_calculation_validations')
       .select('*')
@@ -65,7 +67,7 @@ export function NSFRValidationScreen({ submissionId }: NSFRValidationScreenProps
       .limit(1)
       .maybeSingle();
 
-    if (data) setValidation(data);
+    setValidation(data);
     setLoading(false);
   };
 

@@ -68,6 +68,8 @@ export function LCRValidationScreen({ submissionId }: LCRValidationScreenProps) 
 
   const loadValidation = async () => {
     setLoading(true);
+    setValidation(null); // Clear previous data immediately
+
     const { data } = await supabase
       .from('lcr_calculation_validations')
       .select('*')
@@ -76,7 +78,7 @@ export function LCRValidationScreen({ submissionId }: LCRValidationScreenProps) 
       .limit(1)
       .maybeSingle();
 
-    if (data) setValidation(data);
+    setValidation(data);
     setLoading(false);
   };
 
