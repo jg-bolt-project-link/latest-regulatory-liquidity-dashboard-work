@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, AlertTriangle, TrendingUp, DollarSign, Percent, Info, ChevronDown, ChevronRight, FileText, Database, List } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, AlertCircle, TrendingUp, DollarSign, Percent, Info, ChevronDown, ChevronRight, FileText, Database, List } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { SourceRecordsModal } from '../shared/SourceRecordsModal';
 
