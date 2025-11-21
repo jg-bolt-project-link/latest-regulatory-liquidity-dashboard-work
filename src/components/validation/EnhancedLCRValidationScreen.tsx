@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, AlertTriangle, TrendingUp, DollarSign, Percent, Info, ChevronDown, ChevronRight, FileText, Database } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, TrendingUp, DollarSign, Percent, Info, ChevronDown, ChevronRight, FileText, Database, List } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { SourceRecordsModal } from '../shared/SourceRecordsModal';
 
 interface LCRValidation {
   id: string;
@@ -56,6 +57,7 @@ interface HQLAComponent {
   cap_amount: number | null;
   record_count: number;
   calculation_notes: string | null;
+  fr2052a_line_references: string[];
 }
 
 interface OutflowComponent {
@@ -69,6 +71,7 @@ interface OutflowComponent {
   record_count: number;
   calculation_methodology: string | null;
   regulatory_reference: string | null;
+  fr2052a_line_references: string[];
 }
 
 interface InflowComponent {
@@ -82,6 +85,7 @@ interface InflowComponent {
   record_count: number;
   calculation_methodology: string | null;
   regulatory_reference: string | null;
+  fr2052a_line_references: string[];
 }
 
 interface CalculationRule {
@@ -110,6 +114,16 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set(['hqla', 'outflows', 'inflows']));
   const [selectedRule, setSelectedRule] = useState<CalculationRule | null>(null);
   const [showRuleModal, setShowRuleModal] = useState(false);
+  const [showSourceModal, setShowSourceModal] = useState(false);
+  const [sourceModalData, setSourceModalData] = useState<{
+    componentType: 'hqla' | 'outflow' | 'inflow';
+    componentName: string;
+    productIds: string[];
+    totalAmount: number;
+    calculatedAmount: number;
+    factor: number;
+    ruleCode: string | null;
+  } | null>(null);
 
   useEffect(() => {
     loadValidationData();
@@ -182,6 +196,27 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
       setSelectedRule(data);
       setShowRuleModal(true);
     }
+  };
+
+  const showSourceRecords = (
+    componentType: 'hqla' | 'outflow' | 'inflow',
+    componentName: string,
+    productIds: string[],
+    totalAmount: number,
+    calculatedAmount: number,
+    factor: number,
+    ruleCode: string | null
+  ) => {
+    setSourceModalData({
+      componentType,
+      componentName,
+      productIds,
+      totalAmount,
+      calculatedAmount,
+      factor,
+      ruleCode
+    });
+    setShowSourceModal(true);
   };
 
   const formatCurrency = (value: number) => {
@@ -316,13 +351,31 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
                 <div key={component.id} className="bg-white rounded border border-green-200 p-3 mb-2">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-medium text-slate-900">{component.hqla_category}</span>
-                    <button
-                      onClick={() => showRuleDetails('HQLA_L1_' + component.product_category.toUpperCase())}
-                      className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                    >
-                      <Info className="h-3 w-3" />
-                      View Rule
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => showSourceRecords(
+                          'hqla',
+                          component.hqla_category,
+                          component.fr2052a_line_references || [],
+                          component.total_amount,
+                          component.liquidity_value,
+                          component.liquidity_value_factor,
+                          'HQLA_L1_' + component.product_category.toUpperCase()
+                        )}
+                        className="text-xs text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
+                        title="View source FR2052a records"
+                      >
+                        <List className="h-3 w-3" />
+                        View Records
+                      </button>
+                      <button
+                        onClick={() => showRuleDetails('HQLA_L1_' + component.product_category.toUpperCase())}
+                        className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                      >
+                        <Info className="h-3 w-3" />
+                        View Rule
+                      </button>
+                    </div>
                   </div>
                   <div className="grid grid-cols-4 gap-3 text-sm">
                     <div>
@@ -838,6 +891,22 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
             </div>
           </div>
         </div>
+      )}
+
+      {/* Source Records Modal */}
+      {sourceModalData && (
+        <SourceRecordsModal
+          isOpen={showSourceModal}
+          onClose={() => setShowSourceModal(false)}
+          componentType={sourceModalData.componentType}
+          componentName={sourceModalData.componentName}
+          submissionId={submissionId}
+          productIds={sourceModalData.productIds}
+          totalAmount={sourceModalData.totalAmount}
+          calculatedAmount={sourceModalData.calculatedAmount}
+          factor={sourceModalData.factor}
+          ruleCode={sourceModalData.ruleCode}
+        />
       )}
     </div>
   );
