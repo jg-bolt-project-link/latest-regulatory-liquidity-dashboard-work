@@ -58,6 +58,7 @@ interface HQLAComponent {
   record_count: number;
   calculation_notes: string | null;
   fr2052a_line_references: string[];
+  rule_code?: string;
 }
 
 interface OutflowComponent {
@@ -72,6 +73,7 @@ interface OutflowComponent {
   calculation_methodology: string | null;
   regulatory_reference: string | null;
   fr2052a_line_references: string[];
+  rule_code?: string;
 }
 
 interface InflowComponent {
@@ -86,6 +88,7 @@ interface InflowComponent {
   calculation_methodology: string | null;
   regulatory_reference: string | null;
   fr2052a_line_references: string[];
+  rule_code?: string;
 }
 
 interface CalculationRule {
