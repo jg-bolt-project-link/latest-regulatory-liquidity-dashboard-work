@@ -347,59 +347,72 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
                 {getStatusIcon(validation.level1_validation_status)}
               </div>
 
-              {hqlaComponents.filter(c => c.hqla_level === 1).map((component) => (
-                <div key={component.id} className="bg-white rounded border border-green-200 p-3 mb-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-slate-900">{component.hqla_category}</span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => showSourceRecords(
-                          'hqla',
-                          component.hqla_category,
-                          component.fr2052a_line_references || [],
-                          component.total_amount,
-                          component.liquidity_value,
-                          component.liquidity_value_factor,
-                          'HQLA_L1_' + component.product_category.toUpperCase()
-                        )}
-                        className="text-xs text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
-                        title="View source FR2052a records"
-                      >
-                        <List className="h-3 w-3" />
-                        View Records
-                      </button>
-                      <button
-                        onClick={() => showRuleDetails('HQLA_L1_' + component.product_category.toUpperCase())}
-                        className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                      >
-                        <Info className="h-3 w-3" />
-                        View Rule
-                      </button>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-4 gap-3 text-sm">
-                    <div>
-                      <p className="text-xs text-slate-600">Total Amount</p>
-                      <p className="font-semibold text-slate-900">{formatCurrency(component.total_amount)}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-600">Haircut Rate</p>
-                      <p className="font-semibold text-slate-900">{formatPercent(component.haircut_rate)}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-600">Liquidity Value Factor</p>
-                      <p className="font-semibold text-green-700">{formatPercent(component.liquidity_value_factor)}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-slate-600">Liquidity Value</p>
-                      <p className="font-bold text-green-600">{formatCurrency(component.liquidity_value)}</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-slate-500 mt-2">
-                    {component.record_count} FR2052a records • {component.calculation_notes || 'No haircut, 100% liquidity value'}
+              {hqlaComponents.filter(c => c.hqla_level === 1).length === 0 ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+                  <AlertCircle className="h-8 w-8 text-amber-600 mx-auto mb-2" />
+                  <p className="text-sm text-amber-900 font-medium mb-1">No component data available</p>
+                  <p className="text-xs text-amber-800">
+                    Component breakdown data needs to be generated. Go to <strong>Data Setup</strong> and click <strong>"Generate Sample Data"</strong> to populate detailed component breakdowns.
+                  </p>
+                  <p className="text-xs text-amber-700 mt-2">
+                    Summary total shown below was calculated with old method.
                   </p>
                 </div>
-              ))}
+              ) : (
+                hqlaComponents.filter(c => c.hqla_level === 1).map((component) => (
+                  <div key={component.id} className="bg-white rounded border border-green-200 p-3 mb-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-slate-900">{component.hqla_category}</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => showSourceRecords(
+                            'hqla',
+                            component.hqla_category,
+                            component.fr2052a_line_references || [],
+                            component.total_amount,
+                            component.liquidity_value,
+                            component.liquidity_value_factor,
+                            'HQLA_L1_' + component.product_category.toUpperCase()
+                          )}
+                          className="text-xs text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
+                          title="View source FR2052a records"
+                        >
+                          <List className="h-3 w-3" />
+                          View Records
+                        </button>
+                        <button
+                          onClick={() => showRuleDetails('HQLA_L1_' + component.product_category.toUpperCase())}
+                          className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        >
+                          <Info className="h-3 w-3" />
+                          View Rule
+                        </button>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-4 gap-3 text-sm">
+                      <div>
+                        <p className="text-xs text-slate-600">Total Amount</p>
+                        <p className="font-semibold text-slate-900">{formatCurrency(component.total_amount)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-600">Haircut Rate</p>
+                        <p className="font-semibold text-slate-900">{formatPercent(component.haircut_rate)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-600">Liquidity Value Factor</p>
+                        <p className="font-semibold text-green-700">{formatPercent(component.liquidity_value_factor)}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-600">Liquidity Value</p>
+                        <p className="font-bold text-green-600">{formatCurrency(component.liquidity_value)}</p>
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-2">
+                      {component.record_count} FR2052a records • {component.calculation_notes || 'No haircut, 100% liquidity value'}
+                    </p>
+                  </div>
+                ))
+              )}
 
               <div className="flex justify-between items-center pt-3 border-t-2 border-green-300 mt-3">
                 <span className="font-bold text-slate-900">Level 1 Total Liquidity Value</span>
@@ -414,18 +427,45 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
                 {getStatusIcon(validation.level2a_validation_status)}
               </div>
 
-              {hqlaComponents.filter(c => c.hqla_level === 2).map((component) => (
-                <div key={component.id} className="bg-white rounded border border-blue-200 p-3 mb-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-slate-900">{component.hqla_category}</span>
-                    <button
-                      onClick={() => showRuleDetails('HQLA_L2A_GSE')}
-                      className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                    >
-                      <Info className="h-3 w-3" />
-                      View Rule
-                    </button>
-                  </div>
+              {hqlaComponents.filter(c => c.hqla_level === 2).length === 0 ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+                  <AlertCircle className="h-8 w-8 text-amber-600 mx-auto mb-2" />
+                  <p className="text-sm text-amber-900 font-medium mb-1">No component data available</p>
+                  <p className="text-xs text-amber-800">
+                    Component breakdown data needs to be generated. Go to <strong>Data Setup</strong> and click <strong>"Generate Sample Data"</strong>.
+                  </p>
+                </div>
+              ) : (
+                hqlaComponents.filter(c => c.hqla_level === 2).map((component) => (
+                  <div key={component.id} className="bg-white rounded border border-blue-200 p-3 mb-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-slate-900">{component.hqla_category}</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => showSourceRecords(
+                            'hqla',
+                            component.hqla_category,
+                            component.fr2052a_line_references || [],
+                            component.total_amount,
+                            component.liquidity_value,
+                            component.liquidity_value_factor,
+                            'HQLA_L2A_GSE'
+                          )}
+                          className="text-xs text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
+                          title="View source FR2052a records"
+                        >
+                          <List className="h-3 w-3" />
+                          View Records
+                        </button>
+                        <button
+                          onClick={() => showRuleDetails('HQLA_L2A_GSE')}
+                          className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        >
+                          <Info className="h-3 w-3" />
+                          View Rule
+                        </button>
+                      </div>
+                    </div>
                   <div className="grid grid-cols-4 gap-3 text-sm">
                     <div>
                       <p className="text-xs text-slate-600">Total Amount</p>
@@ -444,11 +484,12 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
                       <p className="font-bold text-blue-600">{formatCurrency(component.liquidity_value)}</p>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-500 mt-2">
-                    {component.record_count} FR2052a records • {component.calculation_notes || '15% haircut applied, 85% liquidity value'}
-                  </p>
-                </div>
-              ))}
+                    <p className="text-xs text-slate-500 mt-2">
+                      {component.record_count} FR2052a records • {component.calculation_notes || '15% haircut applied, 85% liquidity value'}
+                    </p>
+                  </div>
+                ))
+              )}
 
               {validation.level2a_cap_applied && (
                 <div className="bg-yellow-50 border border-yellow-300 rounded p-3 mb-2">
@@ -471,18 +512,45 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
                 {getStatusIcon(validation.level2b_validation_status)}
               </div>
 
-              {hqlaComponents.filter(c => c.hqla_level === 3).map((component) => (
-                <div key={component.id} className="bg-white rounded border border-purple-200 p-3 mb-2">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-slate-900">{component.hqla_category}</span>
-                    <button
-                      onClick={() => showRuleDetails('HQLA_L2B_CORPORATE')}
-                      className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
-                    >
-                      <Info className="h-3 w-3" />
-                      View Rule
-                    </button>
-                  </div>
+              {hqlaComponents.filter(c => c.hqla_level === 3).length === 0 ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-center">
+                  <AlertCircle className="h-8 w-8 text-amber-600 mx-auto mb-2" />
+                  <p className="text-sm text-amber-900 font-medium mb-1">No component data available</p>
+                  <p className="text-xs text-amber-800">
+                    Component breakdown data needs to be generated. Go to <strong>Data Setup</strong> and click <strong>"Generate Sample Data"</strong>.
+                  </p>
+                </div>
+              ) : (
+                hqlaComponents.filter(c => c.hqla_level === 3).map((component) => (
+                  <div key={component.id} className="bg-white rounded border border-purple-200 p-3 mb-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium text-slate-900">{component.hqla_category}</span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => showSourceRecords(
+                            'hqla',
+                            component.hqla_category,
+                            component.fr2052a_line_references || [],
+                            component.total_amount,
+                            component.liquidity_value,
+                            component.liquidity_value_factor,
+                            'HQLA_L2B_CORPORATE'
+                          )}
+                          className="text-xs text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
+                          title="View source FR2052a records"
+                        >
+                          <List className="h-3 w-3" />
+                          View Records
+                        </button>
+                        <button
+                          onClick={() => showRuleDetails('HQLA_L2B_CORPORATE')}
+                          className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                        >
+                          <Info className="h-3 w-3" />
+                          View Rule
+                        </button>
+                      </div>
+                    </div>
                   <div className="grid grid-cols-4 gap-3 text-sm">
                     <div>
                       <p className="text-xs text-slate-600">Total Amount</p>
@@ -501,11 +569,12 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
                       <p className="font-bold text-purple-600">{formatCurrency(component.liquidity_value)}</p>
                     </div>
                   </div>
-                  <p className="text-xs text-slate-500 mt-2">
-                    {component.record_count} FR2052a records • {component.calculation_notes || '50% haircut applied, 50% liquidity value'}
-                  </p>
-                </div>
-              ))}
+                    <p className="text-xs text-slate-500 mt-2">
+                      {component.record_count} FR2052a records • {component.calculation_notes || '50% haircut applied, 50% liquidity value'}
+                    </p>
+                  </div>
+                ))
+              )}
 
               {validation.level2b_cap_applied && (
                 <div className="bg-yellow-50 border border-yellow-300 rounded p-3 mb-2">
