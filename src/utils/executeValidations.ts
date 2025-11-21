@@ -214,6 +214,42 @@ export async function executeValidationsForSubmission(
             submission.legal_entity_id
           );
 
+          // Save FR2052a data rows to database for source record traceability
+          console.log(`  Saving ${fr2052aData.length} FR2052a line items to database...`);
+          const fr2052aRows = fr2052aData.map(item => ({
+            submission_id: submissionId,
+            product_id: item.productId,
+            product_name: item.productName,
+            product_category: item.productCategory,
+            sub_product: item.subProduct,
+            maturity_bucket: item.maturityBucket,
+            counterparty_type: item.counterpartyType,
+            asset_class: item.assetClass,
+            outstanding_balance: item.outstandingBalance,
+            projected_cash_inflow: item.projectedCashInflow,
+            projected_cash_outflow: item.projectedCashOutflow,
+            is_hqla: item.isHQLA,
+            hqla_level: item.hqlaLevel,
+            haircut: item.haircut,
+            runoff_rate: item.runoffRate,
+            encumbered_amount: item.encumberedAmount,
+            currency: item.currency
+          }));
+
+          // Insert in batches to avoid hitting size limits
+          const batchSize = 500;
+          for (let i = 0; i < fr2052aRows.length; i += batchSize) {
+            const batch = fr2052aRows.slice(i, i + batchSize);
+            const { error: insertError } = await supabase
+              .from('fr2052a_data_rows')
+              .insert(batch);
+
+            if (insertError) {
+              console.error(`  ⚠️  Error inserting FR2052a batch ${i / batchSize + 1}:`, insertError);
+            }
+          }
+          console.log(`  ✓ FR2052a line items saved to database`);
+
           // Initialize enhanced calculation engine
           const enhancedEngine = new EnhancedFR2052aCalculationEngine(
             fr2052aData,
