@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { validateFR2052aData } from './fr2052aValidation';
+import { EnhancedFR2052aCalculationEngine } from './enhancedFR2052aCalculations';
+import { generateComprehensiveFR2052aData } from './generateFR2052aData';
 
 export interface ValidationExecutionResult {
   success: boolean;
@@ -182,12 +184,14 @@ export async function executeValidationsForSubmission(
         notes: `LCR ratio: ${(lcrMetrics.lcr_ratio * 100).toFixed(2)}% ${lcrMetrics.is_compliant ? '✓ Compliant' : '⚠ Non-compliant'}`
       };
 
-      const { error: lcrValError } = await supabase
+      const { data: insertedLcrValidation, error: lcrValError } = await supabase
         .from('lcr_calculation_validations')
-        .insert(lcrValidation);
+        .insert(lcrValidation)
+        .select()
+        .maybeSingle();
 
-      if (lcrValError) {
-        console.error(`  ⚠️  Could not save LCR validation:`, lcrValError.message);
+      if (lcrValError || !insertedLcrValidation) {
+        console.error(`  ⚠️  Could not save LCR validation:`, lcrValError?.message);
         result.steps.lcrValidation.executed = false;
       } else {
         result.steps.lcrValidation = {
@@ -199,6 +203,31 @@ export async function executeValidationsForSubmission(
         console.log(`  ✓ LCR validation saved`);
         console.log(`    LCR Ratio: ${(lcrMetrics.lcr_ratio * 100).toFixed(2)}%`);
         console.log(`    Status: ${lcrMetrics.is_compliant ? 'COMPLIANT' : 'NON-COMPLIANT'}`);
+
+        // ========== POPULATE COMPONENT BREAKDOWNS ==========
+        try {
+          console.log(`  Generating detailed component breakdowns...`);
+
+          // Generate FR2052a data for this entity and period
+          const fr2052aData = generateComprehensiveFR2052aData(
+            submission.reporting_period,
+            submission.legal_entity_id
+          );
+
+          // Initialize enhanced calculation engine
+          const enhancedEngine = new EnhancedFR2052aCalculationEngine(
+            fr2052aData,
+            submissionId,
+            submission.legal_entity_id
+          );
+
+          // Calculate and store component breakdowns
+          await enhancedEngine.calculateAndStoreLCRWithComponents(insertedLcrValidation.id);
+
+          console.log(`  ✓ Component breakdowns stored (HQLA, Outflows, Inflows)`);
+        } catch (componentError: any) {
+          console.error(`  ⚠️  Warning: Could not store component details:`, componentError.message);
+        }
       }
     } else {
       console.log(`  ⚠️  No LCR metrics found - skipping LCR validation`);
