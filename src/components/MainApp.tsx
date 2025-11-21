@@ -12,11 +12,11 @@ import { DataQualityDashboardNew } from './DataQualityDashboardNew';
 import { FR2052aDetailView } from './executive/FR2052aDetailView';
 import { FR2052aValidation } from './FR2052aValidation';
 import { DataSetup } from './DataSetup';
+import { ApplicationValidations } from './ApplicationValidations';
 import { supabase } from '../lib/supabase';
 import { seedStateStreetData } from '../utils/seedStateStreetData';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
 import { ChatAssistant } from './shared/ChatAssistant';
-import { ScreenValidator } from './shared/ScreenValidator';
 import {
   LayoutDashboard,
   FileText,
@@ -50,13 +50,12 @@ type ViewType =
   | 'data-quality'
   | 'data-setup'
   | 'fr2052a'
-  | 'fr2052a-validation';
+  | 'fr2052a-validation'
+  | 'app-validations';
 
 export function MainApp() {
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [showValidator, setShowValidator] = useState(true);
-  const [validationPassed, setValidationPassed] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
   const [hasInitialized, setHasInitialized] = useState(false);
 
@@ -98,10 +97,6 @@ export function MainApp() {
     initializeData();
   }, [hasInitialized, isInitializing]);
 
-  const handleValidationComplete = (allPassed: boolean) => {
-    setValidationPassed(allPassed);
-    setShowValidator(false);
-  };
 
   const navigationItems = [
     { id: 'dashboard', label: 'Executive Dashboard', icon: LayoutDashboard },
@@ -114,6 +109,7 @@ export function MainApp() {
     { id: 'data-quality', label: 'Data Quality', icon: CheckCircle },
     { id: 'fr2052a', label: 'FR 2052a Report', icon: Database },
     { id: 'fr2052a-validation', label: 'FR 2052a Validation', icon: FileCheck },
+    { id: 'app-validations', label: 'Application Validations', icon: CheckCircle },
     { id: 'accounts', label: 'Accounts', icon: Wallet },
     { id: 'transactions', label: 'Transactions', icon: Receipt },
     { id: 'reports', label: 'Reports', icon: FileText },
@@ -141,6 +137,8 @@ export function MainApp() {
         return <FR2052aDetailView onNavigate={setActiveView} />;
       case 'fr2052a-validation':
         return <FR2052aValidation />;
+      case 'app-validations':
+        return <ApplicationValidations />;
       case 'accounts':
         return <Accounts />;
       case 'transactions':
@@ -154,7 +152,6 @@ export function MainApp() {
 
   return (
     <>
-      {showValidator && <ScreenValidator onValidationComplete={handleValidationComplete} autoClose={true} />}
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex">
       <aside
         className={`${
