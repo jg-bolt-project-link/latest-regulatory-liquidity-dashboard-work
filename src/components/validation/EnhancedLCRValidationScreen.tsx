@@ -372,7 +372,7 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
                             component.total_amount,
                             component.liquidity_value,
                             component.liquidity_value_factor,
-                            'HQLA_L1_' + component.product_category.toUpperCase()
+                            component.rule_code || null
                           )}
                           className="text-xs text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
                           title="View source FR2052a records"
@@ -381,7 +381,7 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
                           View Records
                         </button>
                         <button
-                          onClick={() => showRuleDetails('HQLA_L1_' + component.product_category.toUpperCase())}
+                          onClick={() => showRuleDetails(component.rule_code || '')}
                           className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
                         >
                           <Info className="h-3 w-3" />
@@ -449,7 +449,7 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
                             component.total_amount,
                             component.liquidity_value,
                             component.liquidity_value_factor,
-                            'HQLA_L2A_GSE'
+                            component.rule_code || null
                           )}
                           className="text-xs text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
                           title="View source FR2052a records"
@@ -458,7 +458,7 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
                           View Records
                         </button>
                         <button
-                          onClick={() => showRuleDetails('HQLA_L2A_GSE')}
+                          onClick={() => showRuleDetails(component.rule_code || '')}
                           className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
                         >
                           <Info className="h-3 w-3" />
@@ -534,7 +534,7 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
                             component.total_amount,
                             component.liquidity_value,
                             component.liquidity_value_factor,
-                            'HQLA_L2B_CORPORATE'
+                            component.rule_code || null
                           )}
                           className="text-xs text-emerald-600 hover:text-emerald-800 flex items-center gap-1"
                           title="View source FR2052a records"
@@ -543,7 +543,7 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
                           View Records
                         </button>
                         <button
-                          onClick={() => showRuleDetails('HQLA_L2B_CORPORATE')}
+                          onClick={() => showRuleDetails(component.rule_code || '')}
                           className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
                         >
                           <Info className="h-3 w-3" />

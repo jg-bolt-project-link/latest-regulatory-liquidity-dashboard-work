@@ -14,6 +14,7 @@ interface HQLAComponentDetail {
   fr2052a_line_references: string[];
   record_count: number;
   calculation_notes: string;
+  rule_code: string;
 }
 
 interface OutflowComponentDetail {
@@ -28,6 +29,7 @@ interface OutflowComponentDetail {
   record_count: number;
   calculation_methodology: string;
   regulatory_reference: string;
+  rule_code: string;
 }
 
 interface InflowComponentDetail {
@@ -42,6 +44,7 @@ interface InflowComponentDetail {
   record_count: number;
   calculation_methodology: string;
   regulatory_reference: string;
+  rule_code: string;
 }
 
 export class EnhancedFR2052aCalculationEngine extends FR2052aCalculationEngine {
@@ -112,18 +115,27 @@ export class EnhancedFR2052aCalculationEngine extends FR2052aCalculationEngine {
       let liquidityValueFactor = 1.0;
       let categoryName = 'Level 1 Assets';
       let notes = 'No haircut, 100% liquidity value';
+      let ruleCode = 'HQLA_L1_CASH';
 
       if (group.level === 1) {
         liquidityValueFactor = 1.0;
-        categoryName = group.category === 'cash' ? 'Cash and Central Bank Reserves' : 'U.S. Treasury Securities';
+        if (group.category === 'cash') {
+          categoryName = 'Cash and Central Bank Reserves';
+          ruleCode = 'HQLA_L1_CASH';
+        } else {
+          categoryName = 'U.S. Treasury Securities';
+          ruleCode = 'HQLA_L1_SOVEREIGN';
+        }
         notes = 'Level 1 HQLA: No haircut, 100% liquidity value';
       } else if (group.level === 2) {
         liquidityValueFactor = 0.85;
         categoryName = 'GSE Securities';
+        ruleCode = 'HQLA_L2A_GSE';
         notes = 'Level 2A HQLA: 15% haircut, 85% liquidity value';
       } else if (group.level === 3) {
         liquidityValueFactor = 0.50;
         categoryName = 'Corporate Debt Securities';
+        ruleCode = 'HQLA_L2B_CORPORATE';
         notes = 'Level 2B HQLA: 50% haircut, 50% liquidity value';
       }
 
@@ -141,7 +153,8 @@ export class EnhancedFR2052aCalculationEngine extends FR2052aCalculationEngine {
         liquidity_value: liquidityValue,
         fr2052a_line_references: group.items.map(item => item.productId),
         record_count: group.items.length,
-        calculation_notes: notes
+        calculation_notes: notes,
+        rule_code: ruleCode
       });
     });
 
@@ -318,7 +331,8 @@ export class EnhancedFR2052aCalculationEngine extends FR2052aCalculationEngine {
         fr2052a_line_references: group.items.map(item => item.productId),
         record_count: group.items.length,
         calculation_methodology: methodology,
-        regulatory_reference: regulatoryReference
+        regulatory_reference: regulatoryReference,
+        rule_code: regulatoryReference
       });
     });
 
@@ -400,7 +414,8 @@ export class EnhancedFR2052aCalculationEngine extends FR2052aCalculationEngine {
         fr2052a_line_references: group.items.map(item => item.productId),
         record_count: group.items.length,
         calculation_methodology: methodology,
-        regulatory_reference: regulatoryReference
+        regulatory_reference: regulatoryReference,
+        rule_code: regulatoryReference
       });
     });
 
