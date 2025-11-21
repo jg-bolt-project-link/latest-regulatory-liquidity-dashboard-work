@@ -42,7 +42,7 @@ export function LCRView({ onBack }: LCRViewProps) {
       .order('report_date', { ascending: false })
       .limit(30);
 
-    console.log('LCR Metrics loaded:', { data, error, 'N/A' });
+    console.log('LCR Metrics loaded:', { data, error });
 
     if (data) setMetrics(data);
     setLoading(false);

@@ -41,7 +41,7 @@ export function NSFRView({ onBack }: NSFRViewProps) {
       .order('report_date', { ascending: false })
       .limit(20);
 
-    console.log('NSFR Metrics loaded:', { data, error, 'N/A' });
+    console.log('NSFR Metrics loaded:', { data, error });
 
     if (data) setMetrics(data);
     setLoading(false);
