@@ -189,15 +189,29 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
   };
 
   const showRuleDetails = async (ruleCode: string) => {
-    const { data } = await supabase
+    if (!ruleCode) {
+      console.error('No rule code provided');
+      return;
+    }
+
+    console.log('Fetching rule details for:', ruleCode);
+    const { data, error } = await supabase
       .from('lcr_calculation_rules')
       .select('*')
       .eq('rule_code', ruleCode)
       .maybeSingle();
 
+    if (error) {
+      console.error('Error fetching rule:', error);
+      return;
+    }
+
     if (data) {
+      console.log('Rule data loaded:', data);
       setSelectedRule(data);
       setShowRuleModal(true);
+    } else {
+      console.warn('No rule found for code:', ruleCode);
     }
   };
 
