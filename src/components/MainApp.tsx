@@ -13,6 +13,7 @@ import { FR2052aDetailView } from './executive/FR2052aDetailView';
 import { FR2052aValidation } from './FR2052aValidation';
 import { DataSetup } from './DataSetup';
 import { ApplicationValidations } from './ApplicationValidations';
+import { CalculationRules } from './CalculationRules';
 import { supabase } from '../lib/supabase';
 import { seedStateStreetData } from '../utils/seedStateStreetData';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
@@ -34,7 +35,8 @@ import {
   Menu,
   X,
   FileCheck,
-  Settings
+  Settings,
+  BookOpen
 } from 'lucide-react';
 
 type ViewType =
@@ -51,7 +53,8 @@ type ViewType =
   | 'data-setup'
   | 'fr2052a'
   | 'fr2052a-validation'
-  | 'app-validations';
+  | 'app-validations'
+  | 'calc-rules';
 
 export function MainApp() {
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
@@ -109,6 +112,7 @@ export function MainApp() {
     { id: 'data-quality', label: 'Data Quality', icon: CheckCircle },
     { id: 'fr2052a', label: 'FR 2052a Report', icon: Database },
     { id: 'fr2052a-validation', label: 'FR 2052a Validation', icon: FileCheck },
+    { id: 'calc-rules', label: 'Calculation Rules', icon: BookOpen },
     { id: 'app-validations', label: 'Application Validations', icon: CheckCircle },
     { id: 'accounts', label: 'Accounts', icon: Wallet },
     { id: 'transactions', label: 'Transactions', icon: Receipt },
@@ -137,6 +141,8 @@ export function MainApp() {
         return <FR2052aDetailView onNavigate={setActiveView} />;
       case 'fr2052a-validation':
         return <FR2052aValidation />;
+      case 'calc-rules':
+        return <CalculationRules />;
       case 'app-validations':
         return <ApplicationValidations />;
       case 'accounts':
