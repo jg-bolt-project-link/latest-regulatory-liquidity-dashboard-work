@@ -99,8 +99,14 @@ export function RegulatoryCompliance() {
 
   const handleSeedData = async () => {
     setLoading(true);
-    await seedRegulatoryRules();
-    await loadData();
+    try {
+      await seedRegulatoryRules();
+      await loadData();
+    } catch (error) {
+      console.error('Error seeding regulatory rules:', error);
+      alert(`Failed to initialize regulatory rules: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setLoading(false);
+    }
   };
 
   const toggleRule = (ruleId: string) => {

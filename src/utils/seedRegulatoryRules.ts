@@ -4,13 +4,18 @@ export async function seedRegulatoryRules() {
   console.log('🔧 Seeding regulatory rules...');
 
   // Get framework IDs
-  const { data: frameworks } = await supabase
+  const { data: frameworks, error: fwError } = await supabase
     .from('regulatory_frameworks')
     .select('id, framework_code');
 
-  if (!frameworks) {
+  if (fwError) {
+    console.error('Error loading frameworks:', fwError);
+    throw new Error(`Failed to load frameworks: ${fwError.message}`);
+  }
+
+  if (!frameworks || frameworks.length === 0) {
     console.error('No frameworks found');
-    return;
+    throw new Error('No regulatory frameworks found. Database may not be initialized.');
   }
 
   const regYY = frameworks.find(f => f.framework_code === 'REG_YY')?.id;
@@ -18,8 +23,9 @@ export async function seedRegulatoryRules() {
   const regQQ = frameworks.find(f => f.framework_code === 'REG_QQ')?.id;
   const nsfr = frameworks.find(f => f.framework_code === 'NSFR')?.id;
 
+  console.log('Creating LCR rule...');
   // Rule 1: LCR
-  const { data: lcrRule } = await supabase
+  const { data: lcrRule, error: lcrError } = await supabase
     .from('regulatory_rules')
     .insert({
       framework_id: regYY,
@@ -34,6 +40,11 @@ export async function seedRegulatoryRules() {
     })
     .select()
     .single();
+
+  if (lcrError) {
+    console.error('Error creating LCR rule:', lcrError);
+    throw new Error(`Failed to create LCR rule: ${lcrError.message}`);
+  }
 
   if (lcrRule) {
     await supabase.from('rule_implementations').insert([
