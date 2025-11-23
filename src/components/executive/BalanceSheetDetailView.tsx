@@ -127,47 +127,49 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
         </button>
       </div>
 
-      <div className="flex items-center gap-4 mb-6">
+      <div className="flex items-center gap-3 mb-6">
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-slate-900">Balance Sheet & Interest Rate Risk</h1>
           <p className="text-sm text-slate-600">Comprehensive balance sheet composition and IRRBB analysis</p>
         </div>
-        <button
-          onClick={() => {
-            const priorBS = balanceSheetMetrics.length > 1 ? balanceSheetMetrics[1] : null;
-            exportBalanceSheetToPPT({
-              currentAssets: latestBS ? formatCurrency(latestBS.total_assets) : 'N/A',
-              priorAssets: priorBS ? formatCurrency(priorBS.total_assets) : undefined,
-              assetsDelta: priorBS ? `${((latestBS!.total_assets - priorBS.total_assets) / priorBS.total_assets * 100).toFixed(1)}%` : undefined,
-              currentLiabilities: latestBS ? formatCurrency(latestBS.total_liabilities) : 'N/A',
-              priorLiabilities: priorBS ? formatCurrency(priorBS.total_liabilities) : undefined,
-              liabilitiesDelta: priorBS ? `${((latestBS!.total_liabilities - priorBS.total_liabilities) / priorBS.total_liabilities * 100).toFixed(1)}%` : undefined,
-              currentEquity: latestBS ? formatCurrency(latestBS.total_equity) : 'N/A',
-              priorEquity: priorBS ? formatCurrency(priorBS.total_equity) : undefined,
-              equityDelta: priorBS ? `${((latestBS!.total_equity - priorBS.total_equity) / priorBS.total_equity * 100).toFixed(1)}%` : undefined,
-              currentTier1Ratio: latestBS ? formatPercent(latestBS.tier1_capital_ratio) : 'N/A',
-              priorTier1Ratio: priorBS ? formatPercent(priorBS.tier1_capital_ratio) : undefined,
-              tier1RatioDelta: priorBS ? `${(latestBS!.tier1_capital_ratio - priorBS.tier1_capital_ratio).toFixed(2)}%` : undefined,
-              currentLeverageRatio: latestBS ? formatPercent(latestBS.leverage_ratio) : 'N/A',
-              priorLeverageRatio: priorBS ? formatPercent(priorBS.leverage_ratio) : undefined,
-              leverageRatioDelta: priorBS ? `${(latestBS!.leverage_ratio - priorBS.leverage_ratio).toFixed(2)}%` : undefined,
-              currentDate: latestBS ? formatDate(latestBS.report_date) : undefined,
-              priorDate: priorBS ? formatDate(priorBS.report_date) : undefined,
-              tier1Status: latestBS && latestBS.tier1_capital_ratio >= 6 ? 'compliant' : 'warning',
-              leverageStatus: latestBS && latestBS.leverage_ratio >= 5 ? 'compliant' : 'warning'
-            });
-          }}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          disabled={!latestBS}
-        >
-          <FileDown className="w-4 h-4" />
-          <span>Export to PowerPoint</span>
-        </button>
-        <div className="w-80">
-          <LegalEntityFilter
-            selectedEntityId={selectedEntityId}
-            onEntityChange={setSelectedEntityId}
-          />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              const priorBS = balanceSheetMetrics.length > 1 ? balanceSheetMetrics[1] : null;
+              exportBalanceSheetToPPT({
+                currentAssets: latestBS ? formatCurrency(latestBS.total_assets) : 'N/A',
+                priorAssets: priorBS ? formatCurrency(priorBS.total_assets) : undefined,
+                assetsDelta: priorBS ? `${((latestBS!.total_assets - priorBS.total_assets) / priorBS.total_assets * 100).toFixed(1)}%` : undefined,
+                currentLiabilities: latestBS ? formatCurrency(latestBS.total_liabilities) : 'N/A',
+                priorLiabilities: priorBS ? formatCurrency(priorBS.total_liabilities) : undefined,
+                liabilitiesDelta: priorBS ? `${((latestBS!.total_liabilities - priorBS.total_liabilities) / priorBS.total_liabilities * 100).toFixed(1)}%` : undefined,
+                currentEquity: latestBS ? formatCurrency(latestBS.total_equity) : 'N/A',
+                priorEquity: priorBS ? formatCurrency(priorBS.total_equity) : undefined,
+                equityDelta: priorBS ? `${((latestBS!.total_equity - priorBS.total_equity) / priorBS.total_equity * 100).toFixed(1)}%` : undefined,
+                currentTier1Ratio: latestBS ? formatPercent(latestBS.tier1_capital_ratio) : 'N/A',
+                priorTier1Ratio: priorBS ? formatPercent(priorBS.tier1_capital_ratio) : undefined,
+                tier1RatioDelta: priorBS ? `${(latestBS!.tier1_capital_ratio - priorBS.tier1_capital_ratio).toFixed(2)}%` : undefined,
+                currentLeverageRatio: latestBS ? formatPercent(latestBS.leverage_ratio) : 'N/A',
+                priorLeverageRatio: priorBS ? formatPercent(priorBS.leverage_ratio) : undefined,
+                leverageRatioDelta: priorBS ? `${(latestBS!.leverage_ratio - priorBS.leverage_ratio).toFixed(2)}%` : undefined,
+                currentDate: latestBS ? formatDate(latestBS.report_date) : undefined,
+                priorDate: priorBS ? formatDate(priorBS.report_date) : undefined,
+                tier1Status: latestBS && latestBS.tier1_capital_ratio >= 6 ? 'compliant' : 'warning',
+                leverageStatus: latestBS && latestBS.leverage_ratio >= 5 ? 'compliant' : 'warning'
+              });
+            }}
+            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={!latestBS}
+            title="Export to PowerPoint"
+          >
+            <FileDown className="w-4 h-4" />
+          </button>
+          <div className="w-72">
+            <LegalEntityFilter
+              selectedEntityId={selectedEntityId}
+              onEntityChange={setSelectedEntityId}
+            />
+          </div>
         </div>
       </div>
 
