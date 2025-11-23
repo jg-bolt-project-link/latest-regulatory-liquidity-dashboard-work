@@ -281,12 +281,16 @@ export async function executeValidationsForSubmission(
     console.log('\n[3/3] Executing NSFR calculation validation...');
 
     // Get NSFR metrics for this entity and period
-    const { data: nsfrMetrics } = await supabase
+    // Query all metrics for the period, then filter in JavaScript due to type mismatch
+    const { data: allNsfrMetrics } = await supabase
       .from('nsfr_metrics')
       .select('*')
-      .eq('legal_entity_id', submission.legal_entity_id)
-      .eq('report_date', submission.reporting_period)
-      .maybeSingle();
+      .eq('report_date', submission.reporting_period);
+
+    // Find the matching entity (legal_entity_id is text in submissions, UUID in metrics)
+    const nsfrMetrics = allNsfrMetrics?.find(
+      m => m.legal_entity_id?.toString() === submission.legal_entity_id
+    ) || null;
 
     if (nsfrMetrics) {
       const nsfrValidation = {
