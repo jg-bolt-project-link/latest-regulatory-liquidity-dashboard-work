@@ -14,6 +14,7 @@ import { FR2052aValidation } from './FR2052aValidation';
 import { DataSetup } from './DataSetup';
 import { ApplicationValidations } from './ApplicationValidations';
 import { CalculationRules } from './CalculationRules';
+import { RegulatoryCompliance } from './RegulatoryCompliance';
 import { supabase } from '../lib/supabase';
 import { seedStateStreetData } from '../utils/seedStateStreetData';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
@@ -54,7 +55,8 @@ type ViewType =
   | 'fr2052a'
   | 'fr2052a-validation'
   | 'app-validations'
-  | 'calc-rules';
+  | 'calc-rules'
+  | 'regulatory-compliance';
 
 export function MainApp() {
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
@@ -113,6 +115,7 @@ export function MainApp() {
     { id: 'fr2052a', label: 'FR 2052a Report', icon: Database },
     { id: 'fr2052a-validation', label: 'FR 2052a Validation', icon: FileCheck },
     { id: 'calc-rules', label: 'Calculation Rules', icon: BookOpen },
+    { id: 'regulatory-compliance', label: 'Regulatory Compliance', icon: Shield },
     { id: 'app-validations', label: 'Application Validations', icon: CheckCircle },
     { id: 'accounts', label: 'Accounts', icon: Wallet },
     { id: 'transactions', label: 'Transactions', icon: Receipt },
@@ -143,6 +146,8 @@ export function MainApp() {
         return <FR2052aValidation />;
       case 'calc-rules':
         return <CalculationRules />;
+      case 'regulatory-compliance':
+        return <RegulatoryCompliance />;
       case 'app-validations':
         return <ApplicationValidations />;
       case 'accounts':
