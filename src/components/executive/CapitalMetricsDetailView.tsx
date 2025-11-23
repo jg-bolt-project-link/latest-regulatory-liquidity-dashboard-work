@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Shield, TrendingUp, AlertTriangle, CheckCircle, Info, ExternalLink, X, FileDown } from 'lucide-react';
+import { Shield, TrendingUp, AlertTriangle, CheckCircle, Info, ExternalLink, X, FileDown, BarChart3 } from 'lucide-react';
 import { LegalEntityFilter } from '../shared/LegalEntityFilter';
 import { MetricValueWithDetails } from '../shared/MetricValueWithDetails';
 import { Breadcrumbs } from '../shared/Breadcrumbs';
@@ -42,6 +42,10 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'regulatory' | 'internal' | 'resolution'>('regulatory');
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+  const [showVisualization, setShowVisualization] = useState<{
+    type: 'regulatory' | 'internal' | 'resolution' | null;
+    show: boolean;
+  }>({ type: null, show: false });
 
   useEffect(() => {
     loadMetrics();
@@ -149,11 +153,11 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
               rcapStatus: currentRC && currentRC.rcap_ratio >= 110 ? 'compliant' : 'warning'
             });
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={balanceSheetMetrics.length === 0}
+          title="Export to PowerPoint"
         >
           <FileDown className="w-4 h-4" />
-          <span>Export to PowerPoint</span>
         </button>
         <div className="w-80">
           <LegalEntityFilter
@@ -206,9 +210,18 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
             {activeTab === 'regulatory' && latestBS && (
               <div className="space-y-6">
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4">
-                    Latest Regulatory Capital ({formatDate(latestBS.report_date)})
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      Latest Regulatory Capital ({formatDate(latestBS.report_date)})
+                    </h3>
+                    <button
+                      onClick={() => setShowVisualization({ type: 'regulatory', show: true })}
+                      className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                      title="Visualize Regulatory Capital Data"
+                    >
+                      <BarChart3 className="w-4 h-4" />
+                    </button>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     <div>
                       <p className="text-sm text-slate-600 mb-1">Tier 1 Capital</p>
@@ -296,7 +309,16 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
             {activeTab === 'internal' && latestBS && (
               <div className="space-y-6">
                 <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Internal Capital Targets</h3>
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-lg font-semibold text-slate-900">Internal Capital Targets</h3>
+                    <button
+                      onClick={() => setShowVisualization({ type: 'internal', show: true })}
+                      className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                      title="Visualize Internal Targets Data"
+                    >
+                      <BarChart3 className="w-4 h-4" />
+                    </button>
+                  </div>
                   <p className="text-sm text-slate-700 mb-4">
                     In addition to regulatory minimums, institutions maintain internal capital targets that exceed regulatory requirements
                     to provide buffers for stress scenarios and business growth.
@@ -356,9 +378,18 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
             {activeTab === 'resolution' && latestRC && (
               <div className="space-y-6">
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4">
-                    Resolution Capital Metrics ({formatDate(latestRC.report_date)})
-                  </h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900">
+                      Resolution Capital Metrics ({formatDate(latestRC.report_date)})
+                    </h3>
+                    <button
+                      onClick={() => setShowVisualization({ type: 'resolution', show: true })}
+                      className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                      title="Visualize Resolution Capital Data"
+                    >
+                      <BarChart3 className="w-4 h-4" />
+                    </button>
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className={`rounded-xl p-6 border-2 ${
                       latestRC.rcap_surplus_deficit >= 0 ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'

@@ -148,12 +148,16 @@ export async function executeValidationsForSubmission(
     console.log('\n[2/3] Executing LCR calculation validation...');
 
     // Get LCR metrics for this entity and period
-    const { data: lcrMetrics } = await supabase
+    // Query all metrics for the period, then filter in JavaScript due to type mismatch
+    const { data: allLcrMetrics } = await supabase
       .from('lcr_metrics')
       .select('*')
-      .eq('legal_entity_id', submission.legal_entity_id)
-      .eq('report_date', submission.reporting_period)
-      .maybeSingle();
+      .eq('report_date', submission.reporting_period);
+
+    // Find the matching entity (legal_entity_id is text in submissions, UUID in metrics)
+    const lcrMetrics = allLcrMetrics?.find(
+      m => m.legal_entity_id?.toString() === submission.legal_entity_id
+    ) || null;
 
     if (lcrMetrics) {
       const lcrValidation = {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { Droplets, AlertTriangle, CheckCircle, Activity, Info, ExternalLink, ArrowLeft, FileDown, X } from 'lucide-react';
+import { Droplets, AlertTriangle, CheckCircle, Activity, Info, ExternalLink, ArrowLeft, FileDown, X, BarChart3 } from 'lucide-react';
 import { LegalEntityFilter } from '../shared/LegalEntityFilter';
 import { MetricValueWithDetails } from '../shared/MetricValueWithDetails';
 import { Breadcrumbs } from '../shared/Breadcrumbs';
@@ -64,6 +64,10 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'lcr' | 'nsfr' | 'stress' | 'resolution'>('lcr');
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+  const [showVisualization, setShowVisualization] = useState<{
+    type: 'lcr' | 'nsfr' | 'stress' | 'resolution' | null;
+    show: boolean;
+  }>({ type: null, show: false });
 
   useEffect(() => {
     loadMetrics();
@@ -172,11 +176,11 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
               nsfrStatus: currentNSFR && currentNSFR.nsfr_ratio >= 105 ? 'compliant' : 'warning'
             });
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={lcrMetrics.length === 0}
+          title="Export to PowerPoint"
         >
           <FileDown className="w-4 h-4" />
-          <span>Export to PowerPoint</span>
         </button>
         <div className="w-80">
           <LegalEntityFilter
@@ -240,7 +244,16 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
               <div className="space-y-6">
                 {latestLCR && (
                   <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-4">Latest LCR ({formatDate(latestLCR.report_date)})</h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-slate-900">Latest LCR ({formatDate(latestLCR.report_date)})</h3>
+                      <button
+                        onClick={() => setShowVisualization({ type: 'lcr', show: true })}
+                        className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                        title="Visualize LCR Data"
+                      >
+                        <BarChart3 className="w-4 h-4" />
+                      </button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
                         <p className="text-sm text-slate-600 mb-1">LCR Ratio</p>
@@ -407,7 +420,16 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
               <div className="space-y-6">
                 {latestNSFR && (
                   <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-4">Latest NSFR ({formatDate(latestNSFR.report_date)})</h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-slate-900">Latest NSFR ({formatDate(latestNSFR.report_date)})</h3>
+                      <button
+                        onClick={() => setShowVisualization({ type: 'nsfr', show: true })}
+                        className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                        title="Visualize NSFR Data"
+                      >
+                        <BarChart3 className="w-4 h-4" />
+                      </button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div>
                         <p className="text-sm text-slate-600 mb-1">NSFR Ratio</p>
@@ -572,9 +594,18 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
               <div className="space-y-6">
                 {latestStress && (
                   <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-4">
-                      Latest Stress Test: {latestStress.scenario_name} ({formatDate(latestStress.report_date)})
-                    </h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        Latest Stress Test: {latestStress.scenario_name} ({formatDate(latestStress.report_date)})
+                      </h3>
+                      <button
+                        onClick={() => setShowVisualization({ type: 'stress', show: true })}
+                        className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                        title="Visualize Stress Test Data"
+                      >
+                        <BarChart3 className="w-4 h-4" />
+                      </button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                       <div>
                         <p className="text-sm text-slate-600 mb-1">Baseline Liquidity</p>
@@ -658,9 +689,18 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
               <div className="space-y-6">
                 {resolutionLiquidity[0] && (
                   <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 className="text-lg font-semibold text-slate-900 mb-4">
-                      Resolution Liquidity Metrics ({formatDate(resolutionLiquidity[0].report_date)})
-                    </h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-slate-900">
+                        Resolution Liquidity Metrics ({formatDate(resolutionLiquidity[0].report_date)})
+                      </h3>
+                      <button
+                        onClick={() => setShowVisualization({ type: 'resolution', show: true })}
+                        className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                        title="Visualize Resolution Liquidity Data"
+                      >
+                        <BarChart3 className="w-4 h-4" />
+                      </button>
+                    </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className={`rounded-xl p-6 border-2 ${
                         resolutionLiquidity[0].rlap_surplus_deficit >= 0 ? 'bg-green-50 border-green-300' : 'bg-red-50 border-red-300'
