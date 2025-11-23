@@ -58,33 +58,22 @@ export function RegulatoryComplianceEnhanced() {
       supabase.from('section_implementations').select('*')
     ]);
 
-    console.log('=== REGULATORY COMPLIANCE DATA LOAD ===');
-    console.log('Frameworks:', fwResult.data?.length, fwResult.data);
-    console.log('Sections:', sectionsResult.data?.length, sectionsResult.data);
-    console.log('Subsections:', subsectionsResult.data?.length, subsectionsResult.data);
-    console.log('Implementations:', implResult.data?.length, implResult.data);
-
     if (fwResult.data) {
       setFrameworks(fwResult.data);
       const regYY = fwResult.data.find(f => f.framework_code === 'REG_YY');
-      console.log('REG_YY framework:', regYY);
       if (regYY) {
         setExpandedFrameworks(new Set([regYY.id]));
-        console.log('Auto-expanding REG_YY:', regYY.id);
       }
     }
     if (sectionsResult.data) {
       setSections(sectionsResult.data);
       const lcrSection = sectionsResult.data.find(s => s.section_number === '252.30');
-      console.log('LCR section:', lcrSection);
       if (lcrSection) {
         setExpandedSections(new Set([lcrSection.id]));
-        console.log('Auto-expanding LCR section:', lcrSection.id);
       }
     }
     if (subsectionsResult.data) setSubsections(subsectionsResult.data);
     if (implResult.data) setImplementations(implResult.data);
-    console.log('=== DATA LOAD COMPLETE ===');
     setLoading(false);
   };
 
@@ -224,7 +213,6 @@ export function RegulatoryComplianceEnhanced() {
       <div className="space-y-3">
         {frameworks.map(framework => {
           const frameworkSections = sections.filter(s => s.framework_id === framework.id);
-          console.log(`Rendering ${framework.framework_code}: ${frameworkSections.length} sections, expanded: ${expandedFrameworks.has(framework.id)}`);
           const isExpanded = expandedFrameworks.has(framework.id);
 
           return (
