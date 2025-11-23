@@ -218,6 +218,10 @@ export async function executeValidationsForSubmission(
           console.log(`  Saving ${fr2052aData.length} FR2052a line items to database...`);
           const fr2052aRows = fr2052aData.map(item => ({
             submission_id: submissionId,
+            legal_entity_id: submission.legal_entity_id,
+            report_date: submission.reporting_period,
+            table_name: 'FR2052a',
+            product: item.productName,
             product_id: item.productId,
             product_name: item.productName,
             product_category: item.productCategory,
@@ -226,11 +230,15 @@ export async function executeValidationsForSubmission(
             counterparty_type: item.counterpartyType,
             asset_class: item.assetClass,
             outstanding_balance: item.outstandingBalance,
+            amount: item.outstandingBalance,
             projected_cash_inflow: item.projectedCashInflow,
             projected_cash_outflow: item.projectedCashOutflow,
+            projected_inflow: item.projectedCashInflow,
+            projected_outflow: item.projectedCashOutflow,
             is_hqla: item.isHQLA,
-            hqla_level: item.hqlaLevel,
+            hqla_level: item.hqlaLevel ? item.hqlaLevel.toString() : null,
             haircut: item.haircut,
+            haircut_rate: item.haircut,
             runoff_rate: item.runoffRate,
             encumbered_amount: item.encumberedAmount,
             currency: item.currency
