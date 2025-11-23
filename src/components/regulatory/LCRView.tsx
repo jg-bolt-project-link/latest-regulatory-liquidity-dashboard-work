@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { ArrowLeft, Plus, TrendingUp, AlertTriangle, CheckCircle, Info } from 'lucide-react';
+import { ArrowLeft, Plus, TrendingUp, AlertTriangle, CheckCircle, Info, BarChart3 } from 'lucide-react';
 import { MetricDetailModal, LCR_METRIC } from './MetricDetailModal';
+import { DataVisualization } from '../shared/DataVisualization';
 
 interface LCRMetric {
   id: string;
@@ -27,6 +28,7 @@ export function LCRView({ onBack }: LCRViewProps) {
   const [showModal, setShowModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showVisualization, setShowVisualization] = useState(false);
 
   useEffect(() => {
     loadMetrics();
@@ -90,6 +92,14 @@ export function LCRView({ onBack }: LCRViewProps) {
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-slate-900">Liquidity Coverage Ratio (LCR)</h2>
+            <button
+              onClick={() => setShowVisualization(true)}
+              className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              title="Visualize LCR Data"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Visualize
+            </button>
             <button
               onClick={() => setShowDetailModal(true)}
               className="p-2 hover:bg-blue-100 rounded-lg transition-colors group"
@@ -393,6 +403,25 @@ function LCRModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () =
           </div>
         </form>
       </div>
+
+      {/* Data Visualization Modal */}
+      <DataVisualization
+        isOpen={showVisualization}
+        onClose={() => setShowVisualization(false)}
+        title="LCR Metrics Visualization"
+        data={metrics}
+        availableAttributes={[
+          { name: 'report_date', label: 'Report Date', type: 'date' },
+          { name: 'is_compliant', label: 'Compliant', type: 'boolean' },
+          { name: 'total_hqla', label: 'Total HQLA', type: 'number' },
+          { name: 'hqla_level_1', label: 'Level 1 HQLA', type: 'number' },
+          { name: 'hqla_level_2a', label: 'Level 2A HQLA', type: 'number' },
+          { name: 'hqla_level_2b', label: 'Level 2B HQLA', type: 'number' },
+          { name: 'total_net_cash_outflows', label: 'Net Cash Outflows', type: 'number' },
+          { name: 'lcr_ratio', label: 'LCR Ratio (%)', type: 'number' }
+        ]}
+        defaultAggregateField="total_hqla"
+      />
     </div>
   );
 }

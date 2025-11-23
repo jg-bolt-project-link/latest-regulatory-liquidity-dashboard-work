@@ -62,25 +62,26 @@ export function DataVisualization({
     [availableAttributes]
   );
 
-  const aggregatedData = useMemo(() => {
-    if (!config.aggregateField || data.length === 0) return [];
+  // Helper functions must be defined before useMemo
+  const aggregateValues = (values: any[], func: ChartConfig['aggregateFunction']) => {
+    const numericValues = values.filter(v => typeof v === 'number' && !isNaN(v));
+    if (numericValues.length === 0) return 0;
 
-    if (config.type === 'trend' && config.dateField) {
-      return aggregateByDate(data, config);
+    switch (func) {
+      case 'sum':
+        return numericValues.reduce((sum, val) => sum + val, 0);
+      case 'avg':
+        return numericValues.reduce((sum, val) => sum + val, 0) / numericValues.length;
+      case 'count':
+        return numericValues.length;
+      case 'min':
+        return Math.min(...numericValues);
+      case 'max':
+        return Math.max(...numericValues);
+      default:
+        return 0;
     }
-
-    if (config.groupBy.length === 0) {
-      const total = aggregateValues(data.map(d => d[config.aggregateField]), config.aggregateFunction);
-      return [{ category: 'Total', value: total }];
-    }
-
-    const grouped = groupData(data, config.groupBy);
-    return Object.entries(grouped).map(([key, items]) => ({
-      category: key,
-      value: aggregateValues(items.map(d => d[config.aggregateField]), config.aggregateFunction),
-      count: items.length
-    })).sort((a, b) => b.value - a.value);
-  }, [data, config]);
+  };
 
   const groupData = (data: DataPoint[], groupBy: string[]) => {
     return data.reduce((acc, item) => {
@@ -138,25 +139,25 @@ export function DataVisualization({
       .sort((a, b) => a.category.localeCompare(b.category));
   };
 
-  const aggregateValues = (values: any[], func: ChartConfig['aggregateFunction']) => {
-    const numericValues = values.filter(v => typeof v === 'number' && !isNaN(v));
-    if (numericValues.length === 0) return 0;
+  const aggregatedData = useMemo(() => {
+    if (!config.aggregateField || data.length === 0) return [];
 
-    switch (func) {
-      case 'sum':
-        return numericValues.reduce((sum, val) => sum + val, 0);
-      case 'avg':
-        return numericValues.reduce((sum, val) => sum + val, 0) / numericValues.length;
-      case 'count':
-        return numericValues.length;
-      case 'min':
-        return Math.min(...numericValues);
-      case 'max':
-        return Math.max(...numericValues);
-      default:
-        return 0;
+    if (config.type === 'trend' && config.dateField) {
+      return aggregateByDate(data, config);
     }
-  };
+
+    if (config.groupBy.length === 0) {
+      const total = aggregateValues(data.map(d => d[config.aggregateField]), config.aggregateFunction);
+      return [{ category: 'Total', value: total }];
+    }
+
+    const grouped = groupData(data, config.groupBy);
+    return Object.entries(grouped).map(([key, items]) => ({
+      category: key,
+      value: aggregateValues(items.map(d => d[config.aggregateField]), config.aggregateFunction),
+      count: items.length
+    })).sort((a, b) => b.value - a.value);
+  }, [data, config]);
 
   const toggleAttribute = (attrName: string) => {
     setSelectedAttributes(prev =>

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
-import { ArrowLeft, Plus, Target, CheckCircle, AlertTriangle, Info } from 'lucide-react';
+import { ArrowLeft, Plus, Target, CheckCircle, AlertTriangle, Info, BarChart3 } from 'lucide-react';
 import { MetricDetailModal, NSFR_METRIC } from './MetricDetailModal';
+import { DataVisualization } from '../shared/DataVisualization';
 
 interface NSFRMetric {
   id: string;
@@ -26,6 +27,7 @@ export function NSFRView({ onBack }: NSFRViewProps) {
   const [showModal, setShowModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showVisualization, setShowVisualization] = useState(false);
 
   useEffect(() => {
     loadMetrics();
@@ -88,6 +90,14 @@ export function NSFRView({ onBack }: NSFRViewProps) {
         <div>
           <div className="flex items-center gap-3">
             <h2 className="text-2xl font-bold text-slate-900">Net Stable Funding Ratio (NSFR)</h2>
+            <button
+              onClick={() => setShowVisualization(true)}
+              className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              title="Visualize NSFR Data"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Visualize
+            </button>
             <button
               onClick={() => setShowDetailModal(true)}
               className="p-2 hover:bg-blue-100 rounded-lg transition-colors group"
@@ -383,6 +393,24 @@ function NSFRModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () 
           </div>
         </form>
       </div>
+
+      {/* Data Visualization Modal */}
+      <DataVisualization
+        isOpen={showVisualization}
+        onClose={() => setShowVisualization(false)}
+        title="NSFR Metrics Visualization"
+        data={metrics}
+        availableAttributes={[
+          { name: 'report_date', label: 'Report Date', type: 'date' },
+          { name: 'is_compliant', label: 'Compliant', type: 'boolean' },
+          { name: 'available_stable_funding', label: 'Available Stable Funding (ASF)', type: 'number' },
+          { name: 'required_stable_funding', label: 'Required Stable Funding (RSF)', type: 'number' },
+          { name: 'retail_deposits', label: 'Retail Deposits', type: 'number' },
+          { name: 'wholesale_funding', label: 'Wholesale Funding', type: 'number' },
+          { name: 'nsfr_ratio', label: 'NSFR Ratio (%)', type: 'number' }
+        ]}
+        defaultAggregateField="available_stable_funding"
+      />
     </div>
   );
 }
