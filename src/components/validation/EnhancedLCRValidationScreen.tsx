@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, AlertTriangle, AlertCircle, TrendingUp, DollarSign, Percent, Info, ChevronDown, ChevronRight, FileText, Database, List } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { SourceRecordsModal } from '../shared/SourceRecordsModal';
+import { SourceRecordsTableModal } from '../shared/SourceRecordsTableModal';
 
 interface LCRValidation {
   id: string;
@@ -980,14 +980,14 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
       )}
 
       {/* Source Records Modal */}
-      {sourceModalData && (
-        <SourceRecordsModal
+      {sourceModalData && validation && (
+        <SourceRecordsTableModal
           isOpen={showSourceModal}
           onClose={() => setShowSourceModal(false)}
           componentType={sourceModalData.componentType}
           componentName={sourceModalData.componentName}
           submissionId={submissionId}
-          productIds={sourceModalData.productIds}
+          reportDate={validation.report_date}
           totalAmount={sourceModalData.totalAmount}
           calculatedAmount={sourceModalData.calculatedAmount}
           factor={sourceModalData.factor}

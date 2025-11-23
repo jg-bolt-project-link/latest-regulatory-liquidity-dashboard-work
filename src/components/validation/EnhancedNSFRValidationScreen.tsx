@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronRight, Info, FileText, Shield, TrendingUp, AlertCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { SourceRecordsTableModal } from '../shared/SourceRecordsTableModal';
 
 interface NSFRValidation {
   id: string;
@@ -64,7 +65,14 @@ export function EnhancedNSFRValidationScreen({ submissionId }: EnhancedNSFRValid
   const [showRuleModal, setShowRuleModal] = useState(false);
   const [selectedRule, setSelectedRule] = useState<CalculationRule | null>(null);
   const [showRecordsModal, setShowRecordsModal] = useState(false);
-  const [selectedComponent, setSelectedComponent] = useState<any>(null);
+  const [selectedComponent, setSelectedComponent] = useState<{
+    componentType: 'asf' | 'rsf';
+    componentName: string;
+    totalAmount: number;
+    calculatedAmount: number;
+    factor: number;
+    ruleCode: string | null;
+  } | null>(null);
 
   useEffect(() => {
     if (submissionId) {
@@ -124,8 +132,19 @@ export function EnhancedNSFRValidationScreen({ submissionId }: EnhancedNSFRValid
     }
   };
 
-  const showSourceRecords = (component: any, componentType: 'asf' | 'rsf') => {
-    setSelectedComponent({ ...component, type: componentType });
+  const showSourceRecords = (component: ASFComponent | RSFComponent, componentType: 'asf' | 'rsf') => {
+    const isASF = componentType === 'asf';
+    const asfComp = component as ASFComponent;
+    const rsfComp = component as RSFComponent;
+
+    setSelectedComponent({
+      componentType,
+      componentName: isASF ? asfComp.asf_category : rsfComp.rsf_category,
+      totalAmount: component.total_amount,
+      calculatedAmount: isASF ? asfComp.calculated_asf : rsfComp.calculated_rsf,
+      factor: isASF ? asfComp.asf_factor : rsfComp.rsf_factor,
+      ruleCode: component.rule_code || null
+    });
     setShowRecordsModal(true);
   };
 
@@ -455,58 +474,19 @@ export function EnhancedNSFRValidationScreen({ submissionId }: EnhancedNSFRValid
       )}
 
       {/* Records Modal */}
-      {showRecordsModal && selectedComponent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="bg-green-600 text-white px-6 py-4 flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold">Source Records</h3>
-                <p className="text-sm text-green-100 mt-1">
-                  {selectedComponent.type === 'asf' ? selectedComponent.asf_category : selectedComponent.rsf_category}
-                </p>
-              </div>
-              <button
-                onClick={() => setShowRecordsModal(false)}
-                className="text-white hover:text-green-100 text-2xl leading-none"
-              >
-                ×
-              </button>
-            </div>
-            <div className="p-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <div className="flex items-start gap-2">
-                  <Info className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-blue-900">Component Summary</p>
-                    <p className="text-sm text-blue-700 mt-1">
-                      {selectedComponent.type === 'asf' ? 'ASF' : 'RSF'} Factor: {formatPercent(selectedComponent.type === 'asf' ? selectedComponent.asf_factor : selectedComponent.rsf_factor)}
-                    </p>
-                    <p className="text-sm text-blue-700">
-                      Total Amount: {formatCurrency(selectedComponent.total_amount)}
-                    </p>
-                    <p className="text-sm text-blue-700">
-                      Calculated {selectedComponent.type === 'asf' ? 'ASF' : 'RSF'}: {formatCurrency(selectedComponent.type === 'asf' ? selectedComponent.calculated_asf : selectedComponent.calculated_rsf)}
-                    </p>
-                    <p className="text-sm text-blue-700 mt-2">
-                      Records: {selectedComponent.record_count || 0} FR 2052a data rows contribute to this component
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <p className="text-slate-600 text-sm">
-                Detailed FR 2052a source record drill-down will be available in a future enhancement.
-              </p>
-            </div>
-            <div className="bg-slate-50 px-6 py-4 flex justify-end">
-              <button
-                onClick={() => setShowRecordsModal(false)}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+      {showRecordsModal && selectedComponent && validation && (
+        <SourceRecordsTableModal
+          isOpen={showRecordsModal}
+          onClose={() => setShowRecordsModal(false)}
+          componentType={selectedComponent.componentType}
+          componentName={selectedComponent.componentName}
+          submissionId={submissionId}
+          reportDate={validation.report_date}
+          totalAmount={selectedComponent.totalAmount}
+          calculatedAmount={selectedComponent.calculatedAmount}
+          factor={selectedComponent.factor}
+          ruleCode={selectedComponent.ruleCode}
+        />
       )}
     </div>
   );
