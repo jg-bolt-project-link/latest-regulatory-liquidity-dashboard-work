@@ -6,6 +6,7 @@ import { LegalEntityFilter } from '../shared/LegalEntityFilter';
 import { MetricValueWithDetails } from '../shared/MetricValueWithDetails';
 import { Breadcrumbs } from '../shared/Breadcrumbs';
 import { exportCapitalMetricsToPPT } from '../../utils/exportToPowerPoint';
+import { DataVisualization } from '../shared/DataVisualization';
 
 interface BalanceSheetMetric {
   id: string;
@@ -557,6 +558,46 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
           </div>
         </div>
       </div>
+
+      {/* Visualization Modals */}
+      {showVisualization.show && (showVisualization.type === 'regulatory' || showVisualization.type === 'internal') && (
+        <DataVisualization
+          isOpen={true}
+          onClose={() => setShowVisualization({ type: null, show: false })}
+          title="Capital Metrics Visualization"
+          data={balanceSheetMetrics}
+          availableAttributes={[
+            { name: 'report_date', label: 'Report Date', type: 'date' },
+            { name: 'tier1_capital', label: 'Tier 1 Capital', type: 'number' },
+            { name: 'tier1_capital_ratio', label: 'Tier 1 Capital Ratio (%)', type: 'number' },
+            { name: 'total_risk_weighted_assets', label: 'Total RWA', type: 'number' },
+            { name: 'leverage_ratio', label: 'Leverage Ratio (%)', type: 'number' },
+            { name: 'total_assets', label: 'Total Assets', type: 'number' }
+          ]}
+          defaultAggregateField="tier1_capital_ratio"
+        />
+      )}
+
+      {showVisualization.show && showVisualization.type === 'resolution' && (
+        <DataVisualization
+          isOpen={true}
+          onClose={() => setShowVisualization({ type: null, show: false })}
+          title="Resolution Capital Visualization"
+          data={resolutionCapitalMetrics}
+          availableAttributes={[
+            { name: 'report_date', label: 'Report Date', type: 'date' },
+            { name: 'rcap_amount', label: 'RCAP Amount', type: 'number' },
+            { name: 'rcap_ratio', label: 'RCAP Ratio', type: 'number' },
+            { name: 'rcap_requirement', label: 'RCAP Requirement', type: 'number' },
+            { name: 'rcap_surplus_deficit', label: 'RCAP Surplus/Deficit', type: 'number' },
+            { name: 'rcen_amount', label: 'RCEN Amount', type: 'number' },
+            { name: 'rcen_ratio', label: 'RCEN Ratio', type: 'number' },
+            { name: 'rcen_requirement', label: 'RCEN Requirement', type: 'number' },
+            { name: 'is_compliant', label: 'Compliant', type: 'boolean' }
+          ]}
+          defaultAggregateField="rcap_ratio"
+        />
+      )}
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { LegalEntityFilter } from '../shared/LegalEntityFilter';
 import { MetricValueWithDetails } from '../shared/MetricValueWithDetails';
 import { Breadcrumbs } from '../shared/Breadcrumbs';
 import { exportLiquidityMetricsToPPT } from '../../utils/exportToPowerPoint';
+import { DataVisualization } from '../shared/DataVisualization';
 
 interface LCRMetric {
   id: string;
@@ -873,6 +874,88 @@ export function LiquidityMetricsDetailView({ onNavigate }: LiquidityMetricsDetai
           </div>
         </div>
       </div>
+
+      {/* Visualization Modals */}
+      {showVisualization.show && showVisualization.type === 'lcr' && (
+        <DataVisualization
+          isOpen={true}
+          onClose={() => setShowVisualization({ type: null, show: false })}
+          title="LCR Metrics Visualization"
+          data={lcrMetrics}
+          availableAttributes={[
+            { name: 'report_date', label: 'Report Date', type: 'date' },
+            { name: 'lcr_ratio', label: 'LCR Ratio', type: 'number' },
+            { name: 'total_hqla', label: 'Total HQLA', type: 'number' },
+            { name: 'hqla_level_1', label: 'HQLA Level 1', type: 'number' },
+            { name: 'hqla_level_2a', label: 'HQLA Level 2A', type: 'number' },
+            { name: 'hqla_level_2b', label: 'HQLA Level 2B', type: 'number' },
+            { name: 'total_net_cash_outflows', label: 'Net Cash Outflows', type: 'number' },
+            { name: 'is_compliant', label: 'Compliant', type: 'boolean' }
+          ]}
+          defaultAggregateField="lcr_ratio"
+        />
+      )}
+
+      {showVisualization.show && showVisualization.type === 'nsfr' && (
+        <DataVisualization
+          isOpen={true}
+          onClose={() => setShowVisualization({ type: null, show: false })}
+          title="NSFR Metrics Visualization"
+          data={nsfrMetrics}
+          availableAttributes={[
+            { name: 'report_date', label: 'Report Date', type: 'date' },
+            { name: 'nsfr_ratio', label: 'NSFR Ratio', type: 'number' },
+            { name: 'available_stable_funding', label: 'Available Stable Funding', type: 'number' },
+            { name: 'required_stable_funding', label: 'Required Stable Funding', type: 'number' },
+            { name: 'retail_deposits', label: 'Retail Deposits', type: 'number' },
+            { name: 'wholesale_funding', label: 'Wholesale Funding', type: 'number' },
+            { name: 'is_compliant', label: 'Compliant', type: 'boolean' }
+          ]}
+          defaultAggregateField="nsfr_ratio"
+        />
+      )}
+
+      {showVisualization.show && showVisualization.type === 'stress' && (
+        <DataVisualization
+          isOpen={true}
+          onClose={() => setShowVisualization({ type: null, show: false })}
+          title="Stress Test Results Visualization"
+          data={stressTests}
+          availableAttributes={[
+            { name: 'report_date', label: 'Report Date', type: 'date' },
+            { name: 'scenario_name', label: 'Scenario Name', type: 'string' },
+            { name: 'scenario_type', label: 'Scenario Type', type: 'string' },
+            { name: 'stress_severity', label: 'Stress Severity', type: 'string' },
+            { name: 'baseline_liquidity', label: 'Baseline Liquidity', type: 'number' },
+            { name: 'stressed_liquidity', label: 'Stressed Liquidity', type: 'number' },
+            { name: 'liquidity_shortfall', label: 'Liquidity Shortfall', type: 'number' },
+            { name: 'survival_days', label: 'Survival Days', type: 'number' },
+            { name: 'passes_internal_threshold', label: 'Passes Threshold', type: 'boolean' }
+          ]}
+          defaultAggregateField="liquidity_shortfall"
+        />
+      )}
+
+      {showVisualization.show && showVisualization.type === 'resolution' && (
+        <DataVisualization
+          isOpen={true}
+          onClose={() => setShowVisualization({ type: null, show: false })}
+          title="Resolution Liquidity Visualization"
+          data={resolutionLiquidity}
+          availableAttributes={[
+            { name: 'report_date', label: 'Report Date', type: 'date' },
+            { name: 'rlap_amount', label: 'RLAP Amount', type: 'number' },
+            { name: 'rlap_ratio', label: 'RLAP Ratio', type: 'number' },
+            { name: 'rlap_requirement', label: 'RLAP Requirement', type: 'number' },
+            { name: 'rlap_surplus_deficit', label: 'RLAP Surplus/Deficit', type: 'number' },
+            { name: 'rlen_amount', label: 'RLEN Amount', type: 'number' },
+            { name: 'rlen_ratio', label: 'RLEN Ratio', type: 'number' },
+            { name: 'rlen_requirement', label: 'RLEN Requirement', type: 'number' },
+            { name: 'is_compliant', label: 'Compliant', type: 'boolean' }
+          ]}
+          defaultAggregateField="rlap_amount"
+        />
+      )}
     </div>
   );
 }
