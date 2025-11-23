@@ -151,11 +151,10 @@ export function DataQualityDashboardNew({ onClose }: DataQualityDashboardNewProp
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowVisualization(true)}
-                className="flex items-center gap-2 px-3 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
-                title="Visualize Data Quality Metrics"
+                className="p-2 bg-white text-blue-700 rounded-lg hover:bg-blue-50 transition-colors"
+                title="Visualize Data"
               >
                 <BarChart3 className="w-4 h-4" />
-                Visualize
               </button>
               <button
                 onClick={handleRefresh}

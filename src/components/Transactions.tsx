@@ -113,11 +113,10 @@ export function Transactions() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowVisualization(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            title="Visualize Transaction Data"
+            className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            title="Visualize Data"
           >
             <BarChart3 className="w-4 h-4" />
-            Visualize
           </button>
           <button
             onClick={() => setShowModal(true)}

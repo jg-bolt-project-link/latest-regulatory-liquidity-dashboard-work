@@ -75,11 +75,10 @@ export function BalanceSheetView({ onBack }: BalanceSheetViewProps) {
         </div>
         <button
           onClick={() => setShowVisualization(true)}
-          className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
-          title="Visualize Balance Sheet Data"
+          className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          title="Visualize Data"
         >
           <BarChart3 className="w-4 h-4" />
-          Visualize
         </button>
       </div>
 

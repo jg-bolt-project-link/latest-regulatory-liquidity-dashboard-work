@@ -94,11 +94,10 @@ export function LCRView({ onBack }: LCRViewProps) {
             <h2 className="text-2xl font-bold text-slate-900">Liquidity Coverage Ratio (LCR)</h2>
             <button
               onClick={() => setShowVisualization(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
-              title="Visualize LCR Data"
+              className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              title="Visualize Data"
             >
               <BarChart3 className="w-4 h-4" />
-              Visualize
             </button>
             <button
               onClick={() => setShowDetailModal(true)}

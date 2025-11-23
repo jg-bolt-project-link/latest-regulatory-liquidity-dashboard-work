@@ -109,18 +109,9 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
             { label: 'Balance Sheet & Interest Rate Risk' }
           ]}
         />
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowVisualization(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
-            title="Visualize Balance Sheet Data"
-          >
-            <BarChart3 className="w-4 h-4" />
-            Visualize
-          </button>
-          <button
-            onClick={() => onNavigate?.('dashboard')}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+        <button
+          onClick={() => onNavigate?.('dashboard')}
+          className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
           title="Close"
         >
           <X className="w-5 h-5 text-slate-600" />
@@ -133,6 +124,13 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
           <p className="text-sm text-slate-600">Comprehensive balance sheet composition and IRRBB analysis</p>
         </div>
         <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowVisualization(true)}
+            className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            title="Visualize Data"
+          >
+            <BarChart3 className="w-4 h-4" />
+          </button>
           <button
             onClick={() => {
               const priorBS = balanceSheetMetrics.length > 1 ? balanceSheetMetrics[1] : null;
@@ -429,7 +427,6 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
         ]}
         defaultAggregateField="total_assets"
       />
-      </div>
     </div>
   );
 }

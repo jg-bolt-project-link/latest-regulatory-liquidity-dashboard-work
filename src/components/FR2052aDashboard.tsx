@@ -169,11 +169,10 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowVisualization(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                title="Visualize FR2052a Data"
+                className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                title="Visualize Data"
               >
                 <BarChart3 className="w-4 h-4" />
-                Visualize
               </button>
               <button
                 onClick={onClose}

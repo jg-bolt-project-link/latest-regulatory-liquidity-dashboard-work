@@ -315,11 +315,10 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
           <div className="flex items-center gap-4">
             <button
               onClick={() => setShowVisualization(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
-              title="Visualize LCR Data"
+              className="p-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              title="Visualize Data"
             >
               <BarChart3 className="w-4 h-4" />
-              Visualize
             </button>
             <div className="flex items-center gap-2">
               {getStatusIcon(validation.overall_validation_status)}
