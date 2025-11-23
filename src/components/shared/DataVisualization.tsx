@@ -35,12 +35,15 @@ export function DataVisualization({
   availableAttributes,
   defaultAggregateField
 }: DataVisualizationProps) {
+  const dateField = availableAttributes.find(a => a.type === 'date')?.name;
+  const hasDateField = !!dateField;
+
   const [config, setConfig] = useState<ChartConfig>({
-    type: 'bar',
-    groupBy: [],
+    type: hasDateField ? 'trend' : 'bar',
+    groupBy: hasDateField ? [dateField] : [],
     aggregateField: defaultAggregateField || availableAttributes.find(a => a.type === 'number')?.name || '',
-    aggregateFunction: 'sum',
-    dateField: availableAttributes.find(a => a.type === 'date')?.name,
+    aggregateFunction: 'avg',
+    dateField: dateField,
     dateGrouping: 'month'
   });
 

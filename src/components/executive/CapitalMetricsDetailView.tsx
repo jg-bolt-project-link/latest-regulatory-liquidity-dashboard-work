@@ -343,33 +343,33 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
                   <div className="space-y-4">
                     <div>
                       <div className="flex justify-between mb-2">
-                        <span className="text-sm font-medium text-slate-700">Tier 1 Capital Buffer</span>
+                        <span className="text-sm font-medium text-slate-700">Tier 1 Capital Buffer (vs Internal Target)</span>
                         <span className="text-sm font-semibold text-green-600">
-                          {formatPercent(latestBS.tier1_capital_ratio - 0.06)}
+                          {formatPercent(latestBS.tier1_capital_ratio - 0.085)}
                         </span>
                       </div>
                       <div className="w-full bg-slate-200 rounded-full h-3">
                         <div
                           className="bg-green-500 h-3 rounded-full"
-                          style={{ width: `${Math.min(((latestBS.tier1_capital_ratio - 0.06) / 0.04) * 100, 100)}%` }}
+                          style={{ width: `${Math.min(((latestBS.tier1_capital_ratio - 0.085) / 0.065) * 100, 100)}%` }}
                         />
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">Above regulatory minimum of 6%</p>
+                      <p className="text-xs text-slate-500 mt-1">Above internal target of 8.5% (Regulatory minimum: 6%)</p>
                     </div>
                     <div>
                       <div className="flex justify-between mb-2">
-                        <span className="text-sm font-medium text-slate-700">Leverage Ratio Buffer</span>
+                        <span className="text-sm font-medium text-slate-700">Leverage Ratio Buffer (vs Internal Target)</span>
                         <span className="text-sm font-semibold text-green-600">
-                          {formatPercent(latestBS.leverage_ratio - 0.05)}
+                          {formatPercent(latestBS.leverage_ratio - 0.06)}
                         </span>
                       </div>
                       <div className="w-full bg-slate-200 rounded-full h-3">
                         <div
                           className="bg-green-500 h-3 rounded-full"
-                          style={{ width: `${Math.min(((latestBS.leverage_ratio - 0.05) / 0.02) * 100, 100)}%` }}
+                          style={{ width: `${Math.min(((latestBS.leverage_ratio - 0.06) / 0.02) * 100, 100)}%` }}
                         />
                       </div>
-                      <p className="text-xs text-slate-500 mt-1">Above G-SIB minimum of 5%</p>
+                      <p className="text-xs text-slate-500 mt-1">Above internal target of 6.0% (G-SIB minimum: 5%)</p>
                     </div>
                   </div>
                 </div>
@@ -565,14 +565,22 @@ export function CapitalMetricsDetailView({ onNavigate }: CapitalMetricsDetailVie
           isOpen={true}
           onClose={() => setShowVisualization({ type: null, show: false })}
           title="Capital Metrics Visualization"
-          data={balanceSheetMetrics}
+          data={balanceSheetMetrics.map(m => ({
+            ...m,
+            report_date: m.report_date,
+            tier1_capital: Number(m.tier1_capital),
+            tier1_capital_ratio: Number(m.tier1_capital_ratio) * 100,
+            total_risk_weighted_assets: Number(m.total_risk_weighted_assets),
+            leverage_ratio: Number(m.leverage_ratio) * 100,
+            total_assets: Number(m.total_assets)
+          }))}
           availableAttributes={[
             { name: 'report_date', label: 'Report Date', type: 'date' },
-            { name: 'tier1_capital', label: 'Tier 1 Capital', type: 'number' },
+            { name: 'tier1_capital', label: 'Tier 1 Capital ($)', type: 'number' },
             { name: 'tier1_capital_ratio', label: 'Tier 1 Capital Ratio (%)', type: 'number' },
-            { name: 'total_risk_weighted_assets', label: 'Total RWA', type: 'number' },
+            { name: 'total_risk_weighted_assets', label: 'Total RWA ($)', type: 'number' },
             { name: 'leverage_ratio', label: 'Leverage Ratio (%)', type: 'number' },
-            { name: 'total_assets', label: 'Total Assets', type: 'number' }
+            { name: 'total_assets', label: 'Total Assets ($)', type: 'number' }
           ]}
           defaultAggregateField="tier1_capital_ratio"
         />
