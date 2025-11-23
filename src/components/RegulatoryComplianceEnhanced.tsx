@@ -58,8 +58,22 @@ export function RegulatoryComplianceEnhanced() {
       supabase.from('section_implementations').select('*')
     ]);
 
-    if (fwResult.data) setFrameworks(fwResult.data);
-    if (sectionsResult.data) setSections(sectionsResult.data);
+    if (fwResult.data) {
+      setFrameworks(fwResult.data);
+      // Auto-expand REG_YY to show data immediately
+      const regYY = fwResult.data.find(f => f.framework_code === 'REG_YY');
+      if (regYY) {
+        setExpandedFrameworks(new Set([regYY.id]));
+      }
+    }
+    if (sectionsResult.data) {
+      setSections(sectionsResult.data);
+      // Auto-expand first section (252.30 - LCR) to show subsections immediately
+      const lcrSection = sectionsResult.data.find(s => s.section_number === '252.30');
+      if (lcrSection) {
+        setExpandedSections(new Set([lcrSection.id]));
+      }
+    }
     if (subsectionsResult.data) setSubsections(subsectionsResult.data);
     if (implResult.data) setImplementations(implResult.data);
     setLoading(false);
@@ -186,11 +200,12 @@ export function RegulatoryComplianceEnhanced() {
         <div className="flex items-start gap-3">
           <Info className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
-            <h3 className="font-semibold text-blue-900 mb-1">Granular Compliance Tracking</h3>
+            <h3 className="font-semibold text-blue-900 mb-1">Granular Compliance Tracking - {totalSubsections} Requirements</h3>
             <p className="text-sm text-blue-800">
               This dashboard tracks compliance at the subsection level. Each regulation is broken down into sections
               (e.g., § 252.30), and each section contains multiple detailed subsections (e.g., § 252.30(a), § 252.30(b)).
-              Click to expand and view all {totalSubsections} specific regulatory requirements.
+              <strong> Regulation YY and § 252.30 (LCR) are auto-expanded below to show the data.</strong> Click any other
+              section to expand and view its detailed requirements.
             </p>
           </div>
         </div>

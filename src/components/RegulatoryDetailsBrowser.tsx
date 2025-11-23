@@ -62,8 +62,22 @@ export function RegulatoryDetailsBrowser() {
       supabase.from('section_implementations').select('*')
     ]);
 
-    if (fwResult.data) setFrameworks(fwResult.data);
-    if (sectionsResult.data) setSections(sectionsResult.data);
+    if (fwResult.data) {
+      setFrameworks(fwResult.data);
+      // Auto-expand REG_YY to show data immediately
+      const regYY = fwResult.data.find(f => f.framework_code === 'REG_YY');
+      if (regYY) {
+        setExpandedFramework(regYY.id);
+      }
+    }
+    if (sectionsResult.data) {
+      setSections(sectionsResult.data);
+      // Auto-expand LCR section to show subsections immediately
+      const lcrSection = sectionsResult.data.find(s => s.section_number === '252.30');
+      if (lcrSection) {
+        setExpandedSections(new Set([lcrSection.id]));
+      }
+    }
     if (subsectionsResult.data) setSubsections(subsectionsResult.data);
     if (implResult.data) setImplementations(implResult.data);
     setLoading(false);
@@ -153,8 +167,9 @@ export function RegulatoryDetailsBrowser() {
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <h3 className="font-semibold text-blue-900 mb-2">How to Use This Browser</h3>
         <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
-          <li>Click a regulation to expand and view all sections</li>
-          <li>Click a section to view detailed subsections and requirements</li>
+          <li><strong>Regulation YY and § 252.30 (LCR) are auto-expanded below</strong> to show 11 detailed LCR requirements</li>
+          <li>Click any regulation to expand and view all sections</li>
+          <li>Click any section to view detailed subsections and requirements</li>
           <li>Green checkmark = Fully implemented with screen/calculation</li>
           <li>Yellow warning = Partially implemented (gaps exist)</li>
           <li>Red X = Not implemented (gap identified)</li>
