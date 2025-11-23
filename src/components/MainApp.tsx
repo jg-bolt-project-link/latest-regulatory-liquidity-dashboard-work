@@ -15,6 +15,10 @@ import { DataSetup } from './DataSetup';
 import { ApplicationValidations } from './ApplicationValidations';
 import { CalculationRules } from './CalculationRules';
 import { RegulatoryCompliance } from './RegulatoryCompliance';
+import { StressTestingDashboard } from './StressTestingDashboard';
+import { ResolutionPlanningModule } from './ResolutionPlanningModule';
+import { CashFlowProjectionsScreen } from './CashFlowProjectionsScreen';
+import { ContingencyFundingPlan } from './ContingencyFundingPlan';
 import { supabase } from '../lib/supabase';
 import { seedStateStreetData } from '../utils/seedStateStreetData';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
@@ -56,7 +60,11 @@ type ViewType =
   | 'fr2052a-validation'
   | 'app-validations'
   | 'calc-rules'
-  | 'regulatory-compliance';
+  | 'regulatory-compliance'
+  | 'stress-testing'
+  | 'resolution-planning'
+  | 'cash-flow-projections'
+  | 'contingency-funding';
 
 export function MainApp() {
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
@@ -116,6 +124,10 @@ export function MainApp() {
     { id: 'fr2052a-validation', label: 'FR 2052a Validation', icon: FileCheck },
     { id: 'calc-rules', label: 'Calculation Rules', icon: BookOpen },
     { id: 'regulatory-compliance', label: 'Regulatory Compliance', icon: Shield },
+    { id: 'stress-testing', label: 'Stress Testing (CCAR)', icon: TrendingUp },
+    { id: 'resolution-planning', label: 'Resolution Planning', icon: Shield },
+    { id: 'cash-flow-projections', label: 'Cash Flow Projections', icon: Activity },
+    { id: 'contingency-funding', label: 'Contingency Funding Plan', icon: Shield },
     { id: 'app-validations', label: 'Application Validations', icon: CheckCircle },
     { id: 'accounts', label: 'Accounts', icon: Wallet },
     { id: 'transactions', label: 'Transactions', icon: Receipt },
@@ -148,6 +160,14 @@ export function MainApp() {
         return <CalculationRules />;
       case 'regulatory-compliance':
         return <RegulatoryCompliance />;
+      case 'stress-testing':
+        return <StressTestingDashboard />;
+      case 'resolution-planning':
+        return <ResolutionPlanningModule />;
+      case 'cash-flow-projections':
+        return <CashFlowProjectionsScreen />;
+      case 'contingency-funding':
+        return <ContingencyFundingPlan />;
       case 'app-validations':
         return <ApplicationValidations />;
       case 'accounts':
