@@ -6,6 +6,7 @@ import { LegalEntityFilter } from '../shared/LegalEntityFilter';
 import { MetricValueWithDetails } from '../shared/MetricValueWithDetails';
 import { Breadcrumbs } from '../shared/Breadcrumbs';
 import { exportBalanceSheetToPPT } from '../../utils/exportToPowerPoint';
+import { DataVisualization } from '../shared/DataVisualization';
 
 interface BalanceSheetMetric {
   id: string;
@@ -43,6 +44,7 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
   const [irrbbMetrics, setIRRBBMetrics] = useState<IRRBBMetric[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
+  const [showVisualization, setShowVisualization] = useState(false);
 
   useEffect(() => {
     loadMetrics();
@@ -107,9 +109,18 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
             { label: 'Balance Sheet & Interest Rate Risk' }
           ]}
         />
-        <button
-          onClick={() => onNavigate?.('dashboard')}
-          className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowVisualization(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+            title="Visualize Balance Sheet Data"
+          >
+            <BarChart3 className="w-4 h-4" />
+            Visualize
+          </button>
+          <button
+            onClick={() => onNavigate?.('dashboard')}
+            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
           title="Close"
         >
           <X className="w-5 h-5 text-slate-600" />
@@ -394,6 +405,30 @@ export function BalanceSheetDetailView({ onNavigate }: BalanceSheetDetailViewPro
           </div>
         </div>
       </div>
+
+      {/* Data Visualization Modal */}
+      <DataVisualization
+        isOpen={showVisualization}
+        onClose={() => setShowVisualization(false)}
+        title="Balance Sheet Data Visualization"
+        data={balanceSheetMetrics}
+        availableAttributes={[
+          { name: 'report_date', label: 'Report Date', type: 'date' },
+          { name: 'total_assets', label: 'Total Assets', type: 'number' },
+          { name: 'total_liabilities', label: 'Total Liabilities', type: 'number' },
+          { name: 'total_equity', label: 'Total Equity', type: 'number' },
+          { name: 'cash_and_due_from_banks', label: 'Cash & Due from Banks', type: 'number' },
+          { name: 'securities_available_for_sale', label: 'Securities AFS', type: 'number' },
+          { name: 'loans_gross', label: 'Loans (Gross)', type: 'number' },
+          { name: 'deposits_total', label: 'Total Deposits', type: 'number' },
+          { name: 'tier1_capital', label: 'Tier 1 Capital', type: 'number' },
+          { name: 'tier1_capital_ratio', label: 'Tier 1 Capital Ratio (%)', type: 'number' },
+          { name: 'leverage_ratio', label: 'Leverage Ratio (%)', type: 'number' }
+        ]}
+        defaultAggregateField="total_assets"
+      />
+      </div>
     </div>
   );
 }
+

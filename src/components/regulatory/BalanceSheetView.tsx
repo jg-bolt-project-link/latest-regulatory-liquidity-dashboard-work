@@ -1,6 +1,7 @@
-import { ArrowLeft, Building2, Info } from 'lucide-react';
+import { ArrowLeft, Building2, Info, BarChart3 } from 'lucide-react';
 import { useState } from 'react';
 import { MetricDetailModal } from './MetricDetailModal';
+import { DataVisualization } from '../shared/DataVisualization';
 
 interface BalanceSheetViewProps {
   onBack: () => void;
@@ -55,6 +56,7 @@ const TIER1_CAPITAL_METRIC = {
 
 export function BalanceSheetView({ onBack }: BalanceSheetViewProps) {
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showVisualization, setShowVisualization] = useState(false);
 
   return (
     <div>
@@ -66,9 +68,19 @@ export function BalanceSheetView({ onBack }: BalanceSheetViewProps) {
         Back to Overview
       </button>
 
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-slate-900">Balance Sheet Metrics</h2>
-        <p className="text-sm text-slate-600 mt-1">Capital Ratios & Asset Composition per Regulation YY</p>
+      <div className="mb-6 flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Balance Sheet Metrics</h2>
+          <p className="text-sm text-slate-600 mt-1">Capital Ratios & Asset Composition per Regulation YY</p>
+        </div>
+        <button
+          onClick={() => setShowVisualization(true)}
+          className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+          title="Visualize Balance Sheet Data"
+        >
+          <BarChart3 className="w-4 h-4" />
+          Visualize
+        </button>
       </div>
 
       <button
@@ -97,6 +109,28 @@ export function BalanceSheetView({ onBack }: BalanceSheetViewProps) {
           onClose={() => setShowDetailModal(false)}
         />
       )}
+
+      {/* Data Visualization Modal */}
+      <DataVisualization
+        isOpen={showVisualization}
+        onClose={() => setShowVisualization(false)}
+        title="Balance Sheet Metrics Visualization"
+        data={[
+          { category: 'Tier 1 Capital', value: 37800000000, type: 'Capital', ratio: 13.2 },
+          { category: 'Total Assets', value: 326800000000, type: 'Assets', ratio: 0 },
+          { category: 'Risk-Weighted Assets', value: 286400000000, type: 'Assets', ratio: 0 },
+          { category: 'Common Equity Tier 1', value: 34200000000, type: 'Capital', ratio: 11.9 },
+          { category: 'Total Equity', value: 32100000000, type: 'Capital', ratio: 0 },
+          { category: 'Total Liabilities', value: 294700000000, type: 'Liabilities', ratio: 0 }
+        ]}
+        availableAttributes={[
+          { name: 'category', label: 'Category', type: 'string' },
+          { name: 'type', label: 'Type', type: 'string' },
+          { name: 'value', label: 'Amount (USD)', type: 'number' },
+          { name: 'ratio', label: 'Ratio (%)', type: 'number' }
+        ]}
+        defaultAggregateField="value"
+      />
     </div>
   );
 }

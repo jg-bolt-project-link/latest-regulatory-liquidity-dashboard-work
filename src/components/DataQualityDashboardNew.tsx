@@ -12,9 +12,11 @@ import {
   Clock,
   GitBranch,
   X,
-  Eye
+  Eye,
+  BarChart3
 } from 'lucide-react';
 import { DataLineageVisualization } from './shared/DataLineageVisualization';
+import { DataVisualization } from './shared/DataVisualization';
 
 interface QualityCheck {
   id: string;
@@ -62,6 +64,7 @@ export function DataQualityDashboardNew({ onClose }: DataQualityDashboardNewProp
   const [dataFeeds, setDataFeeds] = useState<DataFeed[]>([]);
   const [lineageNodes, setLineageNodes] = useState<LineageNode[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showVisualization, setShowVisualization] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'checks' | 'feeds' | 'lineage'>('overview');
   const [selectedLineage, setSelectedLineage] = useState<{ table: string; column: string; name: string } | null>(null);
@@ -146,6 +149,14 @@ export function DataQualityDashboardNew({ onClose }: DataQualityDashboardNewProp
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowVisualization(true)}
+                className="flex items-center gap-2 px-3 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-50 transition-colors text-sm font-medium"
+                title="Visualize Data Quality Metrics"
+              >
+                <BarChart3 className="w-4 h-4" />
+                Visualize
+              </button>
               <button
                 onClick={handleRefresh}
                 disabled={refreshing}
@@ -497,6 +508,25 @@ export function DataQualityDashboardNew({ onClose }: DataQualityDashboardNewProp
           onClose={() => setSelectedLineage(null)}
         />
       )}
+
+      {/* Data Visualization Modal */}
+      <DataVisualization
+        isOpen={showVisualization}
+        onClose={() => setShowVisualization(false)}
+        title="Data Quality Metrics Visualization"
+        data={qualityChecks}
+        availableAttributes={[
+          { name: 'check_type', label: 'Check Type', type: 'string' },
+          { name: 'data_source', label: 'Data Source', type: 'string' },
+          { name: 'status', label: 'Status', type: 'string' },
+          { name: 'last_run_at', label: 'Last Run', type: 'date' },
+          { name: 'total_records', label: 'Total Records', type: 'number' },
+          { name: 'passed_records', label: 'Passed Records', type: 'number' },
+          { name: 'failed_records', label: 'Failed Records', type: 'number' },
+          { name: 'execution_time_ms', label: 'Execution Time (ms)', type: 'number' }
+        ]}
+        defaultAggregateField="total_records"
+      />
     </>
   );
 }
