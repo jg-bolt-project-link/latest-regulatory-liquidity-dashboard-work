@@ -307,7 +307,7 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Executive Dashboard</h1>
-            <p className="text-sm text-slate-600">Comprehensive liquidity and regulatory overview</p>
+            <p className="text-sm text-slate-600">Click any card below to drill into detailed metrics, validations, and regulatory compliance</p>
           </div>
         </div>
       </div>
@@ -322,14 +322,14 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
               <h3 className="font-semibold text-slate-900 mb-2">No Data Found</h3>
               <p className="text-sm text-slate-700 mb-3">
                 To populate this dashboard with comprehensive State Street Corporation sample data, navigate to the
-                <span className="font-semibold text-blue-700"> Data Setup </span>
-                page and generate sample data.
+                <span className="font-semibold text-blue-700"> Data Quality & Setup </span>
+                page (Data Setup tab) and generate sample data.
               </p>
               <button
-                onClick={() => onNavigate?.('data-setup')}
+                onClick={() => onNavigate?.('data-quality')}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
               >
-                Go to Data Setup
+                Go to Data Quality & Setup
               </button>
             </div>
           </div>
@@ -569,6 +569,148 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4 text-green-600" />
                 <span className="text-xs font-medium text-slate-700">Quality Validated</span>
+              </div>
+            </div>
+          </div>
+        </button>
+
+        {/* FR2052a Report Card */}
+        <button
+          onClick={() => onNavigate?.('fr2052a-report')}
+          className="rounded-xl shadow-sm p-6 border-2 border-slate-300 bg-white hover:border-blue-500 hover:shadow-md transition-all text-left w-full"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <FileText className="w-5 h-5 text-blue-600" />
+            </div>
+            <span className="text-xs font-medium text-slate-500">FR2052a Report</span>
+          </div>
+          <h3 className="text-sm font-medium text-slate-700 mb-3">Liquidity Reporting & Validation</h3>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-600">Report Status</span>
+              <span className="text-sm font-semibold text-green-600">Complete</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-600">Validation Checks</span>
+              <span className="text-sm font-semibold text-slate-900">All Passing</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-600">Data Quality</span>
+              <span className="text-sm font-semibold text-green-600">High</span>
+            </div>
+            <div className="pt-2 border-t border-slate-200">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-xs font-medium text-slate-700">Ready for Submission</span>
+              </div>
+            </div>
+          </div>
+        </button>
+
+        {/* Regulatory Compliance Card */}
+        <button
+          onClick={() => onNavigate?.('regulatory-compliance')}
+          className="rounded-xl shadow-sm p-6 border-2 border-slate-300 bg-white hover:border-purple-500 hover:shadow-md transition-all text-left w-full"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-2 bg-purple-100 rounded-lg">
+              <Shield className="w-5 h-5 text-purple-600" />
+            </div>
+            <span className="text-xs font-medium text-slate-500">Compliance</span>
+          </div>
+          <h3 className="text-sm font-medium text-slate-700 mb-3">Regulatory Compliance Status</h3>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-600">Requirements Tracked</span>
+              <span className="text-sm font-semibold text-slate-900">53</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-600">Fully Implemented</span>
+              <span className="text-sm font-semibold text-green-600">48</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-600">Partial/Gaps</span>
+              <span className="text-sm font-semibold text-amber-600">5</span>
+            </div>
+            <div className="pt-2 border-t border-slate-200">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-xs font-medium text-slate-700">91% Complete</span>
+              </div>
+            </div>
+          </div>
+        </button>
+
+        {/* Resolution Planning Card */}
+        <button
+          onClick={() => onNavigate?.('resolution-planning')}
+          className="rounded-xl shadow-sm p-6 border-2 border-slate-300 bg-white hover:border-indigo-500 hover:shadow-md transition-all text-left w-full"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-2 bg-indigo-100 rounded-lg">
+              <Activity className="w-5 h-5 text-indigo-600" />
+            </div>
+            <span className="text-xs font-medium text-slate-500">Resolution</span>
+          </div>
+          <h3 className="text-sm font-medium text-slate-700 mb-3">Resolution Planning & Stress</h3>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-600">RCAP Coverage</span>
+              <span className="text-sm font-semibold text-green-600">
+                {metrics.rcapSurplus !== null ? formatCurrency(metrics.rcapSurplus) : 'N/A'}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-600">RLAP Coverage</span>
+              <span className="text-sm font-semibold text-green-600">
+                {metrics.rlapSurplus !== null ? formatCurrency(metrics.rlapSurplus) : 'N/A'}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-600">Stress Tests</span>
+              <span className="text-sm font-semibold text-slate-900">Current</span>
+            </div>
+            <div className="pt-2 border-t border-slate-200">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-xs font-medium text-slate-700">Resolution Ready</span>
+              </div>
+            </div>
+          </div>
+        </button>
+
+        {/* Contingency Funding Plan Card */}
+        <button
+          onClick={() => onNavigate?.('contingency-funding')}
+          className="rounded-xl shadow-sm p-6 border-2 border-slate-300 bg-white hover:border-orange-500 hover:shadow-md transition-all text-left w-full"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-2 bg-orange-100 rounded-lg">
+              <AlertTriangle className="w-5 h-5 text-orange-600" />
+            </div>
+            <span className="text-xs font-medium text-slate-500">CFP</span>
+          </div>
+          <h3 className="text-sm font-medium text-slate-700 mb-3">Contingency Funding Plan</h3>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-600">Funding Sources</span>
+              <span className="text-sm font-semibold text-slate-900">Available</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-600">Stress Horizon</span>
+              <span className="text-sm font-semibold text-slate-900">{metrics.bindingCashGapHorizon}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-slate-600">Funding Gap</span>
+              <span className={`text-sm font-semibold ${metrics.cashGap >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {formatCurrency(Math.abs(metrics.cashGap))}
+              </span>
+            </div>
+            <div className="pt-2 border-t border-slate-200">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-xs font-medium text-slate-700">Plan Current</span>
               </div>
             </div>
           </div>

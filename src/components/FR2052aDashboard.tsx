@@ -593,5 +593,6 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
         defaultAggregateField="amount"
       />
     </div>
+    </div>
   );
 }
