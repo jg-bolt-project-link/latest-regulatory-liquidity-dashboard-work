@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, AlertTriangle, AlertCircle, TrendingUp, DollarSign, Percent, Info, ChevronDown, ChevronRight, FileText, Database, List } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle, AlertCircle, TrendingUp, DollarSign, Percent, Info, ChevronDown, ChevronRight, FileText, Database, List, BarChart3 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { SourceRecordsTableModal } from '../shared/SourceRecordsTableModal';
+import { DataVisualization } from '../shared/DataVisualization';
 
 interface LCRValidation {
   id: string;
@@ -127,6 +128,8 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
     factor: number;
     ruleCode: string | null;
   } | null>(null);
+  const [showVisualization, setShowVisualization] = useState(false);
+  const [allFR2052aData, setAllFR2052aData] = useState<any[]>([]);
 
   useEffect(() => {
     loadValidationData();
@@ -309,11 +312,21 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
       <div className="bg-white rounded-lg shadow p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl font-bold text-slate-900">LCR Calculation Validation</h2>
-          <div className="flex items-center gap-2">
-            {getStatusIcon(validation.overall_validation_status)}
-            <span className={`text-lg font-semibold ${getStatusColor(validation.overall_validation_status)}`}>
-              {validation.overall_validation_status.toUpperCase()}
-            </span>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setShowVisualization(true)}
+              className="flex items-center gap-2 px-3 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm"
+              title="Visualize LCR Data"
+            >
+              <BarChart3 className="w-4 h-4" />
+              Visualize
+            </button>
+            <div className="flex items-center gap-2">
+              {getStatusIcon(validation.overall_validation_status)}
+              <span className={`text-lg font-semibold ${getStatusColor(validation.overall_validation_status)}`}>
+                {validation.overall_validation_status.toUpperCase()}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -992,6 +1005,28 @@ export function EnhancedLCRValidationScreen({ submissionId }: EnhancedLCRValidat
           calculatedAmount={sourceModalData.calculatedAmount}
           factor={sourceModalData.factor}
           ruleCode={sourceModalData.ruleCode}
+        />
+      )}
+
+      {/* Data Visualization Modal */}
+      {validation && (
+        <DataVisualization
+          isOpen={showVisualization}
+          onClose={() => setShowVisualization(false)}
+          title="LCR Components Visualization"
+          data={[
+            ...hqlaComponents.map(c => ({ type: 'HQLA', category: c.hqla_category, amount: c.liquidity_value, level: `Level ${c.hqla_level}` })),
+            ...outflowComponents.map(c => ({ type: 'Outflow', category: c.outflow_category, amount: c.calculated_outflow, counterparty: c.counterparty_type })),
+            ...inflowComponents.map(c => ({ type: 'Inflow', category: c.inflow_category, amount: c.calculated_inflow, counterparty: c.counterparty_type }))
+          ]}
+          availableAttributes={[
+            { name: 'type', label: 'Component Type', type: 'string' },
+            { name: 'category', label: 'Category', type: 'string' },
+            { name: 'level', label: 'HQLA Level', type: 'string' },
+            { name: 'counterparty', label: 'Counterparty Type', type: 'string' },
+            { name: 'amount', label: 'Calculated Amount', type: 'number' }
+          ]}
+          defaultAggregateField="amount"
         />
       )}
     </div>

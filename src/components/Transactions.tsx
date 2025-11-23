@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Receipt, Plus, ArrowUpRight, ArrowDownRight, Filter } from 'lucide-react';
+import { Receipt, Plus, ArrowUpRight, ArrowDownRight, Filter, BarChart3 } from 'lucide-react';
+import { DataVisualization } from './shared/DataVisualization';
 
 interface Account {
   id: string;
@@ -26,6 +27,7 @@ export function Transactions() {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
+  const [showVisualization, setShowVisualization] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -108,13 +110,23 @@ export function Transactions() {
             <p className="text-sm text-slate-600">Track all account transactions</p>
           </div>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Transaction
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowVisualization(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            title="Visualize Transaction Data"
+          >
+            <BarChart3 className="w-4 h-4" />
+            Visualize
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Transaction
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -393,6 +405,25 @@ function TransactionModal({
           </div>
         </form>
       </div>
+
+      {/* Data Visualization Modal */}
+      <DataVisualization
+        isOpen={showVisualization}
+        onClose={() => setShowVisualization(false)}
+        title="Transactions Data Visualization"
+        data={transactions.map(t => ({
+          ...t,
+          account_name: accounts.find(a => a.id === t.account_id)?.name || 'Unknown'
+        }))}
+        availableAttributes={[
+          { name: 'transaction_type', label: 'Transaction Type', type: 'string' },
+          { name: 'category', label: 'Category', type: 'string' },
+          { name: 'account_name', label: 'Account', type: 'string' },
+          { name: 'transaction_date', label: 'Transaction Date', type: 'date' },
+          { name: 'amount', label: 'Amount', type: 'number' }
+        ]}
+        defaultAggregateField="amount"
+      />
     </div>
   );
 }

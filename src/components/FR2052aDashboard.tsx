@@ -13,6 +13,7 @@ import {
   BarChart3,
   TrendingUp
 } from 'lucide-react';
+import { DataVisualization } from './shared/DataVisualization';
 
 interface FR2052aData {
   id: string;
@@ -50,6 +51,7 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<'data' | 'quality' | 'summary' | 'validation'>('summary');
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [showVisualization, setShowVisualization] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -164,8 +166,17 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
                 <p className="text-sm text-slate-600">Federal Reserve Board regulatory reporting and data quality</p>
               </div>
             </div>
-            <button
-              onClick={onClose}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setShowVisualization(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                title="Visualize FR2052a Data"
+              >
+                <BarChart3 className="w-4 h-4" />
+                Visualize
+              </button>
+              <button
+                onClick={onClose}
               className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
             >
               <X className="w-5 h-5 text-slate-600" />
@@ -561,6 +572,27 @@ export function FR2052aDashboard({ onClose }: { onClose: () => void }) {
           </button>
         </div>
       </div>
+
+      {/* Data Visualization Modal */}
+      <DataVisualization
+        isOpen={showVisualization}
+        onClose={() => setShowVisualization(false)}
+        title="FR2052a Data Visualization"
+        data={productData}
+        availableAttributes={[
+          { name: 'product', label: 'Product', type: 'string' },
+          { name: 'sub_product', label: 'Sub-Product', type: 'string' },
+          { name: 'counterparty', label: 'Counterparty', type: 'string' },
+          { name: 'maturity_bucket', label: 'Maturity Bucket', type: 'string' },
+          { name: 'asset_class', label: 'Asset Class', type: 'string' },
+          { name: 'is_hqla', label: 'Is HQLA', type: 'boolean' },
+          { name: 'report_date', label: 'Report Date', type: 'date' },
+          { name: 'amount', label: 'Outstanding Amount', type: 'number' },
+          { name: 'projected_inflow', label: 'Projected Inflow', type: 'number' },
+          { name: 'projected_outflow', label: 'Projected Outflow', type: 'number' }
+        ]}
+        defaultAggregateField="amount"
+      />
     </div>
   );
 }
