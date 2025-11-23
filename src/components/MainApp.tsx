@@ -4,12 +4,15 @@ import { Accounts } from './Accounts';
 import { Transactions } from './Transactions';
 import { Reports } from './Reports';
 import { BalanceSheetDetailView } from './executive/BalanceSheetDetailView';
-import { LiquidityMetricsWithValidations } from './executive/LiquidityMetricsWithValidations';
+import { LiquidityMetricsDetailView } from './executive/LiquidityMetricsDetailView';
 import { CapitalMetricsDetailView } from './executive/CapitalMetricsDetailView';
 import { CashFlowComprehensive } from './CashFlowComprehensive';
 import { IntradayLiquidityView } from './executive/IntradayLiquidityView';
-import { DataQualityWithSetup } from './DataQualityWithSetup';
-import { FR2052aReportWithValidation } from './FR2052aReportWithValidation';
+import { DataQualityDashboardNew } from './DataQualityDashboardNew';
+import { FR2052aDetailView } from './executive/FR2052aDetailView';
+import { FR2052aValidation } from './FR2052aValidation';
+import { DataSetup } from './DataSetup';
+import { ApplicationValidations } from './ApplicationValidations';
 import { CalculationRules } from './CalculationRules';
 import { RegulatoryComplianceEnhanced } from './RegulatoryComplianceEnhanced';
 import { StressTestingDashboard } from './StressTestingDashboard';
@@ -52,7 +55,11 @@ type ViewType =
   | 'cash-flow-comprehensive'
   | 'intraday-liquidity'
   | 'data-quality'
-  | 'fr2052a-report'
+  | 'data-setup'
+  | 'fr2052a'
+  | 'fr2052a-validation'
+  | 'app-validations'
+  | 'calc-rules'
   | 'regulatory-compliance'
   | 'stress-testing'
   | 'resolution-planning'
@@ -106,18 +113,22 @@ export function MainApp() {
 
   const navigationItems = [
     { id: 'dashboard', label: 'Executive Dashboard', icon: LayoutDashboard },
+    { id: 'data-setup', label: 'Data Setup', icon: Settings },
     { id: 'balance-sheet', label: 'Balance Sheet', icon: TrendingUp },
     { id: 'capital-metrics', label: 'Capital Metrics', icon: Shield },
     { id: 'liquidity-metrics', label: 'Liquidity Metrics', icon: Droplets },
     { id: 'cash-flow-comprehensive', label: 'Cash Flow Analysis', icon: Activity },
     { id: 'intraday-liquidity', label: 'Intraday Liquidity', icon: Clock },
-    { id: 'fr2052a-report', label: 'FR 2052a Report', icon: Database },
+    { id: 'data-quality', label: 'Data Quality', icon: CheckCircle },
+    { id: 'fr2052a', label: 'FR 2052a Report', icon: Database },
+    { id: 'fr2052a-validation', label: 'FR 2052a Validation', icon: FileCheck },
+    { id: 'calc-rules', label: 'Calculation Rules', icon: BookOpen },
     { id: 'regulatory-compliance', label: 'Regulatory Compliance', icon: Shield },
     { id: 'regulatory-details', label: 'Regulation Browser', icon: BookOpen },
     { id: 'stress-testing', label: 'Stress Testing (CCAR)', icon: TrendingUp },
     { id: 'resolution-planning', label: 'Resolution Planning', icon: Shield },
     { id: 'contingency-funding', label: 'Contingency Funding Plan', icon: Shield },
-    { id: 'data-quality', label: 'Data Quality & Setup', icon: Database },
+    { id: 'app-validations', label: 'Application Validations', icon: CheckCircle },
     { id: 'accounts', label: 'Accounts', icon: Wallet },
     { id: 'transactions', label: 'Transactions', icon: Receipt },
     { id: 'reports', label: 'Reports', icon: FileText },
@@ -132,15 +143,21 @@ export function MainApp() {
       case 'capital-metrics':
         return <CapitalMetricsDetailView onNavigate={setActiveView} />;
       case 'liquidity-metrics':
-        return <LiquidityMetricsWithValidations onNavigate={setActiveView} />;
+        return <LiquidityMetricsDetailView onNavigate={setActiveView} />;
       case 'cash-flow-comprehensive':
         return <CashFlowComprehensive />;
       case 'intraday-liquidity':
         return <IntradayLiquidityView onNavigate={setActiveView} />;
       case 'data-quality':
-        return <DataQualityWithSetup />;
-      case 'fr2052a-report':
-        return <FR2052aReportWithValidation />;
+        return <DataQualityDashboardNew onClose={() => setActiveView('dashboard')} />;
+      case 'data-setup':
+        return <DataSetup />;
+      case 'fr2052a':
+        return <FR2052aDetailView onNavigate={setActiveView} />;
+      case 'fr2052a-validation':
+        return <FR2052aValidation />;
+      case 'calc-rules':
+        return <CalculationRules />;
       case 'regulatory-compliance':
         return <RegulatoryComplianceEnhanced />;
       case 'stress-testing':
@@ -151,6 +168,8 @@ export function MainApp() {
         return <ContingencyFundingPlan />;
       case 'regulatory-details':
         return <RegulatoryDetailsBrowser />;
+      case 'app-validations':
+        return <ApplicationValidations />;
       case 'accounts':
         return <Accounts />;
       case 'transactions':

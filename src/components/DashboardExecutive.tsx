@@ -322,14 +322,14 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
               <h3 className="font-semibold text-slate-900 mb-2">No Data Found</h3>
               <p className="text-sm text-slate-700 mb-3">
                 To populate this dashboard with comprehensive State Street Corporation sample data, navigate to the
-                <span className="font-semibold text-blue-700"> Data Quality & Setup </span>
-                page (Data Setup tab) and generate sample data.
+                <span className="font-semibold text-blue-700"> Data Setup </span>
+                page and generate sample data.
               </p>
               <button
-                onClick={() => onNavigate?.('data-quality')}
+                onClick={() => onNavigate?.('data-setup')}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
               >
-                Go to Data Quality & Setup
+                Go to Data Setup
               </button>
             </div>
           </div>
@@ -576,7 +576,7 @@ export function DashboardExecutive({ onNavigate }: DashboardExecutiveProps = {})
 
         {/* FR2052a Report Card */}
         <button
-          onClick={() => onNavigate?.('fr2052a-report')}
+          onClick={() => onNavigate?.('fr2052a')}
           className="rounded-xl shadow-sm p-6 border-2 border-slate-300 bg-white hover:border-blue-500 hover:shadow-md transition-all text-left w-full"
         >
           <div className="flex items-center justify-between mb-4">
