@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Wallet, Plus, TrendingUp, TrendingDown, Edit2, Trash2, Database } from 'lucide-react';
+import { Wallet, Plus, TrendingUp, TrendingDown, Edit2, Trash2, Database, BarChart3 } from 'lucide-react';
 import { seedDashboardData } from '../utils/seedStateStreetData';
+import { DataVisualization } from './shared/DataVisualization';
 
 interface Account {
   id: string;
@@ -20,6 +21,7 @@ export function Accounts() {
   const [loading, setLoading] = useState(true);
   const [seeding, setSeeding] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [showVisualization, setShowVisualization] = useState(false);
 
   useEffect(() => {
     loadAccounts();
@@ -104,13 +106,23 @@ export function Accounts() {
             <p className="text-sm text-slate-600">Manage your accounts and balances</p>
           </div>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Account
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowVisualization(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+            title="Visualize Account Data"
+          >
+            <BarChart3 className="w-4 h-4" />
+            Visualize
+          </button>
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Add Account
+          </button>
+        </div>
       </div>
 
       {accounts.length === 0 && !loading && (
@@ -364,6 +376,22 @@ function AccountModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: 
           </div>
         </form>
       </div>
+
+      {/* Data Visualization Modal */}
+      <DataVisualization
+        isOpen={showVisualization}
+        onClose={() => setShowVisualization(false)}
+        title="Accounts Data Visualization"
+        data={accounts}
+        availableAttributes={[
+          { name: 'account_type', label: 'Account Type', type: 'string' },
+          { name: 'currency', label: 'Currency', type: 'string' },
+          { name: 'institution', label: 'Institution', type: 'string' },
+          { name: 'is_active', label: 'Active Status', type: 'boolean' },
+          { name: 'current_balance', label: 'Current Balance', type: 'number' }
+        ]}
+        defaultAggregateField="current_balance"
+      />
     </div>
   );
 }

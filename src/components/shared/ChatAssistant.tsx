@@ -14,7 +14,7 @@ export function ChatAssistant() {
     {
       id: '1',
       role: 'assistant',
-      content: 'Hello! I can help you understand the data, regulations, and metrics in this application. Ask me about:\n\n• Data sources and lineage\n• Regulatory requirements (Basel III, Federal Reserve rules)\n• Specific metrics and their calculations\n• Navigation and features',
+      content: 'Hello! I can help you understand the data, regulations, and metrics in this application. Ask me about:\n\n• Data sources and lineage\n• Regulatory requirements (Basel III, Federal Reserve rules)\n• Specific metrics and their calculations\n• Data visualization and analytics\n• Navigation and features',
       timestamp: new Date()
     }
   ]);
@@ -106,7 +106,15 @@ export function ChatAssistant() {
       return 'Three icons appear next to metrics for deeper exploration:\n\n**Eye Icon 👁️** - Data Lineage & Quality\n• View data sources and predecessors\n• Check data quality metrics\n• See feed status and statistics\n\n**Text Icon 📄** - Regulatory References\n• View relevant regulatory requirements\n• Access hyperlinks to official regulatory text\n• Understand compliance context\n\n**Table Icon 📊** - Raw Data\n• View the actual database table values\n• See complete data records\n• Explore detailed calculations\n\nClick any icon to open a modal with the relevant information.';
     }
 
-    return 'I can help you with:\n\n• **Regulatory Metrics:** LCR, NSFR, Tier 1 Capital, Leverage Ratio, RCAP/RCEN\n• **Data & Lineage:** Data sources, quality checks, and feed information\n• **Reports:** FR 2052a, Balance Sheet, Resolution Planning\n• **Navigation:** How to use the application and its features\n\nWhat specific topic would you like to learn more about?';
+    if (lowerQuery.includes('visualiz') || lowerQuery.includes('chart') || lowerQuery.includes('graph') || lowerQuery.includes('trend') || lowerQuery.includes('analyt')) {
+      return 'Data Visualization capabilities are available throughout the application:\n\n**How to Access:**\n• Look for the chart/visualization button (📊) on any data table screen\n• Click it to open the interactive visualization panel\n\n**Features:**\n• **Chart Types:** Bar charts, line charts, trend analysis\n• **Grouping:** Select attributes to group data (e.g., by product type, counterparty, maturity)\n• **Aggregation:** Sum, Average, Count, Min, Max of any numeric field\n• **Time Analysis:** Daily, weekly, monthly, quarterly, yearly trends\n• **Export:** Download aggregated data as CSV\n\n**Use Cases:**\n• Analyze HQLA composition by asset class\n• Track cash flow trends over time\n• Compare product categories\n• Identify concentration risks\n• Spot outliers and anomalies\n\nThe visualization engine automatically detects all available attributes in your data and allows you to build custom views.';
+    }
+
+    if (lowerQuery.includes('aggregate') || lowerQuery.includes('group by') || lowerQuery.includes('sum') || lowerQuery.includes('breakdown')) {
+      return 'Data aggregation and grouping is available in the visualization tool:\n\n**Aggregation Functions:**\n• **Sum** - Total across all records\n• **Average** - Mean value\n• **Count** - Number of records\n• **Min/Max** - Minimum and maximum values\n\n**Grouping Options:**\nYou can group data by any categorical attribute:\n• Product categories and types\n• Counterparty types\n• Maturity buckets\n• Asset classes\n• Legal entities\n• Geographic regions\n\n**Multi-Level Grouping:**\nAdd multiple attributes to create nested breakdowns (e.g., "Product Category | Maturity Bucket | Counterparty Type")\n\n**Tips:**\n• Start with one grouping dimension, then add more\n• Use the + button to add attributes to your analysis\n• Click the - button to remove attributes\n• Export results to CSV for further analysis in Excel';
+    }
+
+    return 'I can help you with:\n\n• **Regulatory Metrics:** LCR, NSFR, Tier 1 Capital, Leverage Ratio, RCAP/RCEN\n• **Data Visualization:** Charts, trends, aggregations, and analytics\n• **Data & Lineage:** Data sources, quality checks, and feed information\n• **Reports:** FR 2052a, Balance Sheet, Resolution Planning\n• **Navigation:** How to use the application and its features\n\nWhat specific topic would you like to learn more about?';
   };
 
   const formatTime = (date: Date) => {
