@@ -162,7 +162,7 @@ export async function executeValidationsForSubmission(
     if (lcrMetrics) {
       const lcrValidation = {
         submission_id: submissionId,
-        legal_entity_id: submission.legal_entity_id,
+        legal_entity_id: lcrMetrics.legal_entity_id,  // Use UUID from metrics, not TEXT from submission
         report_date: submission.reporting_period,
         validation_timestamp: new Date().toISOString(),
         level1_assets_calculated: lcrMetrics.hqla_level_1 || 0,
@@ -299,7 +299,7 @@ export async function executeValidationsForSubmission(
     if (nsfrMetrics) {
       const nsfrValidation = {
         submission_id: submissionId,
-        legal_entity_id: submission.legal_entity_id,
+        legal_entity_id: nsfrMetrics.legal_entity_id,  // Use UUID from metrics, not TEXT from submission
         report_date: submission.reporting_period,
         validation_timestamp: new Date().toISOString(),
         total_asf_calculated: nsfrMetrics.available_stable_funding || 0,
