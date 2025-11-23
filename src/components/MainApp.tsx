@@ -6,7 +6,7 @@ import { Reports } from './Reports';
 import { BalanceSheetDetailView } from './executive/BalanceSheetDetailView';
 import { LiquidityMetricsDetailView } from './executive/LiquidityMetricsDetailView';
 import { CapitalMetricsDetailView } from './executive/CapitalMetricsDetailView';
-import { CashFlowAnalysisView } from './executive/CashFlowAnalysisView';
+import { CashFlowComprehensive } from './CashFlowComprehensive';
 import { IntradayLiquidityView } from './executive/IntradayLiquidityView';
 import { DataQualityDashboardNew } from './DataQualityDashboardNew';
 import { FR2052aDetailView } from './executive/FR2052aDetailView';
@@ -14,10 +14,9 @@ import { FR2052aValidation } from './FR2052aValidation';
 import { DataSetup } from './DataSetup';
 import { ApplicationValidations } from './ApplicationValidations';
 import { CalculationRules } from './CalculationRules';
-import { RegulatoryCompliance } from './RegulatoryCompliance';
+import { RegulatoryComplianceEnhanced } from './RegulatoryComplianceEnhanced';
 import { StressTestingDashboard } from './StressTestingDashboard';
 import { ResolutionPlanningModule } from './ResolutionPlanningModule';
-import { CashFlowProjectionsScreen } from './CashFlowProjectionsScreen';
 import { ContingencyFundingPlan } from './ContingencyFundingPlan';
 import { RegulatoryDetailsBrowser } from './RegulatoryDetailsBrowser';
 import { supabase } from '../lib/supabase';
@@ -53,7 +52,7 @@ type ViewType =
   | 'balance-sheet'
   | 'capital-metrics'
   | 'liquidity-metrics'
-  | 'cash-flow'
+  | 'cash-flow-comprehensive'
   | 'intraday-liquidity'
   | 'data-quality'
   | 'data-setup'
@@ -64,7 +63,6 @@ type ViewType =
   | 'regulatory-compliance'
   | 'stress-testing'
   | 'resolution-planning'
-  | 'cash-flow-projections'
   | 'contingency-funding'
   | 'regulatory-details';
 
@@ -119,7 +117,7 @@ export function MainApp() {
     { id: 'balance-sheet', label: 'Balance Sheet', icon: TrendingUp },
     { id: 'capital-metrics', label: 'Capital Metrics', icon: Shield },
     { id: 'liquidity-metrics', label: 'Liquidity Metrics', icon: Droplets },
-    { id: 'cash-flow', label: 'Cash Flow Analysis', icon: Activity },
+    { id: 'cash-flow-comprehensive', label: 'Cash Flow Analysis', icon: Activity },
     { id: 'intraday-liquidity', label: 'Intraday Liquidity', icon: Clock },
     { id: 'data-quality', label: 'Data Quality', icon: CheckCircle },
     { id: 'fr2052a', label: 'FR 2052a Report', icon: Database },
@@ -129,7 +127,6 @@ export function MainApp() {
     { id: 'regulatory-details', label: 'Regulation Browser', icon: BookOpen },
     { id: 'stress-testing', label: 'Stress Testing (CCAR)', icon: TrendingUp },
     { id: 'resolution-planning', label: 'Resolution Planning', icon: Shield },
-    { id: 'cash-flow-projections', label: 'Cash Flow Projections', icon: Activity },
     { id: 'contingency-funding', label: 'Contingency Funding Plan', icon: Shield },
     { id: 'app-validations', label: 'Application Validations', icon: CheckCircle },
     { id: 'accounts', label: 'Accounts', icon: Wallet },
@@ -147,8 +144,8 @@ export function MainApp() {
         return <CapitalMetricsDetailView onNavigate={setActiveView} />;
       case 'liquidity-metrics':
         return <LiquidityMetricsDetailView onNavigate={setActiveView} />;
-      case 'cash-flow':
-        return <CashFlowAnalysisView onNavigate={setActiveView} />;
+      case 'cash-flow-comprehensive':
+        return <CashFlowComprehensive />;
       case 'intraday-liquidity':
         return <IntradayLiquidityView onNavigate={setActiveView} />;
       case 'data-quality':
@@ -162,13 +159,11 @@ export function MainApp() {
       case 'calc-rules':
         return <CalculationRules />;
       case 'regulatory-compliance':
-        return <RegulatoryCompliance />;
+        return <RegulatoryComplianceEnhanced />;
       case 'stress-testing':
         return <StressTestingDashboard />;
       case 'resolution-planning':
         return <ResolutionPlanningModule />;
-      case 'cash-flow-projections':
-        return <CashFlowProjectionsScreen />;
       case 'contingency-funding':
         return <ContingencyFundingPlan />;
       case 'regulatory-details':
