@@ -14,6 +14,7 @@ import { FR2052aValidation } from './FR2052aValidation';
 import { DataSetup } from './DataSetup';
 import { ApplicationValidations } from './ApplicationValidations';
 import { CalculationRules } from './CalculationRules';
+import { EnhancedNSFRValidationScreen } from './validation/EnhancedNSFRValidationScreen';
 import { supabase } from '../lib/supabase';
 import { seedStateStreetData } from '../utils/seedStateStreetData';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
@@ -53,6 +54,7 @@ type ViewType =
   | 'data-setup'
   | 'fr2052a'
   | 'fr2052a-validation'
+  | 'nsfr-validation'
   | 'app-validations'
   | 'calc-rules';
 
@@ -111,7 +113,8 @@ export function MainApp() {
     { id: 'intraday-liquidity', label: 'Intraday Liquidity', icon: Clock },
     { id: 'data-quality', label: 'Data Quality', icon: CheckCircle },
     { id: 'fr2052a', label: 'FR 2052a Report', icon: Database },
-    { id: 'fr2052a-validation', label: 'FR 2052a Validation', icon: FileCheck },
+    { id: 'fr2052a-validation', label: 'LCR Validation', icon: FileCheck },
+    { id: 'nsfr-validation', label: 'NSFR Validation', icon: FileCheck },
     { id: 'calc-rules', label: 'Calculation Rules', icon: BookOpen },
     { id: 'app-validations', label: 'Application Validations', icon: CheckCircle },
     { id: 'accounts', label: 'Accounts', icon: Wallet },
@@ -141,6 +144,8 @@ export function MainApp() {
         return <FR2052aDetailView onNavigate={setActiveView} />;
       case 'fr2052a-validation':
         return <FR2052aValidation />;
+      case 'nsfr-validation':
+        return <EnhancedNSFRValidationScreen />;
       case 'calc-rules':
         return <CalculationRules />;
       case 'app-validations':
