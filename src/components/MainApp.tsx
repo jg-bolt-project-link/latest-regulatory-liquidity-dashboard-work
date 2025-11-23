@@ -19,6 +19,7 @@ import { StressTestingDashboard } from './StressTestingDashboard';
 import { ResolutionPlanningModule } from './ResolutionPlanningModule';
 import { CashFlowProjectionsScreen } from './CashFlowProjectionsScreen';
 import { ContingencyFundingPlan } from './ContingencyFundingPlan';
+import { RegulatoryDetailsBrowser } from './RegulatoryDetailsBrowser';
 import { supabase } from '../lib/supabase';
 import { seedStateStreetData } from '../utils/seedStateStreetData';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
@@ -64,7 +65,8 @@ type ViewType =
   | 'stress-testing'
   | 'resolution-planning'
   | 'cash-flow-projections'
-  | 'contingency-funding';
+  | 'contingency-funding'
+  | 'regulatory-details';
 
 export function MainApp() {
   const [activeView, setActiveView] = useState<ViewType>('dashboard');
@@ -124,6 +126,7 @@ export function MainApp() {
     { id: 'fr2052a-validation', label: 'FR 2052a Validation', icon: FileCheck },
     { id: 'calc-rules', label: 'Calculation Rules', icon: BookOpen },
     { id: 'regulatory-compliance', label: 'Regulatory Compliance', icon: Shield },
+    { id: 'regulatory-details', label: 'Regulation Browser', icon: BookOpen },
     { id: 'stress-testing', label: 'Stress Testing (CCAR)', icon: TrendingUp },
     { id: 'resolution-planning', label: 'Resolution Planning', icon: Shield },
     { id: 'cash-flow-projections', label: 'Cash Flow Projections', icon: Activity },
@@ -168,6 +171,8 @@ export function MainApp() {
         return <CashFlowProjectionsScreen />;
       case 'contingency-funding':
         return <ContingencyFundingPlan />;
+      case 'regulatory-details':
+        return <RegulatoryDetailsBrowser />;
       case 'app-validations':
         return <ApplicationValidations />;
       case 'accounts':
