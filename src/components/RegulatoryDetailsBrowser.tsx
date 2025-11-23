@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronRight, ChevronDown, CheckCircle, AlertCircle, XCircle, BookOpen, FileText, Info } from 'lucide-react';
+import { ChevronRight, ChevronDown, CheckCircle, AlertCircle, XCircle, BookOpen, FileText, Info, Search, ExternalLink } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface Framework {
@@ -48,6 +48,9 @@ export function RegulatoryDetailsBrowser() {
   const [expandedFramework, setExpandedFramework] = useState<string | null>(null);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [selectedSubsection, setSelectedSubsection] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showSearchResults, setShowSearchResults] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -96,6 +99,81 @@ export function RegulatoryDetailsBrowser() {
       newExpanded.add(sectionId);
     }
     setExpandedSections(newExpanded);
+  };
+
+  const handleSearch = async () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setShowSearchResults(false);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const results: any[] = [];
+
+    // Search in sections
+    sections.forEach(section => {
+      if (
+        section.section_title.toLowerCase().includes(query) ||
+        section.section_text.toLowerCase().includes(query) ||
+        section.cfr_citation.toLowerCase().includes(query) ||
+        section.section_number.toLowerCase().includes(query)
+      ) {
+        const framework = frameworks.find(f => f.id === (section as any).framework_id);
+        const impl = getImplementationStatus(section.id);
+        results.push({
+          type: 'section',
+          framework: framework,
+          section: section,
+          implementation: impl
+        });
+      }
+    });
+
+    // Search in subsections
+    subsections.forEach(subsection => {
+      if (
+        subsection.subsection_title.toLowerCase().includes(query) ||
+        subsection.subsection_text.toLowerCase().includes(query) ||
+        subsection.subsection_number.toLowerCase().includes(query)
+      ) {
+        const section = sections.find(s => s.id === (subsection as any).section_id);
+        const framework = section ? frameworks.find(f => f.id === (section as any).framework_id) : null;
+        const impl = getImplementationStatus(undefined, subsection.id);
+        results.push({
+          type: 'subsection',
+          framework: framework,
+          section: section,
+          subsection: subsection,
+          implementation: impl
+        });
+      }
+    });
+
+    setSearchResults(results);
+    setShowSearchResults(true);
+  };
+
+  const navigateToResult = (result: any) => {
+    if (result.framework) {
+      setExpandedFramework(result.framework.id);
+    }
+    if (result.section) {
+      const newExpanded = new Set(expandedSections);
+      newExpanded.add(result.section.id);
+      setExpandedSections(newExpanded);
+    }
+    setShowSearchResults(false);
+    setTimeout(() => {
+      const element = document.getElementById(result.subsection?.id || result.section?.id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.classList.add('ring-2', 'ring-blue-500');
+        setTimeout(() => {
+          element.classList.remove('ring-2', 'ring-blue-500');
+        }, 2000);
+      }
+    }, 300);
   };
 
   const getImplementationStatus = (sectionId?: string, subsectionId?: string) => {
@@ -163,17 +241,115 @@ export function RegulatoryDetailsBrowser() {
         </p>
       </div>
 
+      {/* Search Bar */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+        <div className="flex gap-3">
+          <div className="flex-1 relative">
+            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search regulations by text, citation, or requirement..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+          <button
+            onClick={handleSearch}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <Search className="w-4 h-4" />
+            Search
+          </button>
+        </div>
+        {searchResults.length > 0 && showSearchResults && (
+          <div className="mt-4 border-t border-slate-200 pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-semibold text-slate-900">Found {searchResults.length} matches</h3>
+              <button
+                onClick={() => setShowSearchResults(false)}
+                className="text-sm text-slate-600 hover:text-slate-900"
+              >
+                Clear Results
+              </button>
+            </div>
+            <div className="space-y-2 max-h-96 overflow-y-auto">
+              {searchResults.map((result, idx) => (
+                <div
+                  key={idx}
+                  className="p-3 border border-slate-200 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
+                  onClick={() => navigateToResult(result)}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-medium text-blue-600">
+                          {result.framework?.framework_code}
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          {result.type === 'section' ? result.section?.cfr_citation : result.section?.section_number}
+                        </span>
+                      </div>
+                      <p className="text-sm font-medium text-slate-900">
+                        {result.type === 'section' ? result.section?.section_title : result.subsection?.subsection_title}
+                      </p>
+                      <p className="text-xs text-slate-600 mt-1 line-clamp-2">
+                        {result.type === 'section' ? result.section?.section_text : result.subsection?.subsection_text}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {result.implementation && (
+                        <div className="flex items-center gap-1">
+                          {result.implementation.implementation_status === 'fully_implemented' && (
+                            <CheckCircle className="w-4 h-4 text-green-600" />
+                          )}
+                          {result.implementation.implementation_status === 'partially_implemented' && (
+                            <AlertCircle className="w-4 h-4 text-yellow-600" />
+                          )}
+                          {result.implementation.implementation_status === 'not_implemented' && (
+                            <XCircle className="w-4 h-4 text-red-600" />
+                          )}
+                        </div>
+                      )}
+                      <ExternalLink className="w-4 h-4 text-slate-400" />
+                    </div>
+                  </div>
+                  {result.implementation?.gap_description && (
+                    <div className="mt-2 pt-2 border-t border-slate-100">
+                      <p className="text-xs text-red-600 font-medium">Gap: {result.implementation.gap_description}</p>
+                      <a
+                        href="#regulatory-compliance"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          window.location.href = '#regulatory-compliance';
+                        }}
+                        className="text-xs text-blue-600 hover:underline mt-1 inline-flex items-center gap-1"
+                      >
+                        Analyze in Compliance Dashboard
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Instructions */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
         <h3 className="font-semibold text-blue-900 mb-2">How to Use This Browser</h3>
         <ul className="text-sm text-blue-800 space-y-1 list-disc list-inside">
+          <li><strong>Use the search bar above</strong> to find specific requirements by text or citation</li>
           <li><strong>Regulation YY and § 252.30 (LCR) are auto-expanded below</strong> to show 11 detailed LCR requirements</li>
           <li>Click any regulation to expand and view all sections</li>
           <li>Click any section to view detailed subsections and requirements</li>
           <li>Green checkmark = Fully implemented with screen/calculation</li>
           <li>Yellow warning = Partially implemented (gaps exist)</li>
           <li>Red X = Not implemented (gap identified)</li>
-          <li>Each subsection shows: CFR citation, requirement type, frequency, and implementation details</li>
+          <li>Search results with gaps link directly to the Compliance Dashboard for gap analysis</li>
         </ul>
       </div>
 
@@ -216,7 +392,7 @@ export function RegulatoryDetailsBrowser() {
                     const sectionImpl = getImplementationStatus(section.id);
 
                     return (
-                      <div key={section.id} className={`border rounded-lg ${getStatusColor(sectionImpl?.implementation_status)}`}>
+                      <div id={section.id} key={section.id} className={`border rounded-lg transition-all ${getStatusColor(sectionImpl?.implementation_status)}`}>
                         {/* Section Header */}
                         <button
                           onClick={() => toggleSection(section.id)}
@@ -273,8 +449,9 @@ export function RegulatoryDetailsBrowser() {
 
                                   return (
                                     <div
+                                      id={subsection.id}
                                       key={subsection.id}
-                                      className={`border rounded p-3 ${getStatusColor(subsectionImpl?.implementation_status)}`}
+                                      className={`border rounded p-3 transition-all ${getStatusColor(subsectionImpl?.implementation_status)}`}
                                     >
                                       <div className="flex items-start justify-between mb-2">
                                         <div className="flex items-start gap-2 flex-1">
