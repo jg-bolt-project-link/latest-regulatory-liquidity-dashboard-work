@@ -3,7 +3,7 @@ import { FileUp, CheckCircle, XCircle, AlertTriangle, Database, FileText, Trendi
 import { supabase } from '../lib/supabase';
 import { seedFR2052aWithCalculations } from '../utils/seedFR2052aWithCalculations';
 import { EnhancedLCRValidationScreen } from './validation/EnhancedLCRValidationScreen';
-import { NSFRValidationScreen } from './validation/NSFRValidationScreen';
+import { EnhancedNSFRValidationScreen } from './validation/EnhancedNSFRValidationScreen';
 import { ValidationRuleExecutions } from './validation/ValidationRuleExecutions';
 
 interface ValidationRule {
@@ -1005,7 +1005,7 @@ export function FR2052aValidation() {
             </div>
           </div>
           {selectedSubmission ? (
-            <NSFRValidationScreen submissionId={selectedSubmission.id} />
+            <EnhancedNSFRValidationScreen submissionId={selectedSubmission.id} />
           ) : (
           <div className="bg-white rounded-lg shadow p-8 text-center">
             <BarChart3 className="h-16 w-16 text-slate-400 mx-auto mb-4" />
