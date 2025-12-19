@@ -744,80 +744,8 @@ export async function seedStateStreetData() {
     };
   }
 
-  const lcrData = [
-    {
-      user_id: null,
-      report_date: '2024-09-30',
-      hqla_level_1: 54800000000,
-      hqla_level_2a: 6117647059,
-      hqla_level_2b: 0,
-      total_hqla: 59000000000,
-      total_net_cash_outflows: 52900000000,
-      lcr_ratio: 1.115,
-      is_compliant: true,
-      notes: 'Q3 2024 - State Street Corporation LCR'
-    },
-    {
-      user_id: null,
-      report_date: '2024-06-30',
-      hqla_level_1: 53200000000,
-      hqla_level_2a: 5882352941,
-      hqla_level_2b: 0,
-      total_hqla: 58200000000,
-      total_net_cash_outflows: 51800000000,
-      lcr_ratio: 1.124,
-      is_compliant: true,
-      notes: 'Q2 2024 - State Street Corporation LCR'
-    },
-    {
-      user_id: null,
-      report_date: '2024-03-31',
-      hqla_level_1: 52100000000,
-      hqla_level_2a: 5764705882,
-      hqla_level_2b: 0,
-      total_hqla: 57000000000,
-      total_net_cash_outflows: 50500000000,
-      lcr_ratio: 1.129,
-      is_compliant: true,
-      notes: 'Q1 2024 - State Street Corporation LCR'
-    }
-  ];
-
-  const nsfrData = [
-    {
-      user_id: null,
-      report_date: '2024-09-30',
-      available_stable_funding: 198500000000,
-      required_stable_funding: 160100000000,
-      nsfr_ratio: 1.240,
-      is_compliant: true,
-      retail_deposits: 154200000000,
-      wholesale_funding: 32800000000,
-      notes: 'Q3 2024 - State Street Corporation NSFR'
-    },
-    {
-      user_id: null,
-      report_date: '2024-06-30',
-      available_stable_funding: 195800000000,
-      required_stable_funding: 158900000000,
-      nsfr_ratio: 1.232,
-      is_compliant: true,
-      retail_deposits: 151600000000,
-      wholesale_funding: 32100000000,
-      notes: 'Q2 2024 - State Street Corporation NSFR'
-    },
-    {
-      user_id: null,
-      report_date: '2024-03-31',
-      available_stable_funding: 193200000000,
-      required_stable_funding: 157200000000,
-      nsfr_ratio: 1.229,
-      is_compliant: true,
-      retail_deposits: 149800000000,
-      wholesale_funding: 31900000000,
-      notes: 'Q1 2024 - State Street Corporation NSFR'
-    }
-  ];
+  // LCR and NSFR data will be generated from FR2052a data in Step 2
+  // Removing these to avoid conflicts with the unique constraint on (legal_entity_id, report_date)
 
   const balanceSheetData = [
     {
